@@ -1,0 +1,51 @@
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.method {
+  flex-shrink: 0;
+  display: inline-block;
+  min-width: 4.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: center;
+  color: #fff;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.get {
+  background-color: #2563eb;
+}
+
+.post {
+  background-color: #16a34a;
+}
+
+.put {
+  background-color: #d97706;
+}
+
+.patch {
+  background-color: #d97706;
+}
+
+.delete {
+  background-color: #dc2626;
+}
+
+.path {
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: none;
+  padding: 0;
+}

@@ -1,0 +1,9 @@
+{
+  "label": "画面詳細",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "画面詳細",
+    "description": "ADF Webアプリ（app/src配下）の各画面の詳細設計です。"
+  }
+}

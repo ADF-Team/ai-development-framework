@@ -1,0 +1,162 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* ADFのブランドカラーが確定するまでは、Infimaのデフォルト配色をベースに使う。
+   確定後はここをapp側のglobal.cssの値に合わせて調整する。 */
+:root {
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* サイドバーの文字サイズを既定より大きめに */
+.theme-doc-sidebar-container .menu__link,
+.theme-doc-sidebar-container .menu__list-item-collapsible {
+  font-size: 1rem;
+}
+
+.theme-doc-sidebar-container .menu__list .menu__list .menu__link {
+  font-size: 0.95rem;
+}
+
+/* サイドバー各行の上下余白を広げる（全階層共通） */
+.theme-doc-sidebar-container .menu__link,
+.theme-doc-sidebar-container .menu__caret {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* コードブロックの視認性向上（Prismのplain背景色を上書き） */
+div[class^='codeBlockContainer'] pre,
+div[class*=' codeBlockContainer'] pre {
+  background-color: #eef1f5 !important;
+  border: 1px solid #d7dee6;
+}
+
+[data-theme='dark'] div[class^='codeBlockContainer'] pre,
+[data-theme='dark'] div[class*=' codeBlockContainer'] pre {
+  background-color: #21252b !important;
+  border: 1px solid #3a3f4b;
+}
+
+/* Mermaid図：クリックで拡大モーダル */
+.docusaurus-mermaid-container {
+  cursor: zoom-in !important;
+}
+
+.mermaid-zoom-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2rem !important;
+  background: #fff !important;
+  opacity: 1 !important;
+}
+
+.mermaid-zoom-content {
+  position: relative !important;
+  width: 90vw !important;
+  height: 88vh !important;
+  overflow: hidden !important;
+  background: var(--ifm-background-color) !important;
+  border-radius: 8px !important;
+  padding: 3.5rem 1.5rem 1.5rem !important;
+  cursor: default !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.mermaid-zoom-close {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.75rem !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: 2rem !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  color: var(--ifm-font-color-base) !important;
+}
+
+.mermaid-zoom-toolbar {
+  position: absolute !important;
+  top: 0.75rem !important;
+  left: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  z-index: 1 !important;
+}
+
+.mermaid-zoom-btn {
+  min-width: 2.25rem !important;
+  padding: 0.25rem 0.6rem !important;
+  border: 1px solid var(--ifm-color-emphasis-400) !important;
+  border-radius: 6px !important;
+  background: var(--ifm-background-surface-color) !important;
+  color: var(--ifm-font-color-base) !important;
+  font-size: 1.1rem !important;
+  line-height: 1.4 !important;
+  cursor: pointer !important;
+}
+
+.mermaid-zoom-btn:hover {
+  background: var(--ifm-color-emphasis-200) !important;
+}
+
+.mermaid-zoom-reset {
+  font-size: 0.85rem !important;
+}
+
+.mermaid-zoom-label {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ifm-font-color-base);
+}
+
+.mermaid-zoom-scroll-area {
+  flex: 1 !important;
+  overflow: auto !important;
+  cursor: grab !important;
+  user-select: none !important;
+}
+
+.mermaid-zoom-scroll-area.mermaid-zoom-grabbing {
+  cursor: grabbing !important;
+}
+
+.mermaid-zoom-svg-wrap {
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: top left;
+  transition: transform 0.15s ease;
+}
+
+.mermaid-zoom-svg-wrap svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex-shrink: 0;
+  pointer-events: none;
+}

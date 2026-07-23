@@ -1,0 +1,9 @@
+{
+  "label": "API",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "API",
+    "description": "ADF Webアプリのバックエンド（Next.js API Routes）のエンドポイント仕様です。"
+  }
+}
