@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
+import { Providers } from './provider'
 import './globals.css'
 
 const inter = Inter({
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        {children}
+        <Providers>{children}</Providers>
         <Script id="sw-register" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
