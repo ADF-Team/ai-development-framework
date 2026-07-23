@@ -43,9 +43,10 @@ feature-basedの構成を採用する。Next.js App Routerの`app/`はルーテ�
 ```
 src
 ├── app/                      # Next.js App Router（ルーティング専用。page.tsx/layout.tsx/route.tsのみ）
-│   ├── (auth)/
-│   │   └── login/page.tsx
-│   ├── (dashboard)/
+│   ├── (no-auth)/            # 認証不要（ログインするまで）の画面
+│   │   ├── page.tsx          # ウェルカム画面（/）
+│   │   └── login/page.tsx    # ログイン画面
+│   ├── (auth)/                # 認証必須（ログイン後）の画面
 │   │   ├── projects/
 │   │   │   ├── page.tsx              # 案件一覧
 │   │   │   └── [projectId]/page.tsx  # 案件詳細（工程別ワークスペース）
@@ -187,11 +188,11 @@ src/components/
 
 ## データ取得パターン（重要・必ず従うこと）
 
-**初期表示データは、page.tsx（Server Component）で`lib/services`を直接呼び出して取得する**。API Routes（`/api/...`）をfetchで叩かない（自分自身へのHTTPリクエストは不要なネットワークホップになるため）。
+**初期表示データも含めて、APIの呼び出しは必ず`src/lib/api`配下の`fetchData`ベースの関数を経由する**。`page.tsx`（Server Component）から`lib/services`やPrisma Clientを直接呼ばない（下記「API層」参照）。初期表示・ユーザー操作を問わず呼び出し口を`lib/api`に統一することで、モック時の差し替えもこの層だけで完結する。
 
 ```tsx
-// src/app/(dashboard)/projects/page.tsx
-import { getProjectList } from '@/lib/services/projects'
+// src/app/(auth)/projects/page.tsx
+import { getProjectList } from '@/lib/api/projects'
 import { ProjectListView } from '@/features/projects/components/ProjectListView'
 
 export default async function ProjectsPage() {
@@ -219,7 +220,7 @@ export function ProjectListView({
 }
 ```
 
-**それ以降のユーザー操作（作成・更新・実行など）は、Client Componentから`src/lib/api`配下の関数を呼ぶ**（下記「API層」参照）。
+**それ以降のユーザー操作（作成・更新・実行など）も、Client Componentから同じく`src/lib/api`配下の関数を呼ぶ**（下記「API層」参照）。初期表示・ユーザー操作のどちらも呼び出し先は`lib/api`で統一され、違いはServer Component/Client Componentのどちらから呼ぶかだけになる。
 
 ---
 
@@ -295,7 +296,7 @@ export async function getCurrentUser() {
 
 ### ルート保護（`src/proxy.ts`）
 
-Next.js 16では`middleware.ts`は`proxy.ts`に名称変更されている（エクスポートする関数名も`middleware`ではなく`proxy`）。**本プロジェクトでは必ず`proxy.ts`を使う**（`middleware.ts`は使わない）。ログイン有無だけを判定し、未ログインなら`/login`へリダイレクトする。**管理者ロールの判定はここでは行わない**（proxyはEdge Runtimeで動作し、Prisma／Firebase Admin SDKが使えないため）。ロール判定は`app/(dashboard)/admin/layout.tsx`（Server Component）で`getCurrentUser()`を呼んで行う。
+Next.js 16では`middleware.ts`は`proxy.ts`に名称変更されている（エクスポートする関数名も`middleware`ではなく`proxy`）。**本プロジェクトでは必ず`proxy.ts`を使う**（`middleware.ts`は使わない）。ログイン有無だけを判定し、未ログインなら`/login`へリダイレクトする。**管理者ロールの判定はここでは行わない**（proxyはEdge Runtimeで動作し、Prisma／Firebase Admin SDKが使えないため）。ロール判定は`app/(auth)/admin/layout.tsx`（Server Component）で`getCurrentUser()`を呼んで行う。
 
 ```ts
 // src/proxy.ts
@@ -442,15 +443,22 @@ export const messages = {
 
 ## API層（`src/lib/api`）
 
-エンドポイントはfeatureに分散させず、`src/lib/api`配下にリソース単位でまとめる（管理のしやすさを優先）。**`src/lib/api`配下のファイルはすべて先頭に`'use server'`を付ける**（`FetchData.ts`だけでなく`projects.ts`等の各リソースファイルも）。理由は、ミューテーション成功後に呼ぶ`revalidatePath`がサーバー専用関数のため、呼び出し元の関数自体がServer Actionである必要があるため。
+エンドポイントはfeatureに分散させず、`src/lib/api`配下にリソース単位のフォルダでまとめる（管理のしやすさを優先）。1エンドポイント＝1ファイル（ファイル名は関数名と一致させる）とし、リソースごとにフォルダを切る。**`src/lib/api`配下のファイルはすべて先頭に`'use server'`を付ける**（`FetchData.ts`だけでなく各エンドポイントのファイルも）。理由は、ミューテーション成功後に呼ぶ`revalidatePath`がサーバー専用関数のため、呼び出し元の関数自体がServer Actionである必要があるため。
+
+**`lib/api`配下のGET関数は、Server Component（`page.tsx`）の初期表示・Client Componentのユーザー操作のどちらからも呼ばれる**（Server ActionはServer Component・Client Componentのどちらからも呼び出せるため問題ない）。呼び出し元によって関数を分ける必要はない。
 
 ```
 src/lib/api/
-├── FetchData.ts       # 共通fetchラッパー（Server Action）
-├── projects.ts
-├── stages.ts
-├── adminTemplates.ts
-└── adminUsers.ts
+├── FetchData.ts             # 共通fetchラッパー（Server Action）
+├── projects/
+│   ├── getProjectList.ts
+│   ├── getProject.ts
+│   └── createProject.ts
+├── stages/
+│   └── postExecuteStage.ts
+├── adminTemplates/
+│   └── putStageTemplate.ts
+└── adminUsers/
 ```
 
 `APP_URL`は同一アプリ内の`/api`ルートを絶対URLで呼ぶために必要（Server Action = サーバー側実行のため、ブラウザと違い相対パスのfetchが使えないことに注意）。
@@ -570,15 +578,15 @@ export async function fetchData(
 }
 ```
 
-各リソースのファイルでは、エンドポイントごとに関数を1つずつ定義する。JSDocは`@param 名 - 説明`の形式（ハイフン区切り）で必ず付ける。
+1ファイルにつきエンドポイント1つ（＝関数1つ）を定義する。JSDocは`@param 名 - 説明`の形式（ハイフン区切り）で必ず付ける。
 
 **GET（単純取得）の例**
 
 ```ts
-// src/lib/api/projects.ts
+// src/lib/api/projects/getProject.ts
 'use server'
 
-import { fetchData } from './FetchData'
+import { fetchData } from '../FetchData'
 import { ProjectData } from '@/types/Project'
 
 /**
@@ -597,11 +605,11 @@ export const getProject = async (id: string) => {
 **POST（副作用を伴う操作）の例**：成功・失敗をtoastで必ず通知し、失敗時は`null`を返す
 
 ```ts
-// src/lib/api/stages.ts
+// src/lib/api/stages/postExecuteStage.ts
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { fetchData } from './FetchData'
+import { fetchData } from '../FetchData'
 import { DeliverableData } from '@/types/Deliverable'
 import { messages } from '@/constants/messages'
 import { showSuccessToast, showErrorToast } from '@/utils/toast'
@@ -636,11 +644,11 @@ export const postExecuteStage = async (
 **PUT（管理者用の全体更新）の例**：構造はPOSTと同じで、`method: 'PUT'`にする
 
 ```ts
-// src/lib/api/adminTemplates.ts
+// src/lib/api/adminTemplates/putStageTemplate.ts
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { fetchData } from './FetchData'
+import { fetchData } from '../FetchData'
 import { StageTemplateData } from '@/types/StageTemplate'
 import { messages } from '@/constants/messages'
 import { showSuccessToast, showErrorToast } from '@/utils/toast'
@@ -798,7 +806,7 @@ export const showErrorToast = (message: string) => {
 
 - スキーマは`prisma/schema.prisma`に定義する。テーブル定義は`docs/README.md` C1を正とする
 - マイグレーションは`prisma migrate dev`で作成し、コミットに含める
-- `lib/services`層以外からPrisma Clientを直接importしない（Server ComponentsもAPI Routesも、必ず`lib/services`の関数経由でDBにアクセスする）
+- `lib/services`層以外からPrisma Clientを直接importしない（DBへのアクセスはAPI Routeが`lib/services`の関数経由で行う。Server Componentsは`lib/services`を直接呼ばず、`lib/api`経由でAPI Routeを叩く）
 - Prisma Clientは`lib/prisma.ts`でシングルトン化する（Next.jsの開発時ホットリロードでインスタンスが増殖し、DB接続を使い切る事故を防ぐため）
 
 ```ts
@@ -820,7 +828,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 - Tailwindの警告をそのままにすること
 - モックアップにない挙動を推測で実装しない（不明点は確認する）
-- `lib/services`を経由せず、Server ComponentやAPI RouteからPrisma Clientを直接呼ばない
+- `lib/services`を経由せず、API RouteからPrisma Clientを直接呼ばない
+- Server Component（`page.tsx`）から`lib/services`やPrisma Clientを直接呼ばない（必ず`lib/api`経由でAPI Routeを叩く）
 - Client ComponentからAPI Routeを経由せず直接Prismaやサーバー専用ロジックを呼ばない（`'use client'`のファイルに`lib/services`をimportしない）
 - feature間の直接import
 - `any`型の使用

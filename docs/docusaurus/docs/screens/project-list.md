@@ -6,14 +6,14 @@ title: 案件一覧画面
 # 案件一覧画面
 
 - **URL**: `/projects`
-- **画面ファイル**: `app/src/app/(dashboard)/projects/page.tsx`
+- **画面ファイル**: `app/src/app/(auth)/projects/page.tsx`
 - **コンポーネント**: `app/src/features/projects/components/ProjectListScreen.tsx`
 
 ## 概要
 
 進行中・完了案件を一覧表示し、案件ごとに7工程（要件定義〜ドキュメント）の進捗ステータスを表示する画面。新規案件の作成もここから行う。
 
-ページ自体はServer Componentで、`lib/services/projects`を直接呼び出して初期データを取得する（`/api/projects`をfetchで叩かない。詳細は`CLAUDE.md`の「データ取得パターン」）。
+ページ自体はServer Componentで、`lib/api/projects/getProjectList`（`fetchData`経由）を呼び出して初期データを取得する（`lib/services`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
 
 ## 主要コンポーネント
 

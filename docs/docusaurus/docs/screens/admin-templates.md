@@ -6,7 +6,7 @@ title: テンプレート管理画面
 # テンプレート管理画面（管理者用）
 
 - **URL**: `/admin/templates`, `/admin/templates/[stageKey]`
-- **画面ファイル**: `app/src/app/(dashboard)/admin/templates/page.tsx`, `app/src/app/(dashboard)/admin/templates/[stageKey]/page.tsx`
+- **画面ファイル**: `app/src/app/(auth)/admin/templates/page.tsx`, `app/src/app/(auth)/admin/templates/[stageKey]/page.tsx`
 - **コンポーネント**: `app/src/features/admin-templates/components/TemplateManagementScreen.tsx`
 
 ## 概要

@@ -88,6 +88,14 @@
   --color-border: var(--color-divider);
   --color-input: var(--color-divider);
   --color-ring: var(--color-accent);
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-text);
+  --sidebar-primary: var(--color-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --sidebar-accent-foreground: var(--color-accent);
+  --sidebar-border: var(--color-divider);
+  --sidebar-ring: var(--color-accent);
 }
 
 @media (prefers-color-scheme: light) {
@@ -196,6 +204,14 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
 }
 
 body {

@@ -6,7 +6,7 @@ title: 案件詳細画面（工程別ワークスペース）
 # 案件詳細画面（工程別ワークスペース）
 
 - **URL**: `/projects/[projectId]`
-- **画面ファイル**: `app/src/app/(dashboard)/projects/[projectId]/page.tsx`
+- **画面ファイル**: `app/src/app/(auth)/projects/[projectId]/page.tsx`
 - **コンポーネント**: `app/src/features/stages/components/StageWorkspace.tsx`
 
 ## 概要

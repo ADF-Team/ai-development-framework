@@ -6,7 +6,7 @@ title: ユーザー管理画面
 # ユーザー管理画面（管理者用）
 
 - **URL**: `/admin/users`
-- **画面ファイル**: `app/src/app/(dashboard)/admin/users/page.tsx`
+- **画面ファイル**: `app/src/app/(auth)/admin/users/page.tsx`
 - **コンポーネント**: `app/src/features/admin-users/components/UserManagementScreen.tsx`
 
 ## 概要

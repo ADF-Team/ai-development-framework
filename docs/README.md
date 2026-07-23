@@ -235,6 +235,7 @@
 ## B2. 将来の拡張を見据えた設計方針
 
 - Next.jsのAPI Routes内では、ルートハンドラに直接ロジックを書かず、`lib/services`層に業務ロジックを集約しておく（将来FastAPIへ移植する際、ロジック部分の書き直しを最小限にするため）
+- フロントエンド側も、Server Component（`page.tsx`）の初期表示データ取得を含めてすべて`lib/api`配下の関数経由でAPI Routesを叩く（`lib/services`を直接呼ばない）。呼び出し口をHTTP境界に統一しておくことで、将来バックエンドをFastAPIへ切り出す際もフロントエンド側のコードを変更せずに済む
 - 「組織（Organization）」という概念をデータモデル上に用意しておく（v1では単一組織のみ運用するが、Identity Platformのマルチテナントと対応させやすくするため）
 
 ## B3. Identity Platform運用フロー（ドラフト）

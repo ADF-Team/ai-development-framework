@@ -36,6 +36,22 @@ export const messages = {
       documentation: 'ドキュメント',
     },
   },
+  nav: {
+    projects: '案件一覧',
+    adminTemplates: 'テンプレート管理',
+    adminUsers: 'ユーザー管理',
+    userRoleAdmin: '管理者',
+    logout: 'ログアウト',
+  },
+  projects: {
+    title: '案件一覧',
+    newProjectButton: '新規案件作成',
+    createdAtLabel: '作成日：',
+    overallStatusLabel: {
+      inProgress: '進行中',
+      completed: '完了',
+    },
+  },
   auth: {
     back: '戻る',
     loginGreeting: 'AI Development Framework にログイン',

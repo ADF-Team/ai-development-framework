@@ -6,7 +6,7 @@ title: ログイン画面
 # ログイン画面
 
 - **URL**: `/login`
-- **画面ファイル**: `app/src/app/(auth)/login/page.tsx`
+- **画面ファイル**: `app/src/app/(no-auth)/login/page.tsx`
 - **コンポーネント**: `app/src/features/auth/components/LoginScreen.tsx`
 
 ## 概要
@@ -39,4 +39,4 @@ Identity Platform（Firebase Auth）のクライアント側SDKでメールア�
 ## 補足
 
 - 未ログイン状態で保護ルート（`/projects/*`, `/admin/*`）にアクセスした場合、`middleware.ts`により本画面へリダイレクトされる
-- 管理者ロールの判定はmiddlewareでは行わない（`app/(dashboard)/admin/layout.tsx`で判定）
+- 管理者ロールの判定はmiddlewareでは行わない（`app/(auth)/admin/layout.tsx`で判定）
