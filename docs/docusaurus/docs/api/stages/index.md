@@ -8,7 +8,7 @@ title: 工程
 
 対応画面：[案件詳細（工程別ワークスペース）](../../screens/stage-workspace.md)
 
-**対応テーブル**：[`project_stages`](../../db/tables.md#project_stages)・[`deliverables`](../../db/tables.md#deliverables)（`docs/adf-design.md` C1）
+**対応テーブル**：[`project_stages`](../../db/tables.md#project_stages)・[`deliverables`](../../db/tables.md#deliverables)（`docs/README.md` C1）
 
 `stageKey`は7工程マスタ（`requirements` / `design` / `implementation` / `review` / `security` / `test` / `documentation`）のいずれか。
 

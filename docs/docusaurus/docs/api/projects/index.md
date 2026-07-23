@@ -8,7 +8,7 @@ title: 案件
 
 対応画面：[案件一覧](../../screens/project-list.md)・[案件詳細](../../screens/stage-workspace.md)
 
-**対応テーブル**：[`projects`](../../db/tables.md#projects)（`docs/adf-design.md` C1）
+**対応テーブル**：[`projects`](../../db/tables.md#projects)（`docs/README.md` C1）
 
 ## エンドポイント一覧
 

@@ -15,13 +15,13 @@ Identity Platform（Firebase Auth）のクライアント側SDKでメールア�
 
 ## 主要コンポーネント
 
-`docs/adf-design.md` C3を参照。
+`docs/README.md` C3を参照。
 
-| コンポーネント        | 役割                                                                       |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `LoginForm`            | メール／パスワード入力、Identity Platform SDKの`signIn`呼び出し           |
-| `ForgotPasswordLink`   | パスワードリセットのメール送信フローへの導線                              |
-| `ErrorMessage`         | 認証エラー時のメッセージ表示                                              |
+| コンポーネント       | 役割                                                            |
+| -------------------- | --------------------------------------------------------------- |
+| `LoginForm`          | メール／パスワード入力、Identity Platform SDKの`signIn`呼び出し |
+| `ForgotPasswordLink` | パスワードリセットのメール送信フローへの導線                    |
+| `ErrorMessage`       | 認証エラー時のメッセージ表示                                    |
 
 ## 認証フロー
 

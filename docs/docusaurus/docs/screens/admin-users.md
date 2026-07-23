@@ -17,19 +17,19 @@ title: ユーザー管理画面
 
 ## 主要コンポーネント
 
-`docs/adf-design.md` C3を参照。
+`docs/README.md` C3を参照。
 
-| コンポーネント        | 役割                                       |
-| ------------------------ | ------------------------------------------- |
-| `UserListTable`          | メンバー一覧。ロール・ステータス表示       |
-| `InviteUserModal`        | メールアドレス・ロールを指定して招待       |
-| `RoleSelect`             | ロール変更                                 |
-| `DisableUserButton`      | アカウント無効化／再有効化                 |
+| コンポーネント      | 役割                                 |
+| ------------------- | ------------------------------------ |
+| `UserListTable`     | メンバー一覧。ロール・ステータス表示 |
+| `InviteUserModal`   | メールアドレス・ロールを指定して招待 |
+| `RoleSelect`        | ロール変更                           |
+| `DisableUserButton` | アカウント無効化／再有効化           |
 
 ## 使用API
 
-| API                                                                    | 用途                                       |
-| -------------------------------------------------------------------------- | --------------------------------------------- |
-| [`GET /api/admin/users`](../api/admin-users/get-users.md)                  | 組織内メンバー一覧取得                       |
-| [`POST /api/admin/users`](../api/admin-users/invite-user.md)               | メンバーを招待（メールアドレス・ロールを指定） |
-| [`PATCH /api/admin/users/:id`](../api/admin-users/update-user.md)          | ロール変更・アカウント無効化／再有効化       |
+| API                                                               | 用途                                           |
+| ----------------------------------------------------------------- | ---------------------------------------------- |
+| [`GET /api/admin/users`](../api/admin-users/get-users.md)         | 組織内メンバー一覧取得                         |
+| [`POST /api/admin/users`](../api/admin-users/invite-user.md)      | メンバーを招待（メールアドレス・ロールを指定） |
+| [`PATCH /api/admin/users/:id`](../api/admin-users/update-user.md) | ロール変更・アカウント無効化／再有効化         |

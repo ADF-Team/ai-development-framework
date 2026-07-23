@@ -8,7 +8,7 @@ title: 管理者：テンプレート
 
 対応画面：[テンプレート管理画面](../../screens/admin-templates.md)
 
-**対応テーブル**：[`question_templates` / `prompt_templates` / `quality_gate_items`](../../db/tables.md#question_templates-prompt_templates-quality_gate_items)（`docs/adf-design.md` C1）
+**対応テーブル**：[`question_templates` / `prompt_templates` / `quality_gate_items`](../../db/tables.md#question_templates-prompt_templates-quality_gate_items)（`docs/README.md` C1）
 
 管理者ロール（`role: admin`）のみアクセス可（`403`：一般利用者がアクセスした場合）。
 

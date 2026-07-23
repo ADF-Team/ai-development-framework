@@ -25,4 +25,4 @@ title: "POST /api/projects"
 }
 ```
 
-作成時、サーバー側で7工程分の`project_stages`レコードを`status: not_started`で一括作成する（詳細は「案件作成時の初期化ロジック」`docs/adf-design.md` C4参照）。
+作成時、サーバー側で7工程分の`project_stages`レコードを`status: not_started`で一括作成する（詳細は「案件作成時の初期化ロジック」`docs/README.md` C4参照）。

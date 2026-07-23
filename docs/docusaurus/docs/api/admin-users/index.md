@@ -8,7 +8,7 @@ title: 管理者：ユーザー
 
 対応画面：[ユーザー管理画面](../../screens/admin-users.md)
 
-**対応テーブル**：[`users`](../../db/tables.md#users)（`docs/adf-design.md` C1）
+**対応テーブル**：[`users`](../../db/tables.md#users)（`docs/README.md` C1）
 
 管理者ロール（`role: admin`）のみアクセス可。
 

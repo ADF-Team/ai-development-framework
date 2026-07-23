@@ -15,27 +15,27 @@ title: 案件詳細画面（工程別ワークスペース）
 
 ## 主要コンポーネント
 
-`docs/adf-design.md` C3を参照。
+`docs/README.md` C3を参照。
 
-| コンポーネント             | 役割                                                                       |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `StageTabBar`               | 7工程タブ。完了済み／現在地／未着手をステータス色分け                    |
-| `StageQuestionForm`         | 質問セットを動的にレンダリング                                            |
-| `PromptPreview`              | 生成プロンプトの表示・コピー機能                                          |
-| `ExecutionModeToggle`        | 「プロンプト出力のみ」／「アプリ内実行」の切り替え                       |
-| `DeliverableEditor`          | 成果物の表示・編集（Markdownエディタを想定）                              |
-| `QualityGateChecklist`       | チェック項目一覧。全チェックで「次工程へ」ボタンが活性化                  |
+| コンポーネント         | 役割                                                     |
+| ---------------------- | -------------------------------------------------------- |
+| `StageTabBar`          | 7工程タブ。完了済み／現在地／未着手をステータス色分け    |
+| `StageQuestionForm`    | 質問セットを動的にレンダリング                           |
+| `PromptPreview`        | 生成プロンプトの表示・コピー機能                         |
+| `ExecutionModeToggle`  | 「プロンプト出力のみ」／「アプリ内実行」の切り替え       |
+| `DeliverableEditor`    | 成果物の表示・編集（Markdownエディタを想定）             |
+| `QualityGateChecklist` | チェック項目一覧。全チェックで「次工程へ」ボタンが活性化 |
 
 ## 使用API
 
-| API                                                                                      | 用途                                     |
-| ------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| [`GET /api/projects/:id/stages/:stageKey`](../api/stages/get-stage.md)                     | 質問・回答・プロンプト・成果物・品質ゲート状況の取得 |
-| [`POST /api/projects/:id/stages/:stageKey/answers`](../api/stages/save-answers.md)         | 質問への回答を保存                        |
-| [`POST /api/projects/:id/stages/:stageKey/generate-prompt`](../api/stages/generate-prompt.md) | 回答からプロンプトを生成                  |
-| [`POST /api/projects/:id/stages/:stageKey/execute`](../api/stages/execute.md)               | アプリ内でClaude APIを実行し成果物を生成  |
-| [`PATCH /api/projects/:id/stages/:stageKey/deliverable`](../api/stages/update-deliverable.md) | 成果物の貼り付け・編集を保存              |
-| [`POST /api/projects/:id/stages/:stageKey/quality-gate`](../api/stages/quality-gate.md)     | 品質ゲートのチェック結果を送信・通過判定  |
+| API                                                                                           | 用途                                                 |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [`GET /api/projects/:id/stages/:stageKey`](../api/stages/get-stage.md)                        | 質問・回答・プロンプト・成果物・品質ゲート状況の取得 |
+| [`POST /api/projects/:id/stages/:stageKey/answers`](../api/stages/save-answers.md)            | 質問への回答を保存                                   |
+| [`POST /api/projects/:id/stages/:stageKey/generate-prompt`](../api/stages/generate-prompt.md) | 回答からプロンプトを生成                             |
+| [`POST /api/projects/:id/stages/:stageKey/execute`](../api/stages/execute.md)                 | アプリ内でClaude APIを実行し成果物を生成             |
+| [`PATCH /api/projects/:id/stages/:stageKey/deliverable`](../api/stages/update-deliverable.md) | 成果物の貼り付け・編集を保存                         |
+| [`POST /api/projects/:id/stages/:stageKey/quality-gate`](../api/stages/quality-gate.md)       | 品質ゲートのチェック結果を送信・通過判定             |
 
 ## 画面フロー
 

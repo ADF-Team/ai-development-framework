@@ -17,20 +17,20 @@ title: 案件一覧画面
 
 ## 主要コンポーネント
 
-`docs/adf-design.md` C3を参照。
+`docs/README.md` C3を参照。
 
-| コンポーネント       | 役割                                             |
-| --------------------- | ------------------------------------------------- |
-| `ProjectListHeader`   | 新規作成ボタン                                   |
-| `ProjectCard`         | 案件名／7工程の進捗バー／作成日                  |
-| `NewProjectModal`     | 新規案件作成モーダル                             |
+| コンポーネント      | 役割                            |
+| ------------------- | ------------------------------- |
+| `ProjectListHeader` | 新規作成ボタン                  |
+| `ProjectCard`       | 案件名／7工程の進捗バー／作成日 |
+| `NewProjectModal`   | 新規案件作成モーダル            |
 
 ## 使用API
 
-| API                                            | 用途             |
-| ----------------------------------------------- | ---------------- |
-| [`GET /api/projects`](../api/projects/get-projects.md) | 案件一覧＋工程別ステータス取得 |
-| [`POST /api/projects`](../api/projects/create-project.md) | 新規案件作成      |
+| API                                                       | 用途                           |
+| --------------------------------------------------------- | ------------------------------ |
+| [`GET /api/projects`](../api/projects/get-projects.md)    | 案件一覧＋工程別ステータス取得 |
+| [`POST /api/projects`](../api/projects/create-project.md) | 新規案件作成                   |
 
 ## 画面構成
 

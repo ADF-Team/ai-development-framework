@@ -4,22 +4,22 @@
 
 ## プロジェクト概要
 
-AI Development Framework（ADF）のWebアプリ実装。詳細な要件・API・DB設計は `docs/adf-design.md`（設計ドキュメント v1.1）を正とする。機能追加・仕様確認が必要な場合は、まずこのファイルを参照すること。
+AI Development Framework（ADF）のWebアプリ実装。詳細な要件・API・DB設計は `docs/README.md`（設計ドキュメント v1.1）を正とする。機能追加・仕様確認が必要な場合は、まずこのファイルを参照すること。
 
 ## 技術スタック
 
-| 領域 | 選定 |
-|---|---|
-| フレームワーク | Next.js（App Router） |
-| UIライブラリ | shadcn/ui |
-| CSS | Tailwind CSS |
-| アイコン | lucide-react |
-| 状態管理 | jotai |
-| DB | PostgreSQL（Cloud SQL） |
-| ORM | Prisma |
-| 認証 | Identity Platform（Firebase Auth） |
-| AI API | Anthropic Claude API |
-| デプロイ | Cloud Run |
+| 領域           | 選定                               |
+| -------------- | ---------------------------------- |
+| フレームワーク | Next.js（App Router）              |
+| UIライブラリ   | shadcn/ui                          |
+| CSS            | Tailwind CSS                       |
+| アイコン       | lucide-react                       |
+| 状態管理       | jotai                              |
+| DB             | PostgreSQL（Cloud SQL）            |
+| ORM            | Prisma                             |
+| 認証           | Identity Platform（Firebase Auth） |
+| AI API         | Anthropic Claude API               |
+| デプロイ       | Cloud Run                          |
 
 ---
 
@@ -82,15 +82,15 @@ src
 └── utils/                     # 共有ユーティリティ関数
 ```
 
-### features一覧（`docs/adf-design.md` C3と対応）
+### features一覧（`docs/README.md` C3と対応）
 
-| フォルダ | 対応する画面 |
-|---|---|
-| `features/auth` | ログイン画面 |
-| `features/projects` | 案件一覧画面 |
-| `features/stages` | 案件詳細画面（工程別ワークスペース） |
-| `features/admin-templates` | テンプレート管理画面 |
-| `features/admin-users` | ユーザー管理画面 |
+| フォルダ                   | 対応する画面                         |
+| -------------------------- | ------------------------------------ |
+| `features/auth`            | ログイン画面                         |
+| `features/projects`        | 案件一覧画面                         |
+| `features/stages`          | 案件詳細画面（工程別ワークスペース） |
+| `features/admin-templates` | テンプレート管理画面                 |
+| `features/admin-users`     | ユーザー管理画面                     |
 
 各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `stores` `types` `utils` のうち使うものだけ）。
 
@@ -157,15 +157,15 @@ src/components/
 - `src/components/ui/`：shadcnのCLI（`npx shadcn add`）が生成する場所。フラットな1ファイル構成のまま変更しない（CLIを再実行した際に上書き・パスずれが起きるため）
 - `src/components/`直下のそれ以外：shadcnのプリミティブを組み合わせて作る自作の複合コンポーネント。`table` `card` `button`のような**種類別フォルダ**を作り、その中に親（＋必要なら子フォルダ）を置く
 
-各featureの親コンポーネント名は以下の通り（`docs/adf-design.md` C3の画面構成に対応）。
+各featureの親コンポーネント名は以下の通り（`docs/README.md` C3の画面構成に対応）。
 
-| feature | 親コンポーネント |
-|---|---|
-| `auth` | `LoginScreen` |
-| `projects` | `ProjectListScreen` |
-| `stages` | `StageWorkspace` |
+| feature           | 親コンポーネント           |
+| ----------------- | -------------------------- |
+| `auth`            | `LoginScreen`              |
+| `projects`        | `ProjectListScreen`        |
+| `stages`          | `StageWorkspace`           |
 | `admin-templates` | `TemplateManagementScreen` |
-| `admin-users` | `UserManagementScreen` |
+| `admin-users`     | `UserManagementScreen`     |
 
 ### Client Componentの境界
 
@@ -206,7 +206,11 @@ Client Component側でjotaiにデータを渡す際は、`jotai/utils`の`useHyd
 import { useHydrateAtoms } from 'jotai/utils'
 import { projectsAtom } from '../stores/projectsAtom'
 
-export function ProjectListView({ initialProjects }: { initialProjects: ProjectData[] }) {
+export function ProjectListView({
+  initialProjects,
+}: {
+  initialProjects: ProjectData[]
+}) {
   useHydrateAtoms([[projectsAtom, initialProjects]])
   // ...
 }
@@ -225,7 +229,7 @@ Identity Platformのクライアント側SDKで取得したIDトークンは、�
 2. クライアント → POST /api/auth/session （IDトークンを送る）
 3. サーバー：IDトークンを検証 → createSessionCookie() → Set-Cookie（httpOnly, 'session'）
 4. 以降のリクエスト：fetchData（Server Action）がcookies()でsessionを読み取り、Authorizationヘッダに載せて呼び出す
-5. 各APIルート：verifySessionCookie()で検証（`docs/adf-design.md` C2の「IDトークンを検証」は、実装上はこのセッションCookie検証を指す）
+5. 各APIルート：verifySessionCookie()で検証（`docs/README.md` C2の「IDトークンを検証」は、実装上はこのセッションCookie検証を指す）
 ```
 
 各APIルートは、毎回自分でCookie検証・ユーザー取得を書かず、共通ヘルパーを呼ぶ。
@@ -258,7 +262,7 @@ export async function getCurrentUser() {
 }
 ```
 
-各APIルートの先頭で呼び、`user`が`null`なら`401`、`organization_id`が一致しなければ`403`、管理者用ルートで`role !== 'admin'`なら`403`を返す（`docs/adf-design.md` C2のエラーコードに対応）。
+各APIルートの先頭で呼び、`user`が`null`なら`401`、`organization_id`が一致しなければ`403`、管理者用ルートで`role !== 'admin'`なら`403`を返す（`docs/README.md` C2のエラーコードに対応）。
 
 ### ルート保護（middleware）
 
@@ -320,9 +324,11 @@ export const messages = {
       notFound: 'リソースが見つかりません。',
       conflict: '競合が発生しました。',
       unprocessableEntity: '不正なリクエストです。',
-      tooManyRequests: 'リクエストが混み合っています。しばらくしてから再度お試しください。',
+      tooManyRequests:
+        'リクエストが混み合っています。しばらくしてから再度お試しください。',
       internalServerError: 'サーバーエラーが発生しました。',
-      badGateway: 'AIの実行に失敗しました。しばらくしてから再度お試しください。',
+      badGateway:
+        'AIの実行に失敗しました。しばらくしてから再度お試しください。',
       otherError: 'リクエストに失敗しました。',
       error: 'エラーが発生しました。',
     },
@@ -400,6 +406,7 @@ export const messages = {
   },
 }
 ```
+
 > ⚠️ 文言は仮のたたき台。実際の画面文言はデザイン（Claude Design出力）に合わせて調整する。**画面に表示する日本語文字列は、コンポーネント内に直接書かず必ずここに追加してから参照する。**
 
 ## API層（`src/lib/api`）
@@ -491,16 +498,22 @@ export async function fetchData(
         [ERROR_STATUS.FORBIDDEN]: messages.common.errorMessage.forbidden,
         [ERROR_STATUS.NOT_FOUND]: messages.common.errorMessage.notFound,
         [ERROR_STATUS.CONFLICT]: messages.common.errorMessage.conflict,
-        [ERROR_STATUS.UNPROCESSABLE_ENTITY]: messages.common.errorMessage.unprocessableEntity,
-        [ERROR_STATUS.TOO_MANY_REQUESTS]: messages.common.errorMessage.tooManyRequests,
-        [ERROR_STATUS.INTERNAL_SERVER_ERROR]: messages.common.errorMessage.internalServerError,
+        [ERROR_STATUS.UNPROCESSABLE_ENTITY]:
+          messages.common.errorMessage.unprocessableEntity,
+        [ERROR_STATUS.TOO_MANY_REQUESTS]:
+          messages.common.errorMessage.tooManyRequests,
+        [ERROR_STATUS.INTERNAL_SERVER_ERROR]:
+          messages.common.errorMessage.internalServerError,
         [ERROR_STATUS.BAD_GATEWAY]: messages.common.errorMessage.badGateway,
       }
 
       return {
         error: {
           status: response.status,
-          messages: errorDetail || errorMessageMap[response.status] || messages.common.errorMessage.otherError,
+          messages:
+            errorDetail ||
+            errorMessageMap[response.status] ||
+            messages.common.errorMessage.otherError,
           errorText: `Failed to fetch ${APP_URL}/api${path} ${response.status}`,
         },
       }
@@ -516,7 +529,10 @@ export async function fetchData(
       error: {
         status: ERROR_STATUS.INTERNAL_SERVER_ERROR,
         messages: messages.common.errorMessage.error,
-        errorText: error instanceof Error ? error.message : 'An unexpected error occurred',
+        errorText:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred',
       },
     }
   }
@@ -541,7 +557,9 @@ import { ProjectData } from '@/types/Project'
  */
 export const getProject = async (id: string) => {
   const response = await fetchData(`/projects/${id}`)
-  return response as { project: ProjectData; error?: never } | { error: { status: number; messages: string; errorText: string } }
+  return response as
+    | { project: ProjectData; error?: never }
+    | { error: { status: number; messages: string; errorText: string } }
 }
 ```
 
@@ -606,11 +624,10 @@ export const putStageTemplate = async (
   stageKey: string,
   payload: Omit<StageTemplateData, 'version'>
 ): Promise<number | null> => {
-  const response = await fetchData(
-    `/admin/templates/${stageKey}`,
-    undefined,
-    { method: 'PUT', body: payload }
-  )
+  const response = await fetchData(`/admin/templates/${stageKey}`, undefined, {
+    method: 'PUT',
+    body: payload,
+  })
 
   if (response.error) {
     showErrorToast(response.error.messages)
@@ -625,7 +642,7 @@ export const putStageTemplate = async (
 
 > 💡 `revalidatePath`に渡すパスは、そのミューテーションの影響を受ける画面（一覧・詳細）に合わせる（例：案件作成なら`/projects`、成果物更新なら`/projects/[id]`）。
 
-**PATCH（部分更新：成果物編集・ユーザー無効化など）**：POST/PUTと同じ構造で`method: 'PATCH'`にする（`docs/adf-design.md` C2の`PATCH /deliverable`・`PATCH /admin/users/:id`が該当）。
+**PATCH（部分更新：成果物編集・ユーザー無効化など）**：POST/PUTと同じ構造で`method: 'PATCH'`にする（`docs/README.md` C2の`PATCH /deliverable`・`PATCH /admin/users/:id`が該当）。
 
 ---
 
@@ -705,7 +722,7 @@ export const showErrorToast = (message: string) => {
 
 ## Prisma / DB
 
-- スキーマは`prisma/schema.prisma`に定義する。テーブル定義は`docs/adf-design.md` C1を正とする
+- スキーマは`prisma/schema.prisma`に定義する。テーブル定義は`docs/README.md` C1を正とする
 - マイグレーションは`prisma migrate dev`で作成し、コミットに含める
 - `lib/services`層以外からPrisma Clientを直接importしない（Server ComponentsもAPI Routesも、必ず`lib/services`の関数経由でDBにアクセスする）
 - Prisma Clientは`lib/prisma.ts`でシングルトン化する（Next.jsの開発時ホットリロードでインスタンスが増殖し、DB接続を使い切る事故を防ぐため）
@@ -745,13 +762,13 @@ if (process.env.NODE_ENV !== 'production') {
 
 ## 環境変数
 
-| 変数名 | 用途 |
-|---|---|
-| `DATABASE_URL` | Prismaの接続文字列（Cloud SQL for PostgreSQL） |
-| `ANTHROPIC_API_KEY` | Claude API呼び出し用（サーバー側のみで使用。クライアントに露出させない） |
-| `APP_URL` | `fetchData`が絶対URLを組み立てるために使用（例：`http://localhost:3000`／Cloud RunのURL） |
-| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK用（セッションCookieの発行・検証） |
-| `NEXT_PUBLIC_FIREBASE_*`（API_KEY等） | Identity Platformのクライアント側SDK設定 |
+| 変数名                                                                   | 用途                                                                                      |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                           | Prismaの接続文字列（Cloud SQL for PostgreSQL）                                            |
+| `ANTHROPIC_API_KEY`                                                      | Claude API呼び出し用（サーバー側のみで使用。クライアントに露出させない）                  |
+| `APP_URL`                                                                | `fetchData`が絶対URLを組み立てるために使用（例：`http://localhost:3000`／Cloud RunのURL） |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK用（セッションCookieの発行・検証）                                      |
+| `NEXT_PUBLIC_FIREBASE_*`（API_KEY等）                                    | Identity Platformのクライアント側SDK設定                                                  |
 
 `src/config/`でこれらをexportし、コンポーネント側で`process.env`を直接参照しない。
 
@@ -759,4 +776,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 ## 参照ドキュメント
 
-- `docs/adf-design.md` … 要件定義・基本設計・詳細設計（API仕様・DBスキーマ・品質ゲート等の正本）
+- `docs/README.md` … 要件定義・基本設計・詳細設計（API仕様・DBスキーマ・品質ゲート等の正本）

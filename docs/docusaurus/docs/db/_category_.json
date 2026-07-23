@@ -4,6 +4,6 @@
   "link": {
     "type": "generated-index",
     "title": "DB",
-    "description": "ADF Webアプリのテーブル構成（docs/adf-design.md C1/B7を正とする）。"
+    "description": "ADF Webアプリのテーブル構成（docs/README.md C1/B7を正とする）。"
   }
 }
