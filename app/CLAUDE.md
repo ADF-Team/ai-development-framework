@@ -744,6 +744,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 ## やってはいけないこと
 
+- Tailwindの警告をそのままにすること
 - モックアップにない挙動を推測で実装しない（不明点は確認する）
 - `lib/services`を経由せず、Server ComponentやAPI RouteからPrisma Clientを直接呼ばない
 - Client ComponentからAPI Routeを経由せず直接Prismaやサーバー専用ロジックを呼ばない（`'use client'`のファイルに`lib/services`をimportしない）
