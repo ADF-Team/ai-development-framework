@@ -9,14 +9,27 @@
     "lint": "eslint --ext .ts,.tsx src",
     "lint:fix": "eslint --ext .ts,.tsx src --fix",
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'",
-    "format:check": "prettier --check --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'"
+    "format:check": "prettier --check --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "eslint-config-prettier": "^10.1.8",
+    "firebase": "^12.16.0",
+    "firebase-admin": "^13.10.0",
+    "jotai": "^2.20.2",
+    "lucide-react": "^1.25.0",
     "next": "16.2.11",
     "prettier": "^3.9.6",
+    "radix-ui": "^1.6.5",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -25,6 +38,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

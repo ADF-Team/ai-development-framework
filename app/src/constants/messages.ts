@@ -2,6 +2,20 @@ export const messages = {
   common: {
     brand: 'ADF',
     brandFullName: 'AI Development Framework',
+    errorMessage: {
+      unauthorized: '認証に失敗しました。',
+      forbidden: '権限がありません。',
+      notFound: 'リソースが見つかりません。',
+      conflict: '競合が発生しました。',
+      unprocessableEntity: '不正なリクエストです。',
+      tooManyRequests:
+        'リクエストが混み合っています。しばらくしてから再度お試しください。',
+      internalServerError: 'サーバーエラーが発生しました。',
+      badGateway:
+        'AIの実行に失敗しました。しばらくしてから再度お試しください。',
+      otherError: 'リクエストに失敗しました。',
+      error: 'エラーが発生しました。',
+    },
   },
   welcome: {
     headingLines: ['属人化から、', '標準化へ。'],
@@ -20,6 +34,26 @@ export const messages = {
       security: 'セキュリティ',
       test: 'テスト',
       documentation: 'ドキュメント',
+    },
+  },
+  auth: {
+    back: '戻る',
+    loginGreeting: 'AI Development Framework にログイン',
+    email: 'メールアドレス',
+    emailPlaceholder: 'you@company.com',
+    password: 'パスワード',
+    passwordPlaceholder: '••••••••',
+    loginButton: 'ログイン',
+    forgotPasswordLink: 'パスワードをお忘れですか？',
+    forgotPasswordEmailRequired: 'メールアドレスを入力してください。',
+    forgotPasswordSent: 'パスワード再設定用のメールを送信しました。',
+    errorMessage: {
+      invalidCredentials: 'メールアドレスまたはパスワードが正しくありません。',
+      other: 'ログインに失敗しました。しばらくしてから再度お試しください。',
+    },
+    validation: {
+      emailInvalid: 'メールアドレスの形式で入力してください。',
+      passwordRequired: 'パスワードを入力してください。',
     },
   },
 }

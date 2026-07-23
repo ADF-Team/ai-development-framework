@@ -15,6 +15,7 @@ AI Development Framework（ADF）のWebアプリ実装。詳細な要件・API�
 | CSS            | Tailwind CSS                       |
 | アイコン       | lucide-react                       |
 | 状態管理       | jotai                              |
+| フォーム管理   | zod（スキーマ定義・バリデーション） |
 | DB             | PostgreSQL（Cloud SQL）            |
 | ORM            | Prisma                             |
 | 認証           | Identity Platform（Firebase Auth） |
@@ -31,6 +32,7 @@ AI Development Framework（ADF）のWebアプリ実装。詳細な要件・API�
 4. **アイコンは`lucide-react`のみ**使用する
 5. **画面に表示する日本語文字列は、すべて`src/constants/messages.ts`にオブジェクトとして定義する**。コンポーネント内に直接日本語を書かない
 6. テストは現時点では書かない（v1は実装速度を優先。後日追加する）
+7. **関数（コンポーネント・hooks・ユーティリティ・APIハンドラ等）には、宣言の1行上に一行コメントで簡潔な説明を書く**。`src/lib/api`配下など既存のJSDoc形式（`@param 名 - 説明`）がある箇所はそれを維持すればよい。`src/components/ui/`のshadcn生成物は対象外（生成物の構成を手動で変更しないため）
 
 ---
 
@@ -92,7 +94,7 @@ src
 | `features/admin-templates` | テンプレート管理画面                 |
 | `features/admin-users`     | ユーザー管理画面                     |
 
-各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `stores` `types` `utils` のうち使うものだけ）。
+各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `schemas` `stores` `types` `utils` のうち使うものだけ）。`schemas`にはフォームのzodスキーマを置く（詳細は「フォームバリデーション（zod）」参照）。
 
 ### feature間import制限
 
@@ -206,6 +208,7 @@ Client Component側でjotaiにデータを渡す際は、`jotai/utils`の`useHyd
 import { useHydrateAtoms } from 'jotai/utils'
 import { projectsAtom } from '../stores/projectsAtom'
 
+// 案件一覧画面。Server Componentから受け取った初期データをjotaiにハイドレートする
 export function ProjectListView({
   initialProjects,
 }: {
@@ -235,9 +238,35 @@ Identity Platformのクライアント側SDKで取得したIDトークンは、�
 各APIルートは、毎回自分でCookie検証・ユーザー取得を書かず、共通ヘルパーを呼ぶ。
 
 ```ts
+// src/lib/auth/firebaseAdmin.ts
+// firebase-adminは環境変数未設定時にモジュール読み込み時点でクラッシュするため、
+// 初回呼び出し時まで初期化を遅延させる（`getFirebaseAdminAuth()`経由でのみ使う）
+import { cert, getApps, initializeApp, type App } from 'firebase-admin/app'
+import { getAuth, type Auth } from 'firebase-admin/auth'
+import { firebaseAdminConfig } from '@/config/env'
+
+let app: App | undefined
+
+// Firebase Admin Appのシングルトンを初回呼び出し時に生成する
+function getFirebaseAdminApp(): App {
+  if (!app) {
+    app = getApps()[0] ?? initializeApp({ credential: cert(firebaseAdminConfig) })
+  }
+  return app
+}
+
+/**
+ * セッションCookieの発行・検証に使うFirebase Admin Authを取得する
+ */
+export function getFirebaseAdminAuth(): Auth {
+  return getAuth(getFirebaseAdminApp())
+}
+```
+
+```ts
 // src/lib/auth/getCurrentUser.ts
 import { cookies } from 'next/headers'
-import { auth } from './firebaseAdmin'
+import { getFirebaseAdminAuth } from './firebaseAdmin'
 import { prisma } from '@/lib/prisma'
 
 /**
@@ -250,7 +279,7 @@ export async function getCurrentUser() {
   if (!sessionCookie) return null
 
   try {
-    const decoded = await auth.verifySessionCookie(sessionCookie)
+    const decoded = await getFirebaseAdminAuth().verifySessionCookie(sessionCookie)
     const user = await prisma.user.findUnique({
       where: { identityPlatformUid: decoded.uid },
     })
@@ -264,17 +293,19 @@ export async function getCurrentUser() {
 
 各APIルートの先頭で呼び、`user`が`null`なら`401`、`organization_id`が一致しなければ`403`、管理者用ルートで`role !== 'admin'`なら`403`を返す（`docs/README.md` C2のエラーコードに対応）。
 
-### ルート保護（middleware）
+### ルート保護（`src/proxy.ts`）
 
-`middleware.ts`（プロジェクトルート）でログイン有無だけを判定し、未ログインなら`/login`へリダイレクトする。**管理者ロールの判定はここでは行わない**（middlewareはEdge Runtimeで動作し、Prisma／Firebase Admin SDKが使えないため）。ロール判定は`app/(dashboard)/admin/layout.tsx`（Server Component）で`getCurrentUser()`を呼んで行う。
+Next.js 16では`middleware.ts`は`proxy.ts`に名称変更されている（エクスポートする関数名も`middleware`ではなく`proxy`）。**本プロジェクトでは必ず`proxy.ts`を使う**（`middleware.ts`は使わない）。ログイン有無だけを判定し、未ログインなら`/login`へリダイレクトする。**管理者ロールの判定はここでは行わない**（proxyはEdge Runtimeで動作し、Prisma／Firebase Admin SDKが使えないため）。ロール判定は`app/(dashboard)/admin/layout.tsx`（Server Component）で`getCurrentUser()`を呼んで行う。
 
 ```ts
-// middleware.ts
+// src/proxy.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { SESSION_COOKIE_NAME } from '@/config/env'
 
-export function middleware(request: NextRequest) {
-  const session = request.cookies.get('session')?.value
+// 未ログインで保護ルートにアクセスした場合、/loginへリダイレクトする
+export function proxy(request: NextRequest) {
+  const session = request.cookies.get(SESSION_COOKIE_NAME)?.value
   if (!session) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
@@ -671,6 +702,7 @@ export function useApiAction<Args extends unknown[], T>(
 ) {
   const [isLoading, setIsLoading] = useState(false)
 
+  // isLoadingを管理しながらactionを実行する
   const run = async (...args: Args) => {
     setIsLoading(true)
     const result = await action(...args)
@@ -686,12 +718,54 @@ export function useApiAction<Args extends unknown[], T>(
 
 ---
 
+## フォームバリデーション（zod）
+
+**入力を伴うフォームは、必ずzodのスキーマでバリデーションする**（React Hook Formのようなフォームライブラリは使わず、`useState`によるローカル状態管理＋zodの`safeParse`の組み合わせのみで統一する）。
+
+- スキーマは、そのフォームを使う画面のfeature配下`features/x/schemas/`に置く（例：`features/auth/schemas/loginFormSchema.ts`）。複数featureで共有するスキーマが出てきた場合のみ`src/schemas`への切り出しを検討する
+- ファイル名は`xxxFormSchema.ts`とし、スキーマ本体（`xxxFormSchema`）と`z.infer`で導出した型（`XxxFormValues`）の両方をexportする
+- バリデーションエラーメッセージも画面表示文字列のため、スキーマ内に直接日本語を書かず`src/constants/messages.ts`から参照する
+- フォーム側は`<form>`に`noValidate`を付け、HTML標準のバリデーション（`required`等）と二重にならないようにする。送信時に`schema.safeParse()`を呼び、失敗した場合は最初のissueのmessageを画面表示用のエラー状態にセットする
+
+```ts
+// src/features/auth/schemas/loginFormSchema.ts
+import { z } from 'zod'
+import { messages } from '@/constants/messages'
+
+export const loginFormSchema = z.object({
+  email: z.email(messages.auth.validation.emailInvalid),
+  password: z.string().min(1, messages.auth.validation.passwordRequired),
+})
+
+export type LoginFormValues = z.infer<typeof loginFormSchema>
+```
+
+```tsx
+// 呼び出し側（フォームのonSubmit内）
+const validation = loginFormSchema.safeParse({ email, password })
+if (!validation.success) {
+  setErrorMessage(validation.error.issues[0].message)
+  return
+}
+// validation.data が型付き・検証済みの値
+```
+
+---
+
 ## UI / スタイリング
 
 - コンポーネントは`shadcn/ui`のプリミティブをベースにする（`src/components/ui`に生成されたものをそのまま利用し、独自にゼロから書かない）
 - スタイリングはTailwindのユーティリティクラスのみ。CSS Modulesやstyled-componentsは使わない
 - カラーは`src/app/global.css`にCSS変数として定義し、`tailwind.config`でテーマ拡張として参照する。値はデザイン（Claude Design出力）から転記し、憶測で決めない
 - Server Componentをデフォルトとする。`'use client'`の付け方は「コンポーネント設計方針」を参照（各画面の親コンポーネントにのみ付ける）
+
+### shadcn/uiのセットアップとテーマトークン
+
+`components.json`は`tailwind.config`を持たない（Tailwind v4のCSSファーストのため`"config": ""`）。shadcnのCLIが生成するコンポーネント（`bg-primary`/`text-foreground`/`border-input`/`ring-ring`等）は、このプロジェクト独自のトークン名（`--color-accent`/`--color-surface`/`--color-divider`等）とは別名のため、`src/app/globals.css`の`:root`と`@theme inline`に**shadcn標準トークン名を独自トークンへのエイリアスとして追加**してある（`--color-primary: var(--color-accent);` のように）。新しいshadcnコンポーネントを`npx shadcn add`で追加した際、生成コードが未定義のトークン（例：`--color-chart-1`）を参照していたら、同じ要領でエイリアスを追加する（**生成された`src/components/ui/*.tsx`自体は編集しない**）。
+
+**Radix UIベースのコンポーネント（`Button`の`asChild`、`Label`、`Separator`、`Dialog`等）はクライアント側でcontextを使うため、これらを使う画面の親コンポーネントには必ず`'use client'`を付ける**（`WelcomeScreen`のようにインタラクションが無い画面でも、shadcnのプリミティブを1つでも使えば対象になる）。
+
+Radixコンポーネントの内部クラス（例：`Separator`の`data-[orientation=vertical]:h-full`）は属性セレクタ込みでCSS詳細度が高く、`className`で上書きしようとしても後勝ちにならないことがある。上書きが効かない場合は`style`propで直接指定する（`ui/`ファイル自体は編集しない）。
 
 ### トースト通知（sonner）
 
@@ -758,6 +832,8 @@ if (process.env.NODE_ENV !== 'production') {
 - 同じUIパターン・ロジックのコピペによる重複実装
 - コンポーネントから`sonner`の`toast`を直接呼ぶ（必ず`src/utils/toast.ts`経由）
 - `src/lib/api`配下のミューテーション関数で`'use server'`を付け忘れる（`revalidatePath`が動かなくなる）
+- フォームのバリデーションをzodのスキーマ経由にせず、HTML標準バリデーション（`required`等）や独自の手書きロジックだけで済ませる
+- `middleware.ts`を作成する（Next.js 16では`proxy.ts`を使う）
 
 ---
 

@@ -1,9 +1,14 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { messages } from '@/constants/messages'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 const stageEntries = Object.entries(messages.stages.stageNames)
 
+// ログイン前のランディング画面（/）のエントリーポイント
 export function WelcomeScreen() {
   return (
     <div className="flex min-h-screen flex-1 flex-col items-center bg-bg text-text">
@@ -42,12 +47,13 @@ export function WelcomeScreen() {
             </span>
           ))}
         </p>
-        <Link
-          href="/login"
-          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-accent px-7 py-2.75 font-heading text-sm font-medium text-accent transition-colors hover:bg-accent/12"
+        <Button
+          asChild
+          variant="outline"
+          className="h-auto rounded-full border-accent px-7 py-2.75 font-heading text-sm font-medium text-accent hover:bg-accent/12 hover:text-accent"
         >
-          {messages.welcome.loginButton}
-        </Link>
+          <Link href="/login">{messages.welcome.loginButton}</Link>
+        </Button>
       </div>
 
       <div className="w-full max-w-230 px-8 pb-14">
@@ -63,7 +69,11 @@ export function WelcomeScreen() {
                 </span>
               </div>
               {i < stageEntries.length - 1 && (
-                <div className="h-6 w-px flex-none bg-divider" />
+                <Separator
+                  orientation="vertical"
+                  className="flex-none"
+                  style={{ height: '1.5rem' }}
+                />
               )}
             </div>
           ))}
