@@ -2,47 +2,47 @@
 
 :root {
   /* Nocturne design tokens — base theme is dark, matching docs/design/ADF Screens (standalone).html */
-  --color-bg: #161826;
-  --color-surface: #232532;
-  --color-text: #e9e9ed;
-  --color-accent: #9184d9;
-  --color-accent-2: #a7a1db;
+  --color-bg: #0c1b25;
+  --color-surface: #1b2831;
+  --color-text: #e7eaed;
+  --color-accent: #5197db;
+  --color-accent-2: #80aedc;
   --color-danger: #f2777a;
-  --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
+  --color-divider: color-mix(in srgb, #e7eaed 16%, transparent);
 
-  --color-neutral-100: #f3f5fe;
-  --color-neutral-200: #e4e7f5;
-  --color-neutral-300: #cfd3e5;
-  --color-neutral-400: #b2b6ca;
-  --color-neutral-500: #9397ab;
-  --color-neutral-600: #75798c;
-  --color-neutral-700: #595d6c;
-  --color-neutral-800: #3f424d;
-  --color-neutral-900: #292b31;
+  --color-neutral-100: #eef7fd;
+  --color-neutral-200: #dceaf3;
+  --color-neutral-300: #c5d7e3;
+  --color-neutral-400: #a7bac8;
+  --color-neutral-500: #889ba9;
+  --color-neutral-600: #6a7d8a;
+  --color-neutral-700: #51606a;
+  --color-neutral-800: #39444b;
+  --color-neutral-900: #262c30;
 
-  --color-accent-100: #f5f4ff;
-  --color-accent-200: #e7e5fe;
-  --color-accent-300: #d2cefd;
-  --color-accent-400: #b5abfc;
-  --color-accent-500: #968ae0;
-  --color-accent-600: #796cbf;
-  --color-accent-700: #5d5294;
-  --color-accent-800: #423a6a;
-  --color-accent-900: #2b2741;
+  --color-accent-100: #eef6ff;
+  --color-accent-200: #d8ebff;
+  --color-accent-300: #b4d8fe;
+  --color-accent-400: #7cbdfe;
+  --color-accent-500: #569de2;
+  --color-accent-600: #377ec1;
+  --color-accent-700: #296096;
+  --color-accent-800: #1c456b;
+  --color-accent-900: #182d42;
 
-  --color-accent-2-100: #f5f4ff;
-  --color-accent-2-200: #e7e5fe;
-  --color-accent-2-300: #d2cefd;
-  --color-accent-2-400: #b5afe8;
-  --color-accent-2-500: #9690c9;
-  --color-accent-2-600: #7972a9;
-  --color-accent-2-700: #5c5783;
-  --color-accent-2-800: #423e5d;
-  --color-accent-2-900: #2b293a;
+  --color-accent-2-100: #eef6ff;
+  --color-accent-2-200: #d8ebff;
+  --color-accent-2-300: #b4d8fe;
+  --color-accent-2-400: #8fbce9;
+  --color-accent-2-500: #6f9dca;
+  --color-accent-2-600: #537eaa;
+  --color-accent-2-700: #3d6184;
+  --color-accent-2-800: #2d455e;
+  --color-accent-2-900: #202d3a;
 
-  --color-section: #262a60;
-  --color-section-glow: #353b80;
-  --color-section-ghost: #4c5397;
+  --color-section: #00365a;
+  --color-section-glow: #004a78;
+  --color-section-ghost: #006290;
 
   --font-heading: var(--font-inter), system-ui, sans-serif;
   --font-heading-weight: 500;
@@ -59,9 +59,9 @@
   --radius-md: 8px;
   --radius-lg: 14px;
 
-  --shadow-sm: 0 0 0 1px #3f424d;
-  --shadow-md: 0 0 0 1px #595d6c, 0 6px 18px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 0 0 1px #9397ab, 0 16px 40px rgba(0, 0, 0, 0.65);
+  --shadow-sm: 0 0 0 1px #39444b;
+  --shadow-md: 0 0 0 1px #51606a, 0 6px 18px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 0 0 1px #889ba9, 0 16px 40px rgba(0, 0, 0, 0.65);
 
   /* shadcn/ui slot aliases — map shadcn's expected token names onto the
      Nocturne tokens above so `src/components/ui/*` (CLI-generated, not
@@ -100,35 +100,35 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --color-bg: #f3f4fa;
+    --color-bg: #f0f5f9;
     --color-surface: #ffffff;
-    --color-text: #23242e;
+    --color-text: #1d262d;
     --color-danger: #c94c4c;
-    --color-divider: color-mix(in srgb, #23242e 12%, transparent);
+    --color-divider: color-mix(in srgb, #1d262d 12%, transparent);
 
-    --color-neutral-100: #292b31;
-    --color-neutral-200: #3f424d;
-    --color-neutral-300: #595d6c;
-    --color-neutral-400: #75798c;
-    --color-neutral-500: #9397ab;
-    --color-neutral-600: #b2b6ca;
-    --color-neutral-700: #cfd3e5;
-    --color-neutral-800: #e4e7f5;
-    --color-neutral-900: #f3f5fe;
+    --color-neutral-100: #262c30;
+    --color-neutral-200: #39444b;
+    --color-neutral-300: #51606a;
+    --color-neutral-400: #6a7d8a;
+    --color-neutral-500: #889ba9;
+    --color-neutral-600: #a7bac8;
+    --color-neutral-700: #c5d7e3;
+    --color-neutral-800: #dceaf3;
+    --color-neutral-900: #eef7fd;
 
-    --color-accent-100: #2b2741;
-    --color-accent-200: #423a6a;
-    --color-accent-300: #5d5294;
-    --color-accent-400: #796cbf;
-    --color-accent-500: #968ae0;
-    --color-accent-600: #b5abfc;
-    --color-accent-700: #d2cefd;
-    --color-accent-800: #e7e5fe;
-    --color-accent-900: #f5f4ff;
+    --color-accent-100: #182d42;
+    --color-accent-200: #1c456b;
+    --color-accent-300: #296096;
+    --color-accent-400: #377ec1;
+    --color-accent-500: #569de2;
+    --color-accent-600: #7cbdfe;
+    --color-accent-700: #b4d8fe;
+    --color-accent-800: #d8ebff;
+    --color-accent-900: #eef6ff;
 
-    --shadow-sm: 0 0 0 1px #e4e7f5, 0 1px 2px rgba(35, 36, 46, 0.06);
-    --shadow-md: 0 0 0 1px #cfd3e5, 0 6px 18px rgba(35, 36, 46, 0.1);
-    --shadow-lg: 0 0 0 1px #b2b6ca, 0 16px 40px rgba(35, 36, 46, 0.14);
+    --shadow-sm: 0 0 0 1px #dceaf3, 0 1px 2px rgba(35, 36, 46, 0.06);
+    --shadow-md: 0 0 0 1px #c5d7e3, 0 6px 18px rgba(35, 36, 46, 0.1);
+    --shadow-lg: 0 0 0 1px #a7bac8, 0 16px 40px rgba(35, 36, 46, 0.14);
   }
 }
 
