@@ -31,7 +31,9 @@ export function SaveImpactModal({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{messages.adminTemplates.saveImpactModal.title}</DialogTitle>
+          <DialogTitle>
+            {messages.adminTemplates.saveImpactModal.title}
+          </DialogTitle>
         </DialogHeader>
 
         <p className="text-[13px] text-text/70">

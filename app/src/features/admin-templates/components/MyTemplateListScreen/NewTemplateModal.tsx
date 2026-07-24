@@ -51,7 +51,9 @@ export function NewTemplateModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{messages.adminTemplates.newTemplateModal.title}</DialogTitle>
+          <DialogTitle>
+            {messages.adminTemplates.newTemplateModal.title}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-1.5">
@@ -60,7 +62,9 @@ export function NewTemplateModal({
           </Label>
           <Input
             id="new-template-title"
-            placeholder={messages.adminTemplates.newTemplateModal.namePlaceholder}
+            placeholder={
+              messages.adminTemplates.newTemplateModal.namePlaceholder
+            }
             value={title}
             maxLength={NAME_MAX_LENGTH}
             onChange={(e) => setTitle(e.target.value)}

@@ -24,14 +24,20 @@ export function QuestionSetEditor({
     if (!newQuestionText.trim()) return
     onChange([
       ...questions,
-      { id: `q${Date.now()}`, text: newQuestionText, order: questions.length + 1 },
+      {
+        id: `q${Date.now()}`,
+        text: newQuestionText,
+        order: questions.length + 1,
+      },
     ])
     setNewQuestionText('')
   }
 
   return (
     <PanelCard>
-      <PanelCardKicker>{messages.adminTemplates.questionListLabel}</PanelCardKicker>
+      <PanelCardKicker>
+        {messages.adminTemplates.questionListLabel}
+      </PanelCardKicker>
       <div className="flex flex-col">
         {questions.map((question) => (
           <div
@@ -57,7 +63,12 @@ export function QuestionSetEditor({
           value={newQuestionText}
           onChange={(e) => setNewQuestionText(e.target.value)}
         />
-        <Button type="button" variant="secondary" size="icon" onClick={handleAdd}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          onClick={handleAdd}
+        >
           <Plus />
         </Button>
       </div>

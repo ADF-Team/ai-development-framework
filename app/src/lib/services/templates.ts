@@ -326,7 +326,10 @@ const REQUIREMENTS_PROMPT_TEMPLATE = `あなたは経験豊富なITコンサル�
 function buildDefaultPromptTemplate(stageKey: StageKey): string {
   const stageName = messages.stages.stageNames[stageKey]
   const body = STAGE_QUESTIONS[stageKey]
-    .map((question) => `${question.order}. ${question.text}\n→ {{answer:${question.id}}}`)
+    .map(
+      (question) =>
+        `${question.order}. ${question.text}\n→ {{answer:${question.id}}}`
+    )
     .join('\n\n')
   return `あなたは${stageName}を担当する専門家です。\n${body}\n\n上記を踏まえ、${stageName}工程の成果物を作成してください。`
 }
@@ -400,7 +403,9 @@ function assertStageKey(stageKey: string): asserts stageKey is StageKey {
   }
 }
 
-function currentVersion(versions: TemplateVersionRecord[]): TemplateVersionRecord {
+function currentVersion(
+  versions: TemplateVersionRecord[]
+): TemplateVersionRecord {
   return versions.reduce((latest, version) =>
     version.version > latest.version ? version : latest
   )
@@ -410,7 +415,11 @@ function toVersionSummaries(
   versions: TemplateVersionRecord[]
 ): TemplateVersionSummary[] {
   return versions
-    .map(({ version, createdAt, createdBy }) => ({ version, createdAt, createdBy }))
+    .map(({ version, createdAt, createdBy }) => ({
+      version,
+      createdAt,
+      createdBy,
+    }))
     .sort((a, b) => b.version - a.version)
 }
 

@@ -1,5 +1,8 @@
 import { diffLines, type Change } from 'diff'
-import type { TemplateQuestion, TemplateQualityGateItem } from '@/types/StageTemplate'
+import type {
+  TemplateQuestion,
+  TemplateQualityGateItem,
+} from '@/types/StageTemplate'
 
 export interface TemplateDiff {
   title: Change[]

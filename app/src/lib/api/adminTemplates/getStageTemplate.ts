@@ -9,7 +9,10 @@ import type { StageTemplateDetail } from '@/types/StageTemplate'
  * @param stageKey - 工程キー
  * @returns テンプレートデータ。エラー時はerrorプロパティを含む
  */
-export const getStageTemplate = async (templateId: string, stageKey: string) => {
+export const getStageTemplate = async (
+  templateId: string,
+  stageKey: string
+) => {
   const response = await fetchData(
     `/admin/templates/${templateId}/stages/${stageKey}`
   )

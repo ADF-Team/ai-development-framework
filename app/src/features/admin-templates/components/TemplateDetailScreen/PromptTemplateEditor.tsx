@@ -12,7 +12,9 @@ export function PromptTemplateEditor({
 }) {
   return (
     <PanelCard>
-      <PanelCardKicker>{messages.adminTemplates.promptTemplateLabel}</PanelCardKicker>
+      <PanelCardKicker>
+        {messages.adminTemplates.promptTemplateLabel}
+      </PanelCardKicker>
       <Textarea
         rows={10}
         className="field-sizing-fixed h-96 overflow-y-auto font-mono text-[12.5px] leading-relaxed"

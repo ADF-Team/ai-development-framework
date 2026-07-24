@@ -88,7 +88,9 @@ export function NewProjectModal({
           <Select value={templateId} onValueChange={setTemplateId}>
             <SelectTrigger id="new-project-template" className="w-full">
               <SelectValue
-                placeholder={messages.projects.newProjectModal.templatePlaceholder}
+                placeholder={
+                  messages.projects.newProjectModal.templatePlaceholder
+                }
               />
             </SelectTrigger>
             <SelectContent>

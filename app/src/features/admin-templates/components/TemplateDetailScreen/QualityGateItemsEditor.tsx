@@ -31,7 +31,9 @@ export function QualityGateItemsEditor({
 
   return (
     <PanelCard>
-      <PanelCardKicker>{messages.adminTemplates.qualityGateLabel}</PanelCardKicker>
+      <PanelCardKicker>
+        {messages.adminTemplates.qualityGateLabel}
+      </PanelCardKicker>
       <div className="flex flex-col">
         {items.map((item) => (
           <div
@@ -57,7 +59,12 @@ export function QualityGateItemsEditor({
           value={newGateText}
           onChange={(e) => setNewGateText(e.target.value)}
         />
-        <Button type="button" variant="secondary" size="icon" onClick={handleAdd}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          onClick={handleAdd}
+        >
           <Plus />
         </Button>
       </div>

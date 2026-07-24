@@ -17,10 +17,9 @@ interface PostProjectBody {
 export async function POST(request: Request) {
   const body = (await request.json()) as PostProjectBody
   try {
-    return NextResponse.json(
-      createProject(body.name, body.templateId),
-      { status: 201 }
-    )
+    return NextResponse.json(createProject(body.name, body.templateId), {
+      status: 201,
+    })
   } catch (error) {
     return handleServiceError(error)
   }

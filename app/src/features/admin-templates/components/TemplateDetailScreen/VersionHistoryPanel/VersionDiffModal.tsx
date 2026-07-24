@@ -17,7 +17,8 @@ import type { TemplateDiff } from '../../../utils/buildTemplateDiff'
 
 // 行単位の差分（Change配列）を、追加行=アクセント背景／削除行=danger背景＋取り消し線で描画する
 function DiffLines({ changes }: { changes: Change[] }) {
-  const isUnchanged = changes.length <= 1 && !changes[0]?.added && !changes[0]?.removed
+  const isUnchanged =
+    changes.length <= 1 && !changes[0]?.added && !changes[0]?.removed
 
   if (isUnchanged) {
     return (
