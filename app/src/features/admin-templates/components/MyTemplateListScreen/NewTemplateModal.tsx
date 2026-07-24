@@ -31,6 +31,15 @@ export function NewTemplateModal({
   const [errorMessage, setErrorMessage] = useState('')
   const { run, isLoading } = useApiAction(createTemplate)
 
+  // モーダルを閉じる際、開き方（キャンセル操作／Escape／外側クリック）によらず入力値とエラーメッセージをリセットする
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setTitle('')
+      setErrorMessage('')
+    }
+    onOpenChange(next)
+  }
+
   const handleCreate = async () => {
     const validation = newTemplateFormSchema.safeParse({ title })
     if (!validation.success) {
@@ -41,14 +50,13 @@ export function NewTemplateModal({
 
     const id = await run(title)
     if (id) {
-      setTitle('')
-      onOpenChange(false)
+      handleOpenChange(false)
       router.push(`/admin/templates/${id}`)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -78,7 +86,7 @@ export function NewTemplateModal({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
           >
             {messages.adminTemplates.newTemplateModal.cancelButton}
           </Button>

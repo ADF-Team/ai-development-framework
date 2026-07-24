@@ -45,6 +45,16 @@ export function NewProjectModal({
   const [errorMessage, setErrorMessage] = useState('')
   const { run, isLoading } = useApiAction(createProject)
 
+  // モーダルを閉じる際、開き方（キャンセル操作／Escape／外側クリック）によらず入力値とエラーメッセージをリセットする
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setName('')
+      setTemplateId(initialTemplateId ?? '')
+      setErrorMessage('')
+    }
+    onOpenChange(next)
+  }
+
   const handleCreate = async () => {
     const validation = newProjectFormSchema.safeParse({ name, templateId })
     if (!validation.success) {
@@ -56,13 +66,12 @@ export function NewProjectModal({
     const project = await run(name, templateId)
     if (project) {
       onCreated(project)
-      onOpenChange(false)
-      setName('')
+      handleOpenChange(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{messages.projects.newProjectModal.title}</DialogTitle>
@@ -111,7 +120,7 @@ export function NewProjectModal({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
           >
             {messages.projects.newProjectModal.cancelButton}
           </Button>

@@ -180,6 +180,46 @@ export const messages = {
       successDuplicate: 'テンプレートを複製しました。',
     },
   },
+  adminUsers: {
+    listTitle: 'ユーザー管理',
+    inviteButton: 'メンバーを招待',
+    table: {
+      nameHeader: '名前',
+      emailHeader: 'メールアドレス',
+      roleHeader: 'ロール',
+      statusHeader: 'ステータス',
+    },
+    roleLabel: {
+      user: '利用者',
+      admin: '管理者',
+    },
+    statusLabel: {
+      active: '有効',
+      disabled: '無効化',
+    },
+    disableButton: '無効化',
+    enableButton: '再有効化',
+    inviteModal: {
+      title: 'メンバーを招待',
+      emailLabel: 'メールアドレス',
+      emailPlaceholder: 'new@example.com',
+      nameLabel: '表示名',
+      namePlaceholder: '山田 太郎',
+      roleLabel: 'ロール',
+      description: '招待メールにパスワード設定用のリンクが送信されます。',
+      cancelButton: 'キャンセル',
+      inviteButton: '招待する',
+    },
+    validation: {
+      emailInvalid: 'メールアドレスの形式で入力してください。',
+      displayNameRequired: '表示名を入力してください。',
+      displayNameTooLong: '表示名は255文字以内で入力してください。',
+    },
+    toastMessage: {
+      successInvite: '招待メールを送信しました。',
+      successUpdate: 'ユーザー情報を更新しました。',
+    },
+  },
   auth: {
     back: '戻る',
     loginGreeting: 'AI Development Framework にログイン',
