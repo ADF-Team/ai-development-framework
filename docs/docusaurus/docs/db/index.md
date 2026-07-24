@@ -24,6 +24,7 @@ erDiagram
 
     TEMPLATES ||--o{ TEMPLATE_VERSIONS : has
     TEMPLATES ||--o{ PROJECTS : "referenced by"
+    TEMPLATES |o--o{ TEMPLATES : "duplicated from (published)"
     TEMPLATE_VERSIONS ||--o{ QUESTION_TEMPLATES : has
     TEMPLATE_VERSIONS ||--o{ PROMPT_TEMPLATES : has
     TEMPLATE_VERSIONS ||--o{ QUALITY_GATE_ITEMS : has
@@ -35,6 +36,7 @@ erDiagram
     ORGANIZATIONS {
         uuid id PK
         string name
+        enum status
         timestamptz created_at
     }
     USERS {
@@ -50,6 +52,8 @@ erDiagram
     TEMPLATES {
         uuid id PK
         uuid organization_id FK
+        timestamptz published_at
+        uuid source_published_template_id FK
         timestamptz created_at
     }
     TEMPLATE_VERSIONS {

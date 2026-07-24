@@ -11,44 +11,49 @@ title: テーブル定義
 
 ### organizations
 
-| カラム     | 型           | 制約                          |
-| ---------- | ------------ | ----------------------------- |
-| id         | UUID         | PK, default gen_random_uuid() |
-| name       | VARCHAR(255) | NOT NULL                      |
-| created_at | TIMESTAMPTZ  | NOT NULL, default now()       |
+| カラム     | 型                          | 制約                          |
+| ---------- | --------------------------- | ----------------------------- |
+| id         | UUID                        | PK, default gen_random_uuid() |
+| name       | VARCHAR(255)                | NOT NULL                      |
+| status     | ENUM('active','suspended')  | NOT NULL, default 'active'    |
+| created_at | TIMESTAMPTZ                 | NOT NULL, default now()       |
 
-v1では1組織のみ運用だが、将来の他社ライセンス提供を見据え最初から用意する。
+v1では1組織のみ運用だが、将来の他社ライセンス提供（Phase3）を見据え最初から複数対応の構造で用意する。`status`が`suspended`になると、この会社に属する全ユーザーがログイン不可になる（[会社管理画面](../screens/company-management.md)参照）。
 
 <a id="users"></a>
 
 ### users
 
-| カラム                | 型                        | 制約                          |
-| --------------------- | ------------------------- | ----------------------------- |
-| id                    | UUID                      | PK                            |
-| organization_id       | UUID                      | NOT NULL, FK→organizations.id |
-| identity_platform_uid | VARCHAR(128)              | NOT NULL, UNIQUE              |
-| email                 | VARCHAR(255)              | NOT NULL, UNIQUE              |
-| role                  | ENUM('user','admin')      | NOT NULL, default 'user'      |
-| display_name          | VARCHAR(100)              |                               |
-| status                | ENUM('active','disabled') | NOT NULL, default 'active'    |
-| created_at            | TIMESTAMPTZ               | NOT NULL, default now()       |
+| カラム                | 型                                    | 制約                          |
+| --------------------- | -------------------------------------- | ----------------------------- |
+| id                    | UUID                                   | PK                            |
+| organization_id       | UUID                                   | NOT NULL, FK→organizations.id |
+| identity_platform_uid | VARCHAR(128)                           | NOT NULL, UNIQUE              |
+| email                 | VARCHAR(255)                           | NOT NULL, UNIQUE              |
+| role                  | ENUM('user','admin','system_admin')    | NOT NULL, default 'user'      |
+| display_name          | VARCHAR(100)                           |                               |
+| status                | ENUM('active','disabled')              | NOT NULL, default 'active'    |
+| created_at            | TIMESTAMPTZ                            | NOT NULL, default now()       |
 
 INDEX: `organization_id`
+
+`system_admin`は`admin`の権限をすべて含む上位ロール（自組織の案件・マイテンプレート・ユーザー管理に加え、[会社管理画面](../screens/company-management.md)にアクセスできる）。権限チェックは「`admin`専用機能：`role`が`admin`または`system_admin`」「会社管理機能：`role`が`system_admin`」という2段階で行う。
 
 <a id="templates"></a>
 
 ### templates
 
-| カラム          | 型          | 制約                           |
-| ---------------- | ----------- | ------------------------------ |
-| id               | UUID        | PK, default gen_random_uuid()  |
-| organization_id  | UUID        | NOT NULL, FK→organizations.id  |
-| created_at       | TIMESTAMPTZ | NOT NULL, default now()        |
+| カラム                        | 型          | 制約                                                          |
+| ------------------------------ | ----------- | --------------------------------------------------------------- |
+| id                             | UUID        | PK, default gen_random_uuid()                                   |
+| organization_id                | UUID        | NOT NULL, FK→organizations.id                                   |
+| published_at                   | TIMESTAMPTZ | NULL可。非NULLなら公開中（[公開テンプレート一覧](../screens/published-templates.md)に表示される） |
+| source_published_template_id   | UUID        | NULL可, FK→templates.id。公開テンプレートを複製して作られた場合の複製元 |
+| created_at                     | TIMESTAMPTZ | NOT NULL, default now()                                         |
 
-INDEX: `organization_id`
+INDEX: `organization_id` ／ `published_at`（公開テンプレート一覧の絞り込み用）
 
-テンプレート（7工程分のパック）そのもの。組織内に複数作成できる。
+テンプレート（7工程分のパック）そのもの。組織内に複数作成できる。「公開テンプレート」タグの表示条件（[マイテンプレート一覧画面](../screens/my-templates.md)）：`source_published_template_id`が非NULL、かつこのテンプレートの`template_versions`が1件のみ（未編集）の場合に表示する。新しいバージョンが保存された時点（`template_versions`が2件以上になった時点）でタグは消え、通常の「公開する」ボタンが表示される。
 
 <a id="template_versions"></a>
 

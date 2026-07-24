@@ -21,8 +21,11 @@ title: 状態値の定義
 |                                                                   |      | `ai_executed`          | `/execute`エンドポイント経由でAI生成された保存           |
 | `users.role`                                                      | ENUM | `user`                 | 案件を進める一般利用者                                   |
 |                                                                   |      | `admin`                | マイテンプレートの編集も可能な管理者                     |
+|                                                                   |      | `system_admin`         | `admin`の権限を包含し、会社管理画面にもアクセスできる上位ロール |
 | `users.status`                                                    | ENUM | `active`               | ログイン可能                                             |
 |                                                                   |      | `disabled`             | 無効化済み（退職者等）                                   |
+| `organizations.status`                                            | ENUM | `active`               | ログイン・利用可能                                       |
+|                                                                   |      | `suspended`            | 無効化済み（この会社に属する全ユーザーがログイン不可になる） |
 
 ## 状態遷移ルール（project_stages.status）
 
