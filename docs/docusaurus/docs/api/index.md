@@ -10,7 +10,7 @@ title: API
 - [状態値（status／mode系）の定義](./status-values.md)：全エンドポイント共通で使う語彙
 - [案件](./projects/index.md)：案件の作成・一覧・詳細取得
 - [工程](./stages/index.md)：質問回答・プロンプト生成・AI実行・成果物編集・品質ゲート
-- [管理者：テンプレート](./admin-templates/index.md)：質問セット・プロンプトテンプレート・品質ゲート項目の編集
+- [管理者：テンプレート](./admin-templates/index.md)：質問セット・プロンプトテンプレート・品質ゲート項目の一覧取得・編集・バージョン差分確認
 - [管理者：ユーザー](./admin-users/index.md)：メンバー招待・ロール変更・無効化
 
 ## 認証

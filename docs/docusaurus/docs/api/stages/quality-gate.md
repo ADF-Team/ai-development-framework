@@ -40,7 +40,7 @@ title: "POST /api/projects/{id}/stages/{stageKey}/quality-gate"
 
 ## ロジック概要
 
-1. `stage_key`に紐づく`quality_gate_items`の最新バージョンの項目一覧を取得
+1. `project.template_id`から`template_versions`の最新`version`を取得し、その`id`＋`stage_key`に紐づく`quality_gate_items`の項目一覧を取得
 2. リクエストの`checkedItemIds`を`quality_gate_result`に上書き保存する（通過判定の結果によらず、常に保存する）
 3. 全項目が`checkedItemIds`に含まれているか判定
 4. **全項目通過の場合**：該当`project_stages.status`を`completed`に更新

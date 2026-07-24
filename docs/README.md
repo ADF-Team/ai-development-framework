@@ -61,30 +61,32 @@
 1. ログイン画面
 2. 案件一覧画面（進行中・完了案件と、7工程の進捗ステータス表示）
 3. 案件詳細画面（工程別進行画面：質問フォーム／プロンプト表示／実行モード切替／成果物表示・編集／品質ゲート判定）
-4. テンプレート管理画面（管理者用：質問セット・プロンプトテンプレート・品質ゲート項目の編集）
-5. ユーザー管理画面（管理者用：メンバー招待・ロール変更・アカウント無効化）
+4. マイテンプレート一覧画面（管理者用：7工程分のテンプレート概要一覧。工程を選択してテンプレート詳細画面へ）
+5. テンプレート詳細画面（管理者用：工程ごとの質問セット・プロンプトテンプレート・品質ゲート項目の編集、バージョン履歴・差分確認）
+6. ユーザー管理画面（管理者用：メンバー招待・ロール変更・アカウント無効化）
 
 ## A5. 機能要件一覧
 
 | #   | 機能                         | 概要                                                                                     |
 | --- | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| F1  | 案件管理                     | 案件の作成・一覧表示・工程別進捗ステータスの表示                                         |
+| F1  | 案件管理                     | テンプレートを選択した案件の作成・一覧表示・工程別進捗ステータスの表示                   |
 | F2  | 工程別ガイド付き質問フォーム | 工程ごとに用意された質問に回答する形式のフォーム                                         |
 | F3  | プロンプト自動生成           | 質問への回答をテンプレートに埋め込み、その工程用のプロンプトを組み立てる                 |
 | F4  | 実行モード切り替え           | 「プロンプトのみ出力（コピー用）」／「アプリ内でAI実行し成果物まで生成」を選択可能にする |
 | F5  | 成果物の保存・編集           | 生成された成果物（文章・コード等）をDBに保存し、あとから参照・編集できる                 |
 | F6  | 品質ゲート制御               | チェックリスト形式の通過条件を満たさないと次工程に進めないようにする                     |
-| F7  | テンプレート管理             | 管理者が7工程分の質問セット・プロンプトテンプレート・品質ゲート項目を編集できる          |
+| F7  | マイテンプレート             | 管理者がテンプレート（7工程分の質問セット・プロンプトテンプレート・品質ゲート項目のパック）を複数作成・編集し、バージョン履歴・差分を確認できる。案件はテンプレートを選択して作成する |
 | F8  | 認証                         | 社内複数人がログインして利用できる                                                       |
 | F9  | ユーザー管理                 | 管理者がメンバーを招待し、ロール（利用者／管理者）の設定・アカウントの無効化を行える     |
 
 ## A6. 業務データ（概念レベル：どんな情報を扱うか。テーブル設計はPart Cで扱う）
 
-- **案件**：案件名、作成日、現在の工程、全体ステータス
+- **案件**：案件名、作成日、参照するテンプレート、現在の工程、全体ステータス
 - **工程の進行状況**：案件×工程ごとの状態、回答内容、生成プロンプト、成果物、品質ゲート判定結果
-- **質問セット**：工程ごとの質問項目一覧
-- **プロンプトテンプレート**：工程ごとのプロンプト雛形
-- **品質ゲート項目**：工程ごとのチェック項目一覧
+- **テンプレート**：テンプレート名、7工程分の質問セット・プロンプトテンプレート・品質ゲート項目のパック。複数作成でき、案件は作成時にどれか1つを選ぶ
+- **質問セット**：テンプレート内・工程ごとの質問項目一覧
+- **プロンプトテンプレート**：テンプレート内・工程ごとのプロンプト雛形
+- **品質ゲート項目**：テンプレート内・工程ごとのチェック項目一覧
 - **成果物**：工程に紐づく生成物（本文、生成方式、編集履歴）
 - **ユーザー**：利用者／管理者の権限
 
@@ -261,7 +263,7 @@
 ログイン
   ↓
 案件一覧
-  ├─ 新規案件作成 → 案件詳細（工程1から開始）
+  ├─ 新規案件作成（案件名を入力＋テンプレートを選択） → 案件詳細（工程1から開始）
   └─ 既存案件を選択 → 案件詳細（現在の工程から再開）
 
 案件詳細（工程タブ：要件定義〜ドキュメント）
@@ -269,44 +271,59 @@
     ├─ プロンプトのみ出力（コピー用モーダル）
     └─ アプリ内実行 → 成果物表示・編集
   → 品質ゲートチェック → 通過 → 次工程タブへ
+  ※質問セット・プロンプトテンプレート・品質ゲート項目は、案件が参照するテンプレートの現在有効な版から取得する（テンプレート編集は進行中の案件にも反映される）
 
-（別動線）管理者メニュー → テンプレート管理画面
-  → 工程を選択 → 質問セット／プロンプトテンプレート／品質ゲート項目を編集
+（別動線）管理者メニュー → マイテンプレート一覧（テンプレートのカード一覧）
+  ├─ 新規作成（テンプレート名を入力） → テンプレート詳細（工程1から編集開始。7工程とも空の内容）
+  ├─ カードの「複製する」→ 現在有効な版の内容をコピーした新規テンプレートを作成（バージョン履歴はリセット。既存の案件には影響しない）
+  └─ 既存テンプレートを選択 → テンプレート詳細（工程タブで7工程を切り替え）
+      質問セット／プロンプトテンプレート／品質ゲート項目を編集 → 保存ボタン
+        ├─ このテンプレートを参照する進行中の案件がある場合 → 影響確認モーダル（対象案件一覧を表示）→ 続行 → 保存（テンプレート全体を新バージョンとして追記）
+        └─ 参照している進行中の案件がない場合 → そのまま保存
+      ├─ バージョン履歴から過去バージョンを選択 → 差分モーダルで1つ前のバージョンとの差分を確認
+      └─ 「このテンプレートで案件を作成する」→ 案件一覧（新規案件作成モーダルがこのテンプレート選択済みで開く）
 ```
 
 ## B6. API設計（ドラフト・主要エンドポイント）
 
 | メソッド | パス                                                 | 概要                                                                       |
 | -------- | ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| GET      | `/api/projects`                                      | 案件一覧取得                                                               |
-| POST     | `/api/projects`                                      | 案件作成                                                                   |
-| GET      | `/api/projects/:id`                                  | 案件詳細（工程別ステータス含む）取得                                       |
-| GET      | `/api/projects/:id/stages/:stageKey`                 | 特定工程の質問・回答・プロンプト・成果物・品質ゲート状況を取得             |
-| POST     | `/api/projects/:id/stages/:stageKey/answers`         | 質問への回答を保存                                                         |
-| POST     | `/api/projects/:id/stages/:stageKey/generate-prompt` | 回答をテンプレートに埋め込みプロンプトを生成                               |
-| POST     | `/api/projects/:id/stages/:stageKey/execute`         | Claude APIを呼び出し、成果物を生成・保存                                   |
-| PATCH    | `/api/projects/:id/stages/:stageKey/deliverable`     | 成果物を編集・保存                                                         |
-| POST     | `/api/projects/:id/stages/:stageKey/quality-gate`    | 品質ゲートのチェック結果を送信し、通過判定・次工程への移行を行う           |
-| GET/PUT  | `/api/admin/templates/:stageKey`                     | （管理者用）質問セット・プロンプトテンプレート・品質ゲート項目の取得／編集 |
-| GET      | `/api/admin/users`                                   | （管理者用）組織内メンバー一覧取得                                         |
-| POST     | `/api/admin/users`                                   | （管理者用）メンバーを招待（メールアドレス・ロールを指定）                 |
+| GET      | `/api/projects`                                                  | 案件一覧取得                                                               |
+| POST     | `/api/projects`                                                  | 案件作成（テンプレートを指定する）                                        |
+| GET      | `/api/projects/:id`                                              | 案件詳細（工程別ステータス含む）取得                                       |
+| GET      | `/api/projects/:id/stages/:stageKey`                             | 特定工程の質問・回答・プロンプト・成果物・品質ゲート状況を取得             |
+| POST     | `/api/projects/:id/stages/:stageKey/answers`                     | 質問への回答を保存                                                         |
+| POST     | `/api/projects/:id/stages/:stageKey/generate-prompt`             | 回答をテンプレートに埋め込みプロンプトを生成                               |
+| POST     | `/api/projects/:id/stages/:stageKey/execute`                     | Claude APIを呼び出し、成果物を生成・保存                                   |
+| PATCH    | `/api/projects/:id/stages/:stageKey/deliverable`                 | 成果物を編集・保存                                                         |
+| POST     | `/api/projects/:id/stages/:stageKey/quality-gate`                | 品質ゲートのチェック結果を送信し、通過判定・次工程への移行を行う           |
+| GET      | `/api/admin/templates`                                           | （管理者用）テンプレート概要一覧取得（マイテンプレート一覧画面用）         |
+| POST     | `/api/admin/templates`                                           | （管理者用）テンプレート新規作成（7工程とも空の内容で初期化される）        |
+| GET/PUT  | `/api/admin/templates/:templateId/stages/:stageKey`              | （管理者用）テンプレート名・指定工程の質問セット・プロンプトテンプレート・品質ゲート項目の取得／編集 |
+| GET      | `/api/admin/templates/:templateId/stages/:stageKey/versions/:version` | （管理者用）テンプレートの特定バージョン・指定工程の内容取得（バージョン差分表示用） |
+| GET      | `/api/admin/templates/:templateId/projects`                      | （管理者用）このテンプレートを参照している進行中の案件一覧取得（保存時の影響確認用） |
+| POST     | `/api/admin/templates/:templateId/duplicate`                     | （管理者用）テンプレートの複製（現在有効な版の内容をコピーした新規テンプレートを作成） |
+| GET      | `/api/admin/users`                                               | （管理者用）組織内メンバー一覧取得                                         |
+| POST     | `/api/admin/users`                                               | （管理者用）メンバーを招待（メールアドレス・ロールを指定）                 |
 | PATCH    | `/api/admin/users/:id`                               | （管理者用）ロール変更・アカウント無効化／再有効化                         |
 
 ※ 認証はIdentity PlatformのSDKがクライアント側で発行するIDトークンをAPI Routes側で検証する方式（専用のログインAPIは持たない）
 
 ## B7. DBテーブル設計（ドラフト）
 
-| テーブル             | 主なカラム                                                                                                                                                                  | 備考                                        |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `organizations`      | id, name, created_at                                                                                                                                                        | v1では1組織のみだが最初から用意             |
-| `users`              | id, organization_id, email, role（user/admin）, display_name, created_at                                                                                                    |                                             |
-| `projects`           | id, organization_id, name, current_stage, overall_status, created_by, created_at                                                                                            |                                             |
-| `project_stages`     | id, project_id, stage_key（7工程のenum）, status（未着手/進行中/品質ゲート待ち/完了）, answers（json）, generated_prompt（text）, quality_gate_result（json）, completed_at | 案件×工程の1レコード                        |
-| `deliverables`       | id, project_stage_id, content（text）, generation_method（manual/ai_executed）, version, updated_by, updated_at                                                             | 編集履歴はversionで管理。値の詳細はC2.0参照 |
-| `question_templates` | id, organization_id, stage_key, questions（json配列）, version, updated_at                                                                                                  | 管理者編集用                                |
-| `prompt_templates`   | id, organization_id, stage_key, template_text, version, updated_at                                                                                                          | 管理者編集用                                |
-| `quality_gate_items` | id, organization_id, stage_key, items（json配列）, version, updated_at                                                                                                      | 管理者編集用                                |
-| `api_usage_logs`     | id, project_stage_id, organization_id, tokens_used, cost_estimate, called_at                                                                                                | コスト可視化用                              |
+| テーブル              | 主なカラム                                                                                                                                                                  | 備考                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `organizations`       | id, name, created_at                                                                                                                                                        | v1では1組織のみだが最初から用意                                     |
+| `users`               | id, organization_id, email, role（user/admin）, display_name, created_at                                                                                                    |                                                                       |
+| `templates`           | id, organization_id, created_at                                                                                                                                             | テンプレート（7工程分のパック）そのもの。複数作成できる              |
+| `template_versions`   | id, template_id, title, version, created_by, created_at                                                                                                                     | 追記型。titleはテンプレート名。1回の保存で7工程分まとめて新版になる  |
+| `projects`            | id, organization_id, name, template_id, current_stage, overall_status, created_by, created_at                                                                              | template_idが参照するテンプレートは常に最新版で参照される（ライブ参照） |
+| `project_stages`      | id, project_id, stage_key（7工程のenum）, status（未着手/進行中/品質ゲート待ち/完了）, answers（json）, generated_prompt（text）, quality_gate_result（json）, completed_at | 案件×工程の1レコード                                                 |
+| `deliverables`        | id, project_stage_id, content（text）, generation_method（manual/ai_executed）, version, updated_by, updated_at                                                             | 編集履歴はversionで管理。値の詳細はC2.0参照                          |
+| `question_templates`  | id, template_version_id, stage_key, questions（json配列）                                                                                                                   | template_versions 1件×7工程分のレコードを持つ                        |
+| `prompt_templates`    | id, template_version_id, stage_key, template_text                                                                                                                           | template_versions 1件×7工程分のレコードを持つ                        |
+| `quality_gate_items`  | id, template_version_id, stage_key, items（json配列）                                                                                                                       | template_versions 1件×7工程分のレコードを持つ                        |
+| `api_usage_logs`      | id, project_stage_id, organization_id, tokens_used, cost_estimate, called_at                                                                                                | コスト可視化用                                                       |
 
 ---
 
@@ -320,7 +337,7 @@
 
 ## C1. テーブル定義（詳細）
 
-版管理が必要なテーブル（`deliverables`／`question_templates`／`prompt_templates`／`quality_gate_items`）は、更新のたびに新しい行を追加する**追記型（Append-only）**とし、`version`の最大値が「現在有効な版」となる設計にする。
+版管理が必要なテーブル（`deliverables`／`template_versions`）は、更新のたびに新しい行を追加する**追記型（Append-only）**とし、`version`の最大値が「現在有効な版」となる設計にする。`question_templates`／`prompt_templates`／`quality_gate_items`は`template_versions`にぶら下がる形で、版そのものは持たない（1つの`template_versions`行＝1つの版につき、7工程分のレコードを持つ）。
 
 ### organizations
 
@@ -345,6 +362,29 @@
 
 INDEX: `organization_id`
 
+### templates
+
+| カラム          | 型          | 制約                          |
+| ---------------- | ----------- | ----------------------------- |
+| id               | UUID        | PK, default gen_random_uuid() |
+| organization_id  | UUID        | NOT NULL, FK→organizations.id |
+| created_at       | TIMESTAMPTZ | NOT NULL, default now()       |
+
+INDEX: `organization_id`
+
+### template_versions（追記型）
+
+| カラム      | 型           | 制約                      |
+| ------------ | ------------ | -------------------------- |
+| id          | UUID         | PK                         |
+| template_id | UUID         | NOT NULL, FK→templates.id  |
+| title       | VARCHAR(255) | NOT NULL。テンプレート名   |
+| version     | INTEGER      | NOT NULL                   |
+| created_by  | UUID         | FK→users.id                |
+| created_at  | TIMESTAMPTZ  | NOT NULL                   |
+
+UNIQUE: `(template_id, version)`
+
 ### projects
 
 | カラム                  | 型                              | 制約                             |
@@ -352,12 +392,13 @@ INDEX: `organization_id`
 | id                      | UUID                            | PK                               |
 | organization_id         | UUID                            | NOT NULL, FK                     |
 | name                    | VARCHAR(255)                    | NOT NULL                         |
+| template_id             | UUID                            | NOT NULL, FK→templates.id。案件が参照するテンプレート（常に最新版を参照する） |
 | current_stage           | ENUM(7工程キー)                 | NOT NULL, default 'requirements' |
 | overall_status          | ENUM('in_progress','completed') | NOT NULL, default 'in_progress'  |
 | created_by              | UUID                            | FK→users.id                      |
 | created_at / updated_at | TIMESTAMPTZ                     | NOT NULL                         |
 
-INDEX: `organization_id`, `overall_status`
+INDEX: `organization_id`, `overall_status`, `template_id`
 
 ### project_stages（案件×工程で1レコード）
 
@@ -388,19 +429,18 @@ UNIQUE: `(project_id, stage_key)` ／ INDEX: `project_id`
 
 INDEX: `(project_stage_id, version)`
 
-### question_templates / prompt_templates / quality_gate_items（いずれも追記型・管理者編集用）
+### question_templates / prompt_templates / quality_gate_items（管理者編集用。版そのものはtemplate_versionsが持つ）
 
 | カラム                            | 型              | 制約                                                                                                                                  |
 | --------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | id                                | UUID            | PK                                                                                                                                    |
-| organization_id                   | UUID            | NOT NULL, FK                                                                                                                          |
+| template_version_id               | UUID            | NOT NULL, FK→template_versions.id                                                                                                    |
 | stage_key                         | ENUM(7工程キー) | NOT NULL                                                                                                                              |
 | questions / template_text / items | JSONB or TEXT   | 内容本体。`questions`の各要素は`{id, text, order}`（例：`{"id":"q1","text":"...","order":1}`）。`items`の各要素は`{id, label, order}` |
-| version                           | INTEGER         | NOT NULL                                                                                                                              |
-| created_by                        | UUID            | FK→users.id                                                                                                                           |
-| created_at                        | TIMESTAMPTZ     | NOT NULL                                                                                                                              |
 
-UNIQUE: `(organization_id, stage_key, version)`
+UNIQUE: `(template_version_id, stage_key)`
+
+新しいバージョンを保存する際は、編集した工程だけでなく7工程分すべての行を新しい`template_version_id`に紐づけて複製する（未編集の6工程は直前バージョンの内容をそのままコピーする）。
 
 ### api_usage_logs
 
@@ -438,7 +478,7 @@ INDEX: `(organization_id, called_at)`
 | `deliverables.generation_method`（保存された成果物1件ごとの記録） | ENUM | `manual`               | `prompt_only`で進めた場合の貼り付け・手動編集による保存  |
 |                                                                   |      | `ai_executed`          | `/execute`エンドポイント経由でAI生成された保存           |
 | `users.role`                                                      | ENUM | `user`                 | 案件を進める一般利用者                                   |
-|                                                                   |      | `admin`                | テンプレート管理も可能な管理者                           |
+|                                                                   |      | `admin`                | マイテンプレートの編集も可能な管理者                     |
 | `users.status`                                                    | ENUM | `active`               | ログイン可能                                             |
 |                                                                   |      | `disabled`             | 無効化済み（退職者等）                                   |
 
@@ -488,7 +528,7 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 **Request**
 
 ```json
-{ "name": "案件A" }
+{ "name": "案件A", "templateId": "uuid" }
 ```
 
 **Response 201**
@@ -497,12 +537,26 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 {
   "id": "uuid",
   "name": "案件A",
+  "overallStatus": "in_progress",
   "currentStage": "requirements",
-  "overallStatus": "in_progress"
+  "stageStatuses": {
+    "requirements": "in_progress",
+    "design": "not_started",
+    "implementation": "not_started",
+    "review": "not_started",
+    "security": "not_started",
+    "test": "not_started",
+    "documentation": "not_started"
+  },
+  "createdAt": "2026-07-24"
 }
 ```
 
-※ 作成時、サーバー側で7工程分の`project_stages`レコードを`status: not_started`で一括作成する（詳細はC4参照）。
+**エラー**: `404`（存在しないtemplateIdを指定した場合）
+
+`name`は1〜255文字（`projects.name`のVARCHAR(255)に合わせる）。クライアント側（`newProjectFormSchema`）でバリデーションする。
+
+※ 作成時、サーバー側で7工程分の`project_stages`レコードを`status: not_started`で一括作成する（工程1のみ`in_progress`）。案件は`templateId`を保持し、以降の質問セット・プロンプトテンプレート・品質ゲート項目は常にこのテンプレートの現在有効な版を参照する（詳細はC4参照）。
 
 ### GET /api/projects/:id
 
@@ -636,27 +690,121 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 
 ※ 未通過の場合も`quality_gate_result`への保存は行われる（`project_stages.status`は`quality_gate_pending`のまま維持）。
 
-### GET/PUT /api/admin/templates/:stageKey
+### GET /api/admin/templates
 
-管理者ロールのみアクセス可（`403`：一般利用者がアクセスした場合）。PUTは新バージョンを追記する形で保存する。
+管理者ロールのみアクセス可。マイテンプレート一覧画面用に、テンプレート概要（現在有効な版の情報のみ）をまとめて返す。
+**Response 200**
+
+```json
+{
+  "templates": [
+    {
+      "id": "uuid",
+      "title": "標準テンプレート",
+      "version": 3,
+      "updatedAt": "2026-07-10",
+      "updatedBy": "山田"
+    }
+  ]
+}
+```
+
+### POST /api/admin/templates
+
+管理者ロールのみアクセス可。新規テンプレートを作成する。7工程とも空の内容（質問セット・プロンプトテンプレート・品質ゲート項目なし）で初期化される。
+**Request**
+
+```json
+{ "title": "Webアプリ案件用テンプレート" }
+```
+
+**Response 201**
+
+```json
+{ "id": "uuid", "version": 1 }
+```
+
+`title`は1〜255文字（`template_versions.title`のVARCHAR(255)に合わせる）。クライアント側（`newTemplateFormSchema`）でバリデーションする。
+
+### GET/PUT /api/admin/templates/:templateId/stages/:stageKey
+
+管理者ロールのみアクセス可（`403`：一般利用者がアクセスした場合）。PUTはテンプレート全体（テンプレート名＋指定工程の内容）を新バージョンとして追記する形で保存する（編集していない他の6工程の内容は、直前バージョンからそのまま引き継がれる）。
 **GET Response 200**
 
 ```json
 {
+  "templateId": "uuid",
   "stageKey": "design",
+  "title": "標準テンプレート",
   "questions": [{ "id": "q1", "text": "...", "order": 1 }],
   "promptTemplate": "...{{answer:q1}}...",
   "qualityGateItems": [{ "id": "item1", "label": "...", "order": 1 }],
-  "version": 3
+  "version": 3,
+  "versions": [
+    { "version": 3, "createdAt": "2026-07-10", "createdBy": "山田" },
+    { "version": 2, "createdAt": "2026-05-02", "createdBy": "田中" },
+    { "version": 1, "createdAt": "2026-02-14", "createdBy": "山田" }
+  ]
 }
 ```
 
-**PUT Request**：GETと同じ形式のボディを送信（`version`は不要。サーバー側で自動採番）
+※ `title`はテンプレート名（テンプレート詳細画面の見出し・マイテンプレート一覧のカード見出しに使用）。どの工程タブから見ても同じ値（テンプレート単位で1つ）。
+
+※ `version`／`versions`はテンプレート全体で共有される版番号・履歴（特定の工程だけの版ではない）。バージョン履歴パネル・差分モーダル表示用にGETレスポンスへ含めている（`versions`はバージョン番号の降順）。
+
+**PUT Request**：GETと同じ形式のボディを送信（`version`・`versions`は不要。サーバー側で自動採番）。`title`は1〜255文字（`newTemplateFormSchema`と同じ`stageTemplateFormSchema`のルールでクライアント側バリデーションする）。
 **PUT Response 200**
 
 ```json
 { "version": 4 }
 ```
+
+### GET /api/admin/templates/:templateId/stages/:stageKey/versions/:version
+
+管理者ロールのみアクセス可。バージョン履歴パネルで特定バージョンをクリックした際、差分モーダル表示のために該当バージョン・指定工程の内容を取得する。
+**Response 200**
+
+```json
+{
+  "templateId": "uuid",
+  "stageKey": "design",
+  "title": "標準テンプレート",
+  "questions": [{ "id": "q1", "text": "...", "order": 1 }],
+  "promptTemplate": "...{{answer:q1}}...",
+  "qualityGateItems": [{ "id": "item1", "label": "...", "order": 1 }],
+  "version": 2
+}
+```
+
+**エラー**: `404`（存在しないテンプレートID・バージョン番号を指定した場合）
+
+差分表示は、選択したバージョンと1つ前のバージョン（`version - 1`）をそれぞれ本APIで取得し、クライアント側で行単位の差分（`diff`パッケージの`diffLines`）を計算して表示する（テンプレート名・質問セット・プロンプトテンプレート・品質ゲート項目の4セクション）。初版（`version === 1`）を選択した場合は、比較対象が存在しないため空の内容と比較し、全内容が新規追加として表示される。
+
+### GET /api/admin/templates/:templateId/projects
+
+管理者ロールのみアクセス可。テンプレート詳細画面で保存ボタンを押した際、このテンプレートを参照している**進行中**（`overall_status: in_progress`）の案件一覧を取得し、影響確認モーダルの表示要否・内容を判定するために使う（完了済み案件は対象外）。
+**Response 200**
+
+```json
+{
+  "projects": [
+    { "id": "uuid", "name": "ECサイトリニューアル" }
+  ]
+}
+```
+
+`projects`が1件以上ある場合、クライアント側で`SaveImpactModal`を表示し、管理者が続行を確認してから`PUT /api/admin/templates/:templateId/stages/:stageKey`を呼ぶ。0件の場合は確認なしでそのまま保存する。
+
+### POST /api/admin/templates/:templateId/duplicate
+
+管理者ロールのみアクセス可。現在有効な版（7工程分）の内容をコピーした新規テンプレートを作成する。複製先はバージョン1から始まる独立したテンプレートで、複製元のバージョン履歴は引き継がない。既存の案件が参照しているテンプレートには影響しない（案件のテンプレート差し替えは行わない）。
+**Response 201**
+
+```json
+{ "id": "uuid", "version": 1 }
+```
+
+複製されたテンプレートの`title`は、複製元のタイトルに「のコピー」を付与した値になる（例：「標準テンプレート」→「標準テンプレートのコピー」）。マイテンプレート一覧画面の`TemplateCard`にある「複製する」ボタンから呼ばれ、成功後は複製されたテンプレートの詳細画面（工程1）へ遷移する。
 
 ### GET /api/admin/users
 
@@ -723,7 +871,7 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 
 - `ProjectListHeader`（新規作成ボタン）
 - `ProjectCard`（案件名／7工程の進捗バー／作成日）
-- `NewProjectModal`
+- `NewProjectModal`（案件名の入力欄と、テンプレートの選択欄（プルダウン）。テンプレート詳細画面の「このテンプレートで案件を作成する」から遷移した場合は選択済みの状態で開く。案件名は255文字まで）
 
 ### 案件詳細画面（工程別進行画面）
 
@@ -734,13 +882,23 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 - `DeliverableEditor`（成果物の表示・編集。Markdownエディタを想定）
 - `QualityGateChecklist`（チェック項目一覧。全チェックで「次工程へ」ボタンが活性化）
 
-### テンプレート管理画面（管理者用）
+### マイテンプレート一覧画面（管理者用）
 
-- `StageSelector`（7工程の選択タブ）
-- `QuestionSetEditor`（質問の追加・編集・削除・並べ替え）
-- `PromptTemplateEditor`（テキストエリア。回答プレースホルダーの挿入補助）
-- `QualityGateItemsEditor`（チェック項目の追加・編集・削除）
-- `VersionHistoryPanel`（過去バージョンの確認）
+- `TemplateCard`（テンプレート名／現在バージョン／最終更新日時・更新者。クリックでテンプレート詳細画面（工程1）へ遷移。「複製する」ボタンで現在有効な版の内容をコピーした新規テンプレートを作成し、その詳細画面へ遷移する）
+- `NewTemplateModal`（テンプレート名の入力欄。作成後は7工程とも空の内容のテンプレート詳細画面（工程1）へ遷移する。テンプレート名は255文字まで）
+
+### テンプレート詳細画面（管理者用）
+
+- `StageSelector`（7工程の選択タブ。切り替えると同画面内で該当工程のテンプレート詳細に遷移する）
+- テンプレート名入力欄（画面見出し。枠線付きの入力欄として表示し、編集可能であることが分かるようにする。工程名は小さなラベルとして上に表示する。初期値は工程名だが自由に編集できる。255文字まで）
+- `QuestionSetEditor`（質問の追加・削除）
+- `PromptTemplateEditor`（テキストエリア。回答プレースホルダーの挿入補助。縦幅は固定で、超過分は内部スクロール）
+- `QualityGateItemsEditor`（チェック項目の追加・削除）
+- `VersionHistoryPanel`（過去バージョンの一覧。バージョンをクリックするとVersionDiffModalを開く）
+- `VersionDiffModal`（クリックしたバージョンと1つ前のバージョンの差分を、テンプレート名・質問セット・プロンプトテンプレート・品質ゲート項目ごとに行単位で表示するモーダル。追加行・削除行を色分けして表示する）
+- 保存ボタン（画面見出しの右側に配置。テンプレート名・質問セット・プロンプトテンプレート・品質ゲート項目への変更をまとめて新バージョンとして保存する。個々の追加・削除操作では自動保存しない。保存前にこのテンプレートを参照する進行中の案件の有無を確認し、あれば`SaveImpactModal`を挟む）
+- `SaveImpactModal`（保存ボタン押下時、このテンプレートを参照している進行中の案件が1件以上ある場合に表示。対象案件名の一覧と、保存すると各案件の質問セット・プロンプトテンプレート・品質ゲート項目も変わる旨を表示し、続行を確認する。対象案件がない場合はこのモーダルを挟まずそのまま保存する）
+- 「このテンプレートで案件を作成する」ボタン（クリックで案件一覧画面へ遷移し、このテンプレートが選択済みの状態で新規案件作成モーダルが開く）
 
 ### ユーザー管理画面（管理者用）
 
@@ -755,19 +913,22 @@ quality_gate_pending --(品質ゲート全項目チェック)--> completed
 
 ### 案件作成時の初期化ロジック
 
-1. `projects`レコードを作成（`current_stage: requirements`, `overall_status: in_progress`）
-2. 工程マスタ定義の7つの`stage_key`分、`project_stages`レコードを一括作成（すべて`status: not_started`）
+1. リクエストの`templateId`が存在するか検証する（存在しない場合`404`）
+2. `projects`レコードを作成（`template_id: リクエストのtemplateId`, `current_stage: requirements`, `overall_status: in_progress`）
+3. 工程マスタ定義の7つの`stage_key`分、`project_stages`レコードを一括作成（すべて`status: not_started`。工程1のみ`in_progress`）
+
+以降、この案件の質問セット・プロンプトテンプレート・品質ゲート項目は、常に`template_id`が指すテンプレートの現在有効な版（`template_versions`の最新`version`）を参照する（スナップショットはコピーしない＝ライブ参照。テンプレートを後から編集すると、進行中の案件にも反映される）。
 
 ### プロンプト組み立てロジック
 
 1. `project_stages.answers`（JSONB）を取得
-2. 該当`organization_id`＋`stage_key`の`prompt_templates`のうち最新`version`を取得
+2. `project.template_id`から`template_versions`の最新`version`を取得し、その`id`＋`stage_key`に紐づく`prompt_templates`を取得
 3. テンプレート内のプレースホルダー（`{{answer:質問ID}}`形式）を回答内容で置換
 4. 置換後のテキストを`generated_prompt`として`project_stages`に保存し返却（版管理はせず上書き）
 
 ### 品質ゲート判定ロジック
 
-1. `stage_key`に紐づく`quality_gate_items`の最新バージョンの項目一覧を取得
+1. `project.template_id`から`template_versions`の最新`version`を取得し、その`id`＋`stage_key`に紐づく`quality_gate_items`の項目一覧を取得
 2. リクエストの`checkedItemIds`を`quality_gate_result`に上書き保存する（通過判定の結果によらず、常に保存する）
 3. 全項目が`checkedItemIds`に含まれているか判定
 4. **全項目通過の場合**：該当`project_stages.status`を`completed`に更新

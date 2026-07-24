@@ -1,10 +1,23 @@
+import { Suspense } from 'react'
 import { getProjectList } from '@/lib/api/projects/getProjectList'
+import { getStageTemplateList } from '@/lib/api/adminTemplates/getStageTemplateList'
 import { ProjectListScreen } from '@/features/projects/components/ProjectListScreen'
 
 // 案件一覧画面（/projects）
 export default async function ProjectsPage() {
-  const response = await getProjectList()
-  const projects = 'projects' in response ? response.projects : []
+  const [projectsResponse, templatesResponse] = await Promise.all([
+    getProjectList(),
+    getStageTemplateList(),
+  ])
+  const projects =
+    'projects' in projectsResponse ? projectsResponse.projects : []
+  const templates =
+    'templates' in templatesResponse ? templatesResponse.templates : []
 
-  return <ProjectListScreen initialProjects={projects} />
+  return (
+    // ProjectListScreenがuseSearchParams()（?newFromTemplate=…の読み取り）を使うためSuspenseで包む
+    <Suspense>
+      <ProjectListScreen initialProjects={projects} templates={templates} />
+    </Suspense>
+  )
 }

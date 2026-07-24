@@ -52,8 +52,8 @@ src
 │   │   │   └── [projectId]/page.tsx  # 案件詳細（工程別ワークスペース）
 │   │   └── admin/
 │   │       ├── templates/
-│   │       │   ├── page.tsx
-│   │       │   └── [stageKey]/page.tsx
+│   │       │   ├── page.tsx          # マイテンプレート一覧
+│   │       │   └── [stageKey]/page.tsx  # テンプレート詳細（工程別編集画面）
 │   │       └── users/page.tsx
 │   ├── api/                  # API Routes（docs/adf-design.md の B6/C2 と1対1対応させる）
 │   │   ├── projects/route.ts
@@ -64,7 +64,9 @@ src
 │   │   ├── projects/[id]/stages/[stageKey]/execute/route.ts
 │   │   ├── projects/[id]/stages/[stageKey]/deliverable/route.ts
 │   │   ├── projects/[id]/stages/[stageKey]/quality-gate/route.ts
+│   │   ├── admin/templates/route.ts
 │   │   ├── admin/templates/[stageKey]/route.ts
+│   │   ├── admin/templates/[stageKey]/versions/[version]/route.ts
 │   │   ├── admin/users/route.ts
 │   │   └── admin/users/[id]/route.ts
 │   ├── layout.tsx
@@ -92,7 +94,7 @@ src
 | `features/auth`            | ログイン画面                         |
 | `features/projects`        | 案件一覧画面                         |
 | `features/stages`          | 案件詳細画面（工程別ワークスペース） |
-| `features/admin-templates` | テンプレート管理画面                 |
+| `features/admin-templates` | マイテンプレート一覧画面・テンプレート詳細画面 |
 | `features/admin-users`     | ユーザー管理画面                     |
 
 各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `schemas` `stores` `types` `utils` のうち使うものだけ）。`schemas`にはフォームのzodスキーマを置く（詳細は「フォームバリデーション（zod）」参照）。
@@ -167,7 +169,7 @@ src/components/
 | `auth`            | `LoginScreen`              |
 | `projects`        | `ProjectListScreen`        |
 | `stages`          | `StageWorkspace`           |
-| `admin-templates` | `TemplateManagementScreen` |
+| `admin-templates` | `MyTemplateListScreen` / `TemplateDetailScreen` |
 | `admin-users`     | `UserManagementScreen`     |
 
 ### Client Componentの境界
@@ -380,7 +382,7 @@ export const messages = {
     description: 'AI活用の開発プロセス標準化ツール',
     projectList: '案件一覧',
     projectDetail: '案件詳細',
-    templateManagement: 'テンプレート管理',
+    myTemplates: 'マイテンプレート',
     userManagement: 'ユーザー管理',
   },
   auth: {
@@ -420,9 +422,14 @@ export const messages = {
     },
   },
   adminTemplates: {
+    listTitle: 'マイテンプレート',
+    backToListLink: 'マイテンプレート一覧に戻る',
     questionListLabel: '質問セット',
     promptTemplateLabel: 'プロンプトテンプレート',
     qualityGateLabel: '品質ゲート項目',
+    versionHistoryLabel: 'バージョン履歴',
+    saveButton: 'テンプレートを保存',
+    versionDiffTitle: 'バージョン差分',
     toastMessage: {
       successUpdate: 'テンプレートを更新しました。',
     },

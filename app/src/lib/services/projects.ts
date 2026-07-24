@@ -1,5 +1,7 @@
 import { messages } from '@/constants/messages'
-import { STAGE_ORDER } from '@/types/Project'
+import { STAGE_ORDER, isStageKey } from '@/types/Project'
+import { ServiceError } from './ServiceError'
+import { STAGE_QUALITY_GATE_ITEMS, getStageTemplateContent } from './templates'
 import type {
   ProjectListItem,
   ProjectDetail,
@@ -7,256 +9,13 @@ import type {
   StageStatus,
   OverallStatus,
 } from '@/types/Project'
-import type { StageDetail, StageQuestion, QualityGateItem } from '@/types/Stage'
+import type { StageDetail, StageQuestion } from '@/types/Stage'
 import type { DeliverableData } from '@/types/Deliverable'
 
 // TODO: インフラ（Cloud SQL）準備後、Prisma経由でDBアクセスする実装に置き換える。
 // 現状はプロセス内メモリのモックストアで案件・工程の状態を保持する（サーバー再起動でリセットされる）
-
-export class ServiceError extends Error {
-  status: number
-
-  constructor(status: number, message: string) {
-    super(message)
-    this.status = status
-  }
-}
-
-const STAGE_QUESTIONS: Record<StageKey, StageQuestion[]> = {
-  requirements: [
-    { id: 'q1', order: 1, text: 'この案件の目的・解決したい課題は何ですか？' },
-    { id: 'q2', order: 2, text: '想定ユーザー（利用者）は誰ですか？' },
-    {
-      id: 'q3',
-      order: 3,
-      text: '必須機能（MVP）は何ですか？箇条書きで教えてください',
-    },
-    {
-      id: 'q4',
-      order: 4,
-      text: 'あれば嬉しい機能（Nice to have）はありますか？',
-    },
-    {
-      id: 'q5',
-      order: 5,
-      text: '非機能要件（性能・セキュリティ・可用性等）で気にすべき点はありますか？',
-    },
-    { id: 'q6', order: 6, text: '納期・予算の制約はありますか？' },
-    {
-      id: 'q7',
-      order: 7,
-      text: '参考にしたい既存サービス・競合はありますか？',
-    },
-    {
-      id: 'q8',
-      order: 8,
-      text: '顧客から受け取っている資料や議事録の要点があれば教えてください',
-    },
-  ],
-  design: [
-    {
-      id: 'q1',
-      order: 1,
-      text: '使用する技術スタック（言語・フレームワーク）は決まっていますか？',
-    },
-    {
-      id: 'q2',
-      order: 2,
-      text: '主要なデータエンティティ（登場する「モノ」）は何ですか？',
-    },
-    {
-      id: 'q3',
-      order: 3,
-      text: '想定される画面・機能一覧は？（要件定義書から引用可）',
-    },
-    { id: 'q4', order: 4, text: '外部連携するシステム・APIはありますか？' },
-    {
-      id: 'q5',
-      order: 5,
-      text: '想定同時接続数・データ量などのスケール感は？',
-    },
-    {
-      id: 'q6',
-      order: 6,
-      text: '特にセキュリティ・権限管理で気をつけたい点は？',
-    },
-    {
-      id: 'q7',
-      order: 7,
-      text: '既存の設計規約・命名規則があれば教えてください',
-    },
-    {
-      id: 'q8',
-      order: 8,
-      text: 'UI／デザインの方向性はありますか？（既存のブランドガイドライン、参考にしたいデザインテイスト、ダーク/ライトモードの要否、既存デザインシステム・UIライブラリの指定など）',
-    },
-    {
-      id: 'q9',
-      order: 9,
-      text: 'デバイス対応の範囲は？（PC専用／レスポンシブ対応／モバイルアプリ相当の対応が必要か）',
-    },
-  ],
-  implementation: [
-    {
-      id: 'q1',
-      order: 1,
-      text: '実装するのは全体のうちどの機能・画面ですか？',
-    },
-    {
-      id: 'q2',
-      order: 2,
-      text: '使用する言語・フレームワーク・バージョンは？',
-    },
-    { id: 'q3', order: 3, text: '参照すべき設計書・API仕様は？' },
-    {
-      id: 'q4',
-      order: 4,
-      text: '自社のコーディング規約・スタイルガイドはありますか？',
-    },
-    { id: 'q5', order: 5, text: '既存コードとの整合性で気をつけるべき点は？' },
-    {
-      id: 'q6',
-      order: 6,
-      text: '特に注意すべきエッジケース・例外処理はありますか？',
-    },
-  ],
-  review: [
-    { id: 'q1', order: 1, text: 'レビュー対象のコード（ファイル・差分）は？' },
-    {
-      id: 'q2',
-      order: 2,
-      text: '重点的に見てほしい観点は？（可読性／パフォーマンス／セキュリティ等）',
-    },
-    { id: 'q3', order: 3, text: '遵守すべきコーディング規約は？' },
-    { id: 'q4', order: 4, text: '対象の言語・フレームワークのバージョンは？' },
-  ],
-  security: [
-    {
-      id: 'q1',
-      order: 1,
-      text: '対象システムの用途・扱うデータの機微性は？（個人情報の有無等）',
-    },
-    { id: 'q2', order: 2, text: '対象コード・エンドポイント一覧は？' },
-    { id: 'q3', order: 3, text: '使用しているライブラリ・依存関係の一覧は？' },
-    { id: 'q4', order: 4, text: '外部公開の有無、想定される攻撃経路は？' },
-  ],
-  test: [
-    { id: 'q1', order: 1, text: 'テスト対象の機能・仕様書は？' },
-    {
-      id: 'q2',
-      order: 2,
-      text: '単体テスト／結合テストどちらを重視しますか？',
-    },
-    { id: 'q3', order: 3, text: '使用するテストフレームワークは？' },
-    { id: 'q4', order: 4, text: '特に網羅したい異常系・境界値は？' },
-  ],
-  documentation: [
-    {
-      id: 'q1',
-      order: 1,
-      text: 'ドキュメントの対象読者は？（社内エンジニア／顧客／両方）',
-    },
-    {
-      id: 'q2',
-      order: 2,
-      text: '生成したいドキュメント種別は？（README／API仕様書／DB設計書等）',
-    },
-    { id: 'q3', order: 3, text: '参照すべきソースコード・設計書は？' },
-    {
-      id: 'q4',
-      order: 4,
-      text: '既存のドキュメントフォーマット・テンプレートはありますか？',
-    },
-  ],
-}
-
-const STAGE_QUALITY_GATE_ITEMS: Record<StageKey, QualityGateItem[]> = {
-  requirements: [
-    { id: 'g1', order: 1, label: '必須機能（MVP）が明記されている' },
-    { id: 'g2', order: 2, label: '想定ユーザーが明確になっている' },
-    {
-      id: 'g3',
-      order: 3,
-      label: '非機能要件（性能・セキュリティ等）に抜け漏れがない',
-    },
-    { id: 'g4', order: 4, label: '要件間の矛盾がない' },
-    {
-      id: 'g5',
-      order: 5,
-      label: '顧客・関係者の合意が取れている（社内案件の場合は担当者承認）',
-    },
-  ],
-  design: [
-    {
-      id: 'g1',
-      order: 1,
-      label: '要件定義書の機能がすべて設計に反映されている',
-    },
-    { id: 'g2', order: 2, label: 'DB設計に矛盾・重複がない' },
-    { id: 'g3', order: 3, label: 'API設計が命名規則・構成標準に沿っている' },
-    { id: 'g4', order: 4, label: 'セキュリティ・権限周りの設計に漏れがない' },
-    {
-      id: 'g5',
-      order: 5,
-      label: '拡張性・パフォーマンス面のリスクが検討されている',
-    },
-    {
-      id: 'g6',
-      order: 6,
-      label:
-        'UI／デザインの方向性が定義されている（既存デザインとの整合性、または新規デザイン方針の決定が明記されている）',
-    },
-  ],
-  implementation: [
-    {
-      id: 'g1',
-      order: 1,
-      label:
-        '設計書通りに実装されている（差分がない、または差分理由が説明されている）',
-    },
-    { id: 'g2', order: 2, label: 'コーディング規約に違反していない' },
-    { id: 'g3', order: 3, label: '主要な異常系・エッジケースが考慮されている' },
-    { id: 'g4', order: 4, label: 'ビルド・Lintが通る' },
-  ],
-  review: [
-    {
-      id: 'g1',
-      order: 1,
-      label:
-        '可読性・命名に関する指摘がすべて解消（または対応方針が決定）されている',
-    },
-    { id: 'g2', order: 2, label: 'リファクタリング提案が確認済み' },
-    { id: 'g3', order: 3, label: 'レビュー指摘のうち重大なものがゼロ' },
-  ],
-  security: [
-    { id: 'g1', order: 1, label: 'OWASP Top 10観点での重大な脆弱性がゼロ' },
-    { id: 'g2', order: 2, label: '依存ライブラリに既知の重大脆弱性がない' },
-    {
-      id: 'g3',
-      order: 3,
-      label: '検出された指摘が重要度別に整理され、対応方針が決まっている',
-    },
-  ],
-  test: [
-    { id: 'g1', order: 1, label: '主要機能に対する単体テストが存在する' },
-    { id: 'g2', order: 2, label: '結合テストで想定シナリオがカバーされている' },
-    { id: 'g3', order: 3, label: 'テストがすべてパスしている' },
-    { id: 'g4', order: 4, label: 'カバレッジが一定水準に達している' },
-  ],
-  documentation: [
-    {
-      id: 'g1',
-      order: 1,
-      label: 'README・API仕様書・DB設計書が最新のコード・設計と一致している',
-    },
-    {
-      id: 'g2',
-      order: 2,
-      label: '対象読者（社内／顧客）に応じた記述レベルになっている',
-    },
-    { id: 'g3', order: 3, label: '誤字脱字・欠落セクションがない' },
-  ],
-}
+// 各案件はtemplateId（lib/services/templates）を1つ参照し、工程ごとの質問セット・プロンプトテンプレート・
+// 品質ゲート項目は常にそのテンプレートの現在有効な版から取得する（テンプレート編集は既存案件にも反映される＝ライブ参照）
 
 interface StageRecord {
   status: StageStatus
@@ -269,6 +28,7 @@ interface StageRecord {
 interface ProjectRecord {
   id: string
   name: string
+  templateId: string
   overallStatus: OverallStatus
   currentStage: StageKey
   createdAt: string
@@ -310,12 +70,15 @@ function completedGate(
   )
 }
 
+const SEED_TEMPLATE_ID = 't1'
+
 const PROJECTS = new Map<string, ProjectRecord>([
   [
     'p1',
     {
       id: 'p1',
       name: 'ECサイトリニューアル',
+      templateId: SEED_TEMPLATE_ID,
       overallStatus: 'in_progress',
       currentStage: 'design',
       createdAt: '2026-06-01',
@@ -366,6 +129,7 @@ const PROJECTS = new Map<string, ProjectRecord>([
     {
       id: 'p2',
       name: '社内問い合わせBot',
+      templateId: SEED_TEMPLATE_ID,
       overallStatus: 'in_progress',
       currentStage: 'security',
       createdAt: '2026-05-15',
@@ -480,6 +244,7 @@ const PROJECTS = new Map<string, ProjectRecord>([
     {
       id: 'p3',
       name: '請求書自動化ツール',
+      templateId: SEED_TEMPLATE_ID,
       overallStatus: 'in_progress',
       currentStage: 'requirements',
       createdAt: '2026-07-20',
@@ -499,6 +264,7 @@ const PROJECTS = new Map<string, ProjectRecord>([
     {
       id: 'p4',
       name: '社内ナレッジ検索',
+      templateId: SEED_TEMPLATE_ID,
       overallStatus: 'completed',
       currentStage: 'documentation',
       createdAt: '2026-03-10',
@@ -608,10 +374,6 @@ function findProjectOrThrow(projectId: string): ProjectRecord {
   return project
 }
 
-function isStageKey(value: string): value is StageKey {
-  return (STAGE_ORDER as string[]).includes(value)
-}
-
 function findStageOrThrow(
   project: ProjectRecord,
   stageKey: string
@@ -622,13 +384,27 @@ function findStageOrThrow(
   return project.stages[stageKey]
 }
 
+// 案件レコードを一覧表示用アイテム（7工程分のステータスサマリー付き）に変換する
+function toListItem(project: ProjectRecord): ProjectListItem {
+  return {
+    id: project.id,
+    name: project.name,
+    overallStatus: project.overallStatus,
+    currentStage: project.currentStage,
+    stageStatuses: Object.fromEntries(
+      STAGE_ORDER.map((key) => [key, project.stages[key].status])
+    ) as Record<StageKey, StageStatus>,
+    createdAt: project.createdAt,
+  }
+}
+
 // 質問への回答をプロンプトテンプレートに埋め込んでプロンプト文を組み立てる
 function buildPrompt(
   stageKey: StageKey,
+  questions: StageQuestion[],
   answers: Record<string, string>
 ): string {
   const stageName = messages.stages.stageNames[stageKey]
-  const questions = STAGE_QUESTIONS[stageKey]
   const lines = [
     `あなたは${stageName}を担当する専門家です。以下のヒアリング回答をもとに、${stageName}工程の成果物を作成してください。`,
     '',
@@ -649,16 +425,55 @@ function buildPrompt(
  * 案件一覧を、各案件の7工程分のステータスサマリー付きで取得する
  */
 export function listProjects(): ProjectListItem[] {
-  return Array.from(PROJECTS.values()).map((project) => ({
-    id: project.id,
-    name: project.name,
-    overallStatus: project.overallStatus,
-    currentStage: project.currentStage,
-    stageStatuses: Object.fromEntries(
-      STAGE_ORDER.map((key) => [key, project.stages[key].status])
-    ) as Record<StageKey, StageStatus>,
-    createdAt: project.createdAt,
-  }))
+  return Array.from(PROJECTS.values()).map(toListItem)
+}
+
+/**
+ * 指定テンプレートを参照している進行中の案件一覧を取得する（テンプレート編集時の影響確認用）
+ * @param templateId - テンプレートID
+ */
+export function listInProgressProjectsByTemplate(
+  templateId: string
+): { id: string; name: string }[] {
+  return Array.from(PROJECTS.values())
+    .filter(
+      (project) =>
+        project.templateId === templateId &&
+        project.overallStatus === 'in_progress'
+    )
+    .map((project) => ({ id: project.id, name: project.name }))
+}
+
+/**
+ * 案件を作成する（選択したテンプレートを参照する状態で、7工程分のレコードを一括作成する）
+ * @param name - 案件名
+ * @param templateId - 参照するテンプレートID
+ */
+export function createProject(
+  name: string,
+  templateId: string
+): ProjectListItem {
+  // テンプレートの存在確認（工程1の内容取得を試みることで検証する）
+  getStageTemplateContent(templateId, STAGE_ORDER[0])
+
+  const id = `p${Date.now()}`
+  const stages = Object.fromEntries(
+    STAGE_ORDER.map((stageKey) => [stageKey, emptyStage()])
+  ) as Record<StageKey, StageRecord>
+  stages.requirements.status = 'in_progress'
+
+  const project: ProjectRecord = {
+    id,
+    name,
+    templateId,
+    overallStatus: 'in_progress',
+    currentStage: 'requirements',
+    createdAt: new Date().toISOString().slice(0, 10),
+    stages,
+  }
+  PROJECTS.set(id, project)
+
+  return toListItem(project)
 }
 
 /**
@@ -681,6 +496,7 @@ export function getProjectDetail(projectId: string): ProjectDetail {
 
 /**
  * 特定工程の質問・回答・プロンプト・成果物・品質ゲート状況を取得する
+ * （質問セット・品質ゲート項目は、案件が参照するテンプレートの現在有効な版から取得する）
  * @param projectId - 案件ID
  * @param stageKey - 工程キー
  */
@@ -691,14 +507,15 @@ export function getStageDetail(
   const project = findProjectOrThrow(projectId)
   const stage = findStageOrThrow(project, stageKey)
   const key = stageKey as StageKey
+  const template = getStageTemplateContent(project.templateId, key)
   return {
     stageKey: key,
     status: stage.status,
-    questions: STAGE_QUESTIONS[key],
+    questions: template.questions,
     answers: stage.answers,
     generatedPrompt: stage.generatedPrompt,
     deliverable: stage.deliverable,
-    qualityGateItems: STAGE_QUALITY_GATE_ITEMS[key],
+    qualityGateItems: template.qualityGateItems,
     qualityGateResult: stage.qualityGateResult,
   }
 }
@@ -748,7 +565,8 @@ export function generateStagePrompt(
     throw new ServiceError(409, messages.common.errorMessage.conflict)
   }
 
-  stage.generatedPrompt = buildPrompt(key, stage.answers)
+  const template = getStageTemplateContent(project.templateId, key)
+  stage.generatedPrompt = buildPrompt(key, template.questions, stage.answers)
   return { generatedPrompt: stage.generatedPrompt }
 }
 
@@ -777,10 +595,11 @@ export function executeStage(
 
   // TODO: Anthropic API呼び出しに置き換える。現状は回答内容から簡易的な成果物を組み立てるモック
   const stageName = messages.stages.stageNames[key]
+  const template = getStageTemplateContent(project.templateId, key)
   const content = [
     `# ${stageName}工程の成果物`,
     '',
-    ...STAGE_QUESTIONS[key]
+    ...template.questions
       .filter((question) => stage.answers[question.id])
       .map((question) => `## ${question.text}\n${stage.answers[question.id]}`),
   ].join('\n')
@@ -857,7 +676,10 @@ export function submitQualityGate(
   const project = findProjectOrThrow(projectId)
   const stage = findStageOrThrow(project, stageKey)
   const key = stageKey as StageKey
-  const items = STAGE_QUALITY_GATE_ITEMS[key]
+  const items = getStageTemplateContent(
+    project.templateId,
+    key
+  ).qualityGateItems
 
   stage.qualityGateResult = Object.fromEntries(
     items.map((item) => [

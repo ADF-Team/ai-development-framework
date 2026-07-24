@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ServiceError } from '@/lib/services/projects'
+import { ServiceError } from '@/lib/services/ServiceError'
 
 /**
  * lib/servicesのServiceErrorをAPI RouteのレスポンスJSONに変換する

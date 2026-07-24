@@ -18,6 +18,11 @@ export const STAGE_ORDER: StageKey[] = [
   'documentation',
 ]
 
+// 文字列が有効な工程キーかを判定する型ガード
+export function isStageKey(value: string): value is StageKey {
+  return (STAGE_ORDER as string[]).includes(value)
+}
+
 export type StageStatus =
   'not_started' | 'in_progress' | 'quality_gate_pending' | 'completed'
 

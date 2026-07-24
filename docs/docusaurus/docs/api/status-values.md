@@ -20,7 +20,7 @@ title: 状態値の定義
 | `deliverables.generation_method`（保存された成果物1件ごとの記録） | ENUM | `manual`               | `prompt_only`で進めた場合の貼り付け・手動編集による保存  |
 |                                                                   |      | `ai_executed`          | `/execute`エンドポイント経由でAI生成された保存           |
 | `users.role`                                                      | ENUM | `user`                 | 案件を進める一般利用者                                   |
-|                                                                   |      | `admin`                | テンプレート管理も可能な管理者                           |
+|                                                                   |      | `admin`                | マイテンプレートの編集も可能な管理者                     |
 | `users.status`                                                    | ENUM | `active`               | ログイン可能                                             |
 |                                                                   |      | `disabled`             | 無効化済み（退職者等）                                   |
 
