@@ -15,7 +15,7 @@ title: 公開テンプレート一覧画面
 
 `AppSidebar`の「ライブラリ」グループから常に表示される（`docs/README.md` C3参照）。
 
-ページ自体はServer Componentで、`lib/api/publishedTemplates/getPublishedTemplateList`（`fetchData`経由）を呼び出して初期データを取得する（`lib/services`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
+ページ自体はServer Componentで、`lib/frontend/apiClient/publishedTemplates/getPublishedTemplateList`（`fetchData`経由）を呼び出して初期データを取得する（`service.ts`・`repository.ts`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
 
 ## 主要コンポーネント
 

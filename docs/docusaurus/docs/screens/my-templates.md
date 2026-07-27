@@ -13,7 +13,7 @@ title: マイテンプレート一覧画面
 
 管理者が作成したテンプレート（7工程分の質問セット・プロンプトテンプレート・品質ゲート項目のパック）を、カード形式で一覧表示する画面。管理者ロール（`role: admin`）のみアクセス可能。テンプレートは複数作成できる。
 
-ページ自体はServer Componentで、`lib/api/adminTemplates/getStageTemplateList`（`fetchData`経由）を呼び出して初期データを取得する（`lib/services`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
+ページ自体はServer Componentで、`lib/frontend/apiClient/adminTemplates/getStageTemplateList`（`fetchData`経由）を呼び出して初期データを取得する（`service.ts`・`repository.ts`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
 
 ## 主要コンポーネント
 

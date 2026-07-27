@@ -13,7 +13,7 @@ title: 案件一覧画面
 
 進行中・完了案件を一覧表示し、案件ごとに7工程（要件定義〜ドキュメント）の進捗ステータスを表示する画面。新規案件の作成もここから行う。
 
-ページ自体はServer Componentで、`lib/api/projects/getProjectList`と`lib/api/adminTemplates/getStageTemplateList`（いずれも`fetchData`経由）を並行して呼び出し、案件一覧と（`NewProjectModal`のテンプレート選択欄用の）テンプレート一覧を初期データとして取得する（`lib/services`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
+ページ自体はServer Componentで、`lib/frontend/apiClient/projects/getProjectList`と`lib/frontend/apiClient/adminTemplates/getStageTemplateList`（いずれも`fetchData`経由）を並行して呼び出し、案件一覧と（`NewProjectModal`のテンプレート選択欄用の）テンプレート一覧を初期データとして取得する（`service.ts`・`repository.ts`は直接呼ばない。詳細は`CLAUDE.md`の「データ取得パターン」）。
 
 ## 主要コンポーネント
 

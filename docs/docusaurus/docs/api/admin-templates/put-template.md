@@ -14,7 +14,7 @@ title: "PUT /api/admin/templates/{templateId}/stages/{stageKey}"
 
 ## Request
 
-[GET](./get-template.md)と同じ形式のボディを送信（`version`・`versions`は不要。サーバー側で自動採番）。`title`は1〜255文字（`newTemplateFormSchema`と同じルールでクライアント側バリデーションする）。
+[GET](./get-template.md)と同じ形式のボディを送信（`version`・`versions`は不要。サーバー側で自動採番）。`title`は1〜255文字（`createTemplateSchema`と同じルールでバリデーションする）。
 
 ## Response 200
 
