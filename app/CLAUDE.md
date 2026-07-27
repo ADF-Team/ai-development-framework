@@ -32,13 +32,13 @@ AI Development Framework（ADF）のWebアプリ実装。詳細な要件・API�
 4. **アイコンは`lucide-react`のみ**使用する
 5. **画面に表示する日本語文字列は、すべて`src/constants/messages.ts`にオブジェクトとして定義する**。コンポーネント内に直接日本語を書かない
 6. テストは現時点では書かない（v1は実装速度を優先。後日追加する）
-7. **関数（コンポーネント・hooks・ユーティリティ・APIハンドラ等）には、宣言の1行上に一行コメントで簡潔な説明を書く**。`src/lib/api`配下など既存のJSDoc形式（`@param 名 - 説明`）がある箇所はそれを維持すればよい。`src/components/ui/`のshadcn生成物は対象外（生成物の構成を手動で変更しないため）
+7. **関数（コンポーネント・hooks・ユーティリティ・APIハンドラ等）には、宣言の1行上に一行コメントで簡潔な説明を書く**。`src/lib/frontend/apiClient`配下など既存のJSDoc形式（`@param 名 - 説明`）がある箇所はそれを維持すればよい。`src/components/ui/`のshadcn生成物は対象外（生成物の構成を手動で変更しないため）
 
 ---
 
 ## ディレクトリ構成
 
-feature-basedの構成を採用する。Next.js App Routerの`app/`はルーティング専用の特殊フォルダのため、bulletproof-react準拠の構成を以下のように読み替える。
+feature-basedの構成を採用する。Next.js App Routerの`app/`はルーティング専用の特殊フォルダのため、bulletproof-react準拠の構成を以下のように読み替える。加えて、`app/api`（バックエンド）はroute/service/repositoryの3層構成、`lib`と`schemas`は「利用するレイヤー（バックエンド専用／フロントエンド専用／共通）」を基準にサブフォルダを分ける（詳細は後述の各セクション）。
 
 ```
 src
@@ -55,36 +55,60 @@ src
 │   │       │   ├── page.tsx          # マイテンプレート一覧
 │   │       │   └── [stageKey]/page.tsx  # テンプレート詳細（工程別編集画面）
 │   │       └── users/page.tsx
-│   ├── api/                  # API Routes（docs/adf-design.md の B6/C2 と1対1対応させる）
-│   │   ├── projects/route.ts
-│   │   ├── projects/[id]/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/answers/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/generate-prompt/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/execute/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/deliverable/route.ts
-│   │   ├── projects/[id]/stages/[stageKey]/quality-gate/route.ts
-│   │   ├── admin/templates/route.ts
-│   │   ├── admin/templates/[stageKey]/route.ts
-│   │   ├── admin/templates/[stageKey]/versions/[version]/route.ts
-│   │   ├── admin/users/route.ts
-│   │   └── admin/users/[id]/route.ts
+│   ├── api/                  # API Routes（docs/README.md の B6/C2 と1対1対応させる）。route/service/repositoryの3層構成は「API実装（route/service/repository）」参照
+│   │   ├── auth/session/route.ts
+│   │   ├── projects/
+│   │   │   ├── route.ts
+│   │   │   ├── service.ts
+│   │   │   ├── repository.ts
+│   │   │   └── [id]/
+│   │   │       ├── route.ts                     # ../service.ts を利用
+│   │   │       └── stages/[stageKey]/
+│   │   │           ├── route.ts
+│   │   │           ├── service.ts
+│   │   │           ├── repository.ts
+│   │   │           ├── answers/route.ts          # ../service.ts を利用
+│   │   │           ├── generate-prompt/route.ts  # ../service.ts を利用
+│   │   │           ├── execute/route.ts          # ../service.ts を利用
+│   │   │           ├── deliverable/route.ts      # ../service.ts を利用
+│   │   │           └── quality-gate/route.ts     # ../service.ts を利用
+│   │   └── admin/
+│   │       ├── templates/
+│   │       │   ├── route.ts
+│   │       │   ├── service.ts
+│   │       │   ├── repository.ts
+│   │       │   └── [stageKey]/
+│   │       │       ├── route.ts                        # ../service.ts を利用
+│   │       │       └── versions/[version]/route.ts     # ../../service.ts を利用
+│   │       └── users/
+│   │           ├── route.ts
+│   │           ├── service.ts
+│   │           ├── repository.ts
+│   │           └── [id]/route.ts                # ../service.ts を利用
 │   ├── layout.tsx
 │   └── provider.tsx          # jotaiのProvider、sonnerの<Toaster />等、グローバルプロバイダをまとめる
 │
 ├── components/                # ui/（shadcn生成物）＋ table/ card/ button/ 等の種類別フォルダ（詳細は「コンポーネント設計方針」）
 ├── config/                    # 環境変数のエクスポート、定数
-├── constants/                  # messages.ts（日本語文字列）、response.ts（HTTPステータス定数）
+├── constants/                  # messages.ts（日本語文字列）、response.ts（HTTPステータス定数）。API・フロント共通のため層分けの対象外
 ├── features/                  # 機能単位のモジュール（下記「features一覧」参照）
 ├── hooks/                     # 複数featureで使う共有hooks
-├── lib/
-│   ├── api/                   # クライアント側APIコール（下記「API層」参照）
-│   ├── services/               # サーバー側の業務ロジック（API RoutesとServer Componentsの両方から呼ばれる）
-│   ├── prisma.ts              # Prisma Clientのシングルトン
-│   └── auth/                  # Identity Platform SDKのラッパー
+├── lib/                       # 「利用するレイヤー」で分ける（詳細は「libのレイヤー分け」）
+│   ├── api/                   # バックエンド専用の共通処理
+│   │   ├── prisma.ts          # Prisma Clientのシングルトン
+│   │   ├── response.ts        # API RouteのレスポンスをNextResponse.jsonで返す共通ヘルパー
+│   │   └── auth/              # Identity Platform（Firebase Admin SDK）のラッパー
+│   ├── frontend/               # フロントエンド専用の共通処理
+│   │   └── apiClient/         # 旧`lib/api`。fetchDataベースのAPI呼び出し関数群（詳細は「APIクライアント層」）
+│   └── （直下）                # API・フロント両方から使うが、utils/constants等の既存フォルダに当てはまらない共有ライブラリコード
+├── schemas/                   # zodスキーマ。「利用するレイヤー」で分ける（詳細は「フォームバリデーション（zod）」）
+│   ├── api/                    # APIルート内部でのみ使うスキーマ
+│   ├── frontend/                # フォームの入力検証などフロントエンド専用スキーマ
+│   └── （直下）                # フォームとAPI両方から使う共有スキーマ（例：CreateProjectSchema）
 ├── stores/                    # アプリ全体で使うグローバルjotai atom（例：現在ログイン中のユーザー）
 ├── types/                     # DBエンティティに対応する共有型（Project, ProjectStage, Deliverable等）
-└── utils/                     # 共有ユーティリティ関数
+├── utils/                     # 共有ユーティリティ関数
+└── prisma/                    # schema.prisma、マイグレーション
 ```
 
 ### features一覧（`docs/README.md` C3と対応）
@@ -97,7 +121,7 @@ src
 | `features/admin-templates` | マイテンプレート一覧画面・テンプレート詳細画面 |
 | `features/admin-users`     | ユーザー管理画面                     |
 
-各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `schemas` `stores` `types` `utils` のうち使うものだけ）。`schemas`にはフォームのzodスキーマを置く（詳細は「フォームバリデーション（zod）」参照）。
+各featureの中身は必要なフォルダのみ作成する（`components` `hooks` `stores` `types` `utils` のうち使うものだけ）。zodスキーマはfeature配下には置かず、`src/schemas`に統一する（詳細は「フォームバリデーション（zod）」参照）。
 
 ### feature間import制限
 
@@ -188,13 +212,166 @@ src/components/
 
 ---
 
+## API実装（route/service/repository）
+
+`app/api`配下は、責務ではなく「リソース」単位でフォルダを切り、その中に`route.ts` `service.ts` `repository.ts`をまとめる。
+
+| ファイル | 責務 |
+|---|---|
+| `route.ts` | リクエストの受付、`getCurrentUser`による認証・認可チェック、`schemas`のzodスキーマによるバリデーション、`service`の呼び出し、`lib/api/response.ts`経由でのレスポンス返却 |
+| `service.ts` | ビジネスロジック。`repository`の呼び出し、複数repositoryの組み合わせ |
+| `repository.ts` | Prismaを使ったDBアクセス。SQLに近い処理のみを持つ（ビジネスロジックを書かない） |
+
+### ネストしたルートの扱い
+
+Next.jsの動的ルート（`[id]` `[stageKey]`等）が深くネストする場合、ネストのたびに`service.ts`/`repository.ts`を作らない。**同じリソースを扱う一番浅い階層に1組だけ**`service.ts`/`repository.ts`を置き、ネストしたルートの`route.ts`はそこを相対importする（例：`projects/[id]/route.ts`は`../service`を、`projects/[id]/stages/[stageKey]/answers/route.ts`は`../service`を参照する。ディレクトリ構成の図中のコメントを参照）。「stages」は案件（projects）とは別のリソースとみなし、`projects/[id]/stages/[stageKey]/`の階層に独自の`service.ts`/`repository.ts`を持つ。
+
+### 実装例（projectsリソース）
+
+```ts
+// src/app/api/projects/repository.ts
+import { prisma } from '@/lib/api/prisma'
+
+// 組織に紐づく案件を、工程別ステータス付きで取得する
+export async function findProjectsByOrganization(organizationId: string) {
+  return prisma.project.findMany({
+    where: { organizationId },
+    include: { stages: true },
+  })
+}
+
+// 案件を作成する
+export async function createProject(data: { organizationId: string; userId: string; name: string }) {
+  return prisma.project.create({
+    data: { organizationId: data.organizationId, createdBy: data.userId, name: data.name },
+  })
+}
+
+const STAGE_KEYS = ['requirements', 'design', 'implementation', 'review', 'security', 'test', 'documentation'] as const
+
+// 7工程分のproject_stagesレコードを初期化する
+export async function initializeProjectStages(projectId: string) {
+  await prisma.projectStage.createMany({
+    data: STAGE_KEYS.map((stageKey) => ({ projectId, stageKey, status: 'not_started' })),
+  })
+}
+```
+
+```ts
+// src/app/api/projects/service.ts
+import * as repository from './repository'
+import type { CreateProjectInput } from '@/schemas/createProjectSchema'
+
+// 案件一覧を取得する
+export async function getProjectList(organizationId: string) {
+  return repository.findProjectsByOrganization(organizationId)
+}
+
+// 案件を作成し、7工程分のproject_stagesを初期化する
+export async function createProject(organizationId: string, userId: string, input: CreateProjectInput) {
+  const project = await repository.createProject({ organizationId, userId, name: input.name })
+  await repository.initializeProjectStages(project.id)
+  return project
+}
+```
+
+```ts
+// src/app/api/projects/route.ts
+import { NextRequest } from 'next/server'
+import { getCurrentUser } from '@/lib/api/auth/getCurrentUser'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { ERROR_STATUS } from '@/constants/response'
+import { createProjectSchema } from '@/schemas/createProjectSchema'
+import { getProjectList, createProject } from './service'
+
+// 案件一覧を取得する
+export async function GET() {
+  const user = await getCurrentUser()
+  if (!user) return apiError(ERROR_STATUS.UNAUTHORIZED)
+
+  const projects = await getProjectList(user.organizationId)
+  return apiSuccess({ projects })
+}
+
+// 案件を作成する
+export async function POST(request: NextRequest) {
+  const user = await getCurrentUser()
+  if (!user) return apiError(ERROR_STATUS.UNAUTHORIZED)
+
+  const body = await request.json()
+  const parsed = createProjectSchema.safeParse(body)
+  if (!parsed.success) {
+    return apiError(ERROR_STATUS.UNPROCESSABLE_ENTITY, parsed.error.issues[0].message)
+  }
+
+  const project = await createProject(user.organizationId, user.id, parsed.data)
+  return apiSuccess(project, { status: 201 })
+}
+```
+
+ネストしたルート（`[id]/route.ts`）は同じ`service`を相対importする。
+
+```ts
+// src/app/api/projects/[id]/route.ts
+import { getCurrentUser } from '@/lib/api/auth/getCurrentUser'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { ERROR_STATUS } from '@/constants/response'
+import { getProjectDetail } from '../service'
+
+// 案件詳細を取得する
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await getCurrentUser()
+  if (!user) return apiError(ERROR_STATUS.UNAUTHORIZED)
+
+  const { id } = await params
+  const project = await getProjectDetail(user.organizationId, id)
+  if (!project) return apiError(ERROR_STATUS.NOT_FOUND)
+
+  return apiSuccess(project)
+}
+```
+
+### 共通レスポンスヘルパー（`lib/api/response.ts`）
+
+```ts
+// src/lib/api/response.ts
+import { NextResponse } from 'next/server'
+import { messages } from '@/constants/messages'
+
+/**
+ * 成功レスポンスを返す
+ * @param data - レスポンスボディ
+ * @param init - ステータスコード等（省略時は200）
+ */
+export function apiSuccess<T>(data: T, init?: { status?: number }) {
+  return NextResponse.json(data, { status: init?.status ?? 200 })
+}
+
+/**
+ * エラーレスポンスを返す
+ * @param status - HTTPステータスコード
+ * @param detail - 詳細メッセージ（省略時はステータスコードに応じた既定文言はクライアント側のfetchDataが補う）
+ */
+export function apiError(status: number, detail?: string) {
+  return NextResponse.json(
+    { error: { detail: detail ?? messages.common.errorMessage.otherError } },
+    { status }
+  )
+}
+```
+
+---
+
 ## データ取得パターン（重要・必ず従うこと）
 
-**初期表示データも含めて、APIの呼び出しは必ず`src/lib/api`配下の`fetchData`ベースの関数を経由する**。`page.tsx`（Server Component）から`lib/services`やPrisma Clientを直接呼ばない（下記「API層」参照）。初期表示・ユーザー操作を問わず呼び出し口を`lib/api`に統一することで、モック時の差し替えもこの層だけで完結する。
+**初期表示データも含めて、APIの呼び出しは必ず`src/lib/frontend/apiClient`配下の`fetchData`ベースの関数を経由する**。`page.tsx`（Server Component）からrepositoryやPrisma Clientを直接呼ばない（下記「APIクライアント層」参照）。初期表示・ユーザー操作を問わず呼び出し口を`lib/frontend/apiClient`に統一することで、モック時の差し替えもこの層だけで完結する。
 
 ```tsx
 // src/app/(auth)/projects/page.tsx
-import { getProjectList } from '@/lib/api/projects'
+import { getProjectList } from '@/lib/frontend/apiClient/projects'
 import { ProjectListView } from '@/features/projects/components/ProjectListView'
 
 export default async function ProjectsPage() {
@@ -222,7 +399,7 @@ export function ProjectListView({
 }
 ```
 
-**それ以降のユーザー操作（作成・更新・実行など）も、Client Componentから同じく`src/lib/api`配下の関数を呼ぶ**（下記「API層」参照）。初期表示・ユーザー操作のどちらも呼び出し先は`lib/api`で統一され、違いはServer Component/Client Componentのどちらから呼ぶかだけになる。
+**それ以降のユーザー操作（作成・更新・実行など）も、Client Componentから同じく`src/lib/frontend/apiClient`配下の関数を呼ぶ**（下記「APIクライアント層」参照）。初期表示・ユーザー操作のどちらも呼び出し先は`lib/frontend/apiClient`で統一され、違いはServer Component/Client Componentのどちらから呼ぶかだけになる。
 
 ---
 
@@ -241,7 +418,7 @@ Identity Platformのクライアント側SDKで取得したIDトークンは、�
 各APIルートは、毎回自分でCookie検証・ユーザー取得を書かず、共通ヘルパーを呼ぶ。
 
 ```ts
-// src/lib/auth/firebaseAdmin.ts
+// src/lib/api/auth/firebaseAdmin.ts
 // firebase-adminは環境変数未設定時にモジュール読み込み時点でクラッシュするため、
 // 初回呼び出し時まで初期化を遅延させる（`getFirebaseAdminAuth()`経由でのみ使う）
 import { cert, getApps, initializeApp, type App } from 'firebase-admin/app'
@@ -267,10 +444,10 @@ export function getFirebaseAdminAuth(): Auth {
 ```
 
 ```ts
-// src/lib/auth/getCurrentUser.ts
+// src/lib/api/auth/getCurrentUser.ts
 import { cookies } from 'next/headers'
 import { getFirebaseAdminAuth } from './firebaseAdmin'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/api/prisma'
 
 /**
  * セッションCookieから現在のユーザー情報を取得する
@@ -448,14 +625,14 @@ export const messages = {
 
 > ⚠️ 文言は仮のたたき台。実際の画面文言はデザイン（Claude Design出力）に合わせて調整する。**画面に表示する日本語文字列は、コンポーネント内に直接書かず必ずここに追加してから参照する。**
 
-## API層（`src/lib/api`）
+## APIクライアント層（`src/lib/frontend/apiClient`）
 
-エンドポイントはfeatureに分散させず、`src/lib/api`配下にリソース単位のフォルダでまとめる（管理のしやすさを優先）。1エンドポイント＝1ファイル（ファイル名は関数名と一致させる）とし、リソースごとにフォルダを切る。**`src/lib/api`配下のファイルはすべて先頭に`'use server'`を付ける**（`FetchData.ts`だけでなく各エンドポイントのファイルも）。理由は、ミューテーション成功後に呼ぶ`revalidatePath`がサーバー専用関数のため、呼び出し元の関数自体がServer Actionである必要があるため。
+エンドポイントはfeatureに分散させず、`src/lib/frontend/apiClient`配下にリソース単位のフォルダでまとめる（管理のしやすさを優先）。1エンドポイント＝1ファイル（ファイル名は関数名と一致させる）とし、リソースごとにフォルダを切る。**`src/lib/frontend/apiClient`配下のファイルはすべて先頭に`'use server'`を付ける**（`FetchData.ts`だけでなく各エンドポイントのファイルも）。理由は、ミューテーション成功後に呼ぶ`revalidatePath`がサーバー専用関数のため、呼び出し元の関数自体がServer Actionである必要があるため。
 
-**`lib/api`配下のGET関数は、Server Component（`page.tsx`）の初期表示・Client Componentのユーザー操作のどちらからも呼ばれる**（Server ActionはServer Component・Client Componentのどちらからも呼び出せるため問題ない）。呼び出し元によって関数を分ける必要はない。
+**`lib/frontend/apiClient`配下のGET関数は、Server Component（`page.tsx`）の初期表示・Client Componentのユーザー操作のどちらからも呼ばれる**（Server ActionはServer Component・Client Componentのどちらからも呼び出せるため問題ない）。呼び出し元によって関数を分ける必要はない。
 
 ```
-src/lib/api/
+src/lib/frontend/apiClient/
 ├── FetchData.ts             # 共通fetchラッパー（Server Action）
 ├── projects/
 │   ├── getProjectList.ts
@@ -471,7 +648,7 @@ src/lib/api/
 `APP_URL`は同一アプリ内の`/api`ルートを絶対URLで呼ぶために必要（Server Action = サーバー側実行のため、ブラウザと違い相対パスのfetchが使えないことに注意）。
 
 ```ts
-// src/lib/api/FetchData.ts
+// src/lib/frontend/apiClient/FetchData.ts
 'use server'
 
 import { cookies } from 'next/headers'
@@ -590,7 +767,7 @@ export async function fetchData(
 **GET（単純取得）の例**
 
 ```ts
-// src/lib/api/projects/getProject.ts
+// src/lib/frontend/apiClient/projects/getProject.ts
 'use server'
 
 import { fetchData } from '../FetchData'
@@ -612,7 +789,7 @@ export const getProject = async (id: string) => {
 **POST（副作用を伴う操作）の例**：成功・失敗をtoastで必ず通知し、失敗時は`null`を返す
 
 ```ts
-// src/lib/api/stages/postExecuteStage.ts
+// src/lib/frontend/apiClient/stages/postExecuteStage.ts
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -651,7 +828,7 @@ export const postExecuteStage = async (
 **PUT（管理者用の全体更新）の例**：構造はPOSTと同じで、`method: 'PUT'`にする
 
 ```ts
-// src/lib/api/adminTemplates/putStageTemplate.ts
+// src/lib/frontend/apiClient/adminTemplates/putStageTemplate.ts
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -709,7 +886,7 @@ import { useState } from 'react'
 
 /**
  * API呼び出しのローディング状態を管理する共通フック
- * @param action - src/lib/api の関数（成功時は値、失敗時はnullを返す想定）
+ * @param action - src/lib/frontend/apiClient の関数（成功時は値、失敗時はnullを返す想定）
  * @returns run（実行関数）とisLoading
  */
 export function useApiAction<Args extends unknown[], T>(
@@ -735,34 +912,76 @@ export function useApiAction<Args extends unknown[], T>(
 
 ## フォームバリデーション（zod）
 
-**入力を伴うフォームは、必ずzodのスキーマでバリデーションする**（React Hook Formのようなフォームライブラリは使わず、`useState`によるローカル状態管理＋zodの`safeParse`の組み合わせのみで統一する）。
+**入力を伴うフォームは、必ずzodのスキーマでバリデーションする**（React Hook Formのようなフォームライブラリは使わず、`useState`によるローカル状態管理＋zodの`safeParse`の組み合わせのみで統一する）。**APIルートのリクエストボディのバリデーションにも同じzodスキーマを使う**（`route.ts`の「バリデーション」責務。詳細は「API実装（route/service/repository）」参照）。
 
-- スキーマは、そのフォームを使う画面のfeature配下`features/x/schemas/`に置く（例：`features/auth/schemas/loginFormSchema.ts`）。複数featureで共有するスキーマが出てきた場合のみ`src/schemas`への切り出しを検討する
-- ファイル名は`xxxFormSchema.ts`とし、スキーマ本体（`xxxFormSchema`）と`z.infer`で導出した型（`XxxFormValues`）の両方をexportする
+スキーマの置き場所は、feature配下ではなく`src/schemas`に統一し、「利用するレイヤー」で分ける（ディレクトリ構成参照）。
+
+| 置き場所 | 使う場面 |
+|---|---|
+| `schemas/frontend/` | フロントエンドのフォームでのみ使う（APIには送らない値の検証。例：ログインフォーム） |
+| `schemas/api/` | APIルート内部でのみ使う（管理用APIの内部処理等） |
+| `schemas/`（直下） | フォームの入力値とAPIのリクエストボディの両方に使う共有スキーマ（例：案件作成） |
+
+- ファイル名は`xxxSchema.ts`とし、スキーマ本体（`xxxSchema`）と`z.infer`で導出した型（`XxxInput`）の両方をexportする
 - バリデーションエラーメッセージも画面表示文字列のため、スキーマ内に直接日本語を書かず`src/constants/messages.ts`から参照する
 - フォーム側は`<form>`に`noValidate`を付け、HTML標準のバリデーション（`required`等）と二重にならないようにする。送信時に`schema.safeParse()`を呼び、失敗した場合は最初のissueのmessageを画面表示用のエラー状態にセットする
+- `types/`（DBエンティティの型）と`schemas/`（入力値のバリデーション）は役割が異なる。API・フォームから受け取る値の検証には`schemas/`を使い、DBから取得したデータの型には`types/`を使う
+
+**フロントエンド専用の例（ログインフォーム。Identity Platform側で認証するため、APIへのリクエストボディ検証は不要でフロントのみで完結）**
 
 ```ts
-// src/features/auth/schemas/loginFormSchema.ts
+// src/schemas/frontend/loginSchema.ts
 import { z } from 'zod'
 import { messages } from '@/constants/messages'
 
-export const loginFormSchema = z.object({
+export const loginSchema = z.object({
   email: z.email(messages.auth.validation.emailInvalid),
   password: z.string().min(1, messages.auth.validation.passwordRequired),
 })
 
-export type LoginFormValues = z.infer<typeof loginFormSchema>
+export type LoginInput = z.infer<typeof loginSchema>
 ```
 
 ```tsx
 // 呼び出し側（フォームのonSubmit内）
-const validation = loginFormSchema.safeParse({ email, password })
+const validation = loginSchema.safeParse({ email, password })
 if (!validation.success) {
   setErrorMessage(validation.error.issues[0].message)
   return
 }
 // validation.data が型付き・検証済みの値
+```
+
+**共有スキーマの例（案件作成。`NewProjectModal`のフォームと、`POST /api/projects`のリクエストボディ検証の両方で同じスキーマを使う）**
+
+```ts
+// src/schemas/createProjectSchema.ts
+import { z } from 'zod'
+import { messages } from '@/constants/messages'
+
+export const createProjectSchema = z.object({
+  name: z.string().min(1, messages.projects.validation.nameRequired).max(255),
+})
+
+export type CreateProjectInput = z.infer<typeof createProjectSchema>
+```
+
+```tsx
+// フロント側：src/features/projects/components/ProjectListScreen/NewProjectModal.tsx
+const validation = createProjectSchema.safeParse({ name })
+if (!validation.success) {
+  setErrorMessage(validation.error.issues[0].message)
+  return
+}
+await createProject(validation.data)
+```
+
+```ts
+// バックエンド側：src/app/api/projects/route.ts（抜粋。「API実装（route/service/repository）」参照）
+const parsed = createProjectSchema.safeParse(body)
+if (!parsed.success) {
+  return apiError(ERROR_STATUS.UNPROCESSABLE_ENTITY, parsed.error.issues[0].message)
+}
 ```
 
 ---
@@ -813,11 +1032,11 @@ export const showErrorToast = (message: string) => {
 
 - スキーマは`prisma/schema.prisma`に定義する。テーブル定義は`docs/README.md` C1を正とする
 - マイグレーションは`prisma migrate dev`で作成し、コミットに含める
-- `lib/services`層以外からPrisma Clientを直接importしない（DBへのアクセスはAPI Routeが`lib/services`の関数経由で行う。Server Componentsは`lib/services`を直接呼ばず、`lib/api`経由でAPI Routeを叩く）
-- Prisma Clientは`lib/prisma.ts`でシングルトン化する（Next.jsの開発時ホットリロードでインスタンスが増殖し、DB接続を使い切る事故を防ぐため）
+- **Prisma Clientは各リソースの`repository.ts`からのみimportする**（`route.ts` `service.ts`からは直接呼ばない。DBアクセスの窓口を`repository.ts`に一本化するため。詳細は「API実装（route/service/repository）」参照）
+- Prisma Clientは`lib/api/prisma.ts`でシングルトン化する（Next.jsの開発時ホットリロードでインスタンスが増殖し、DB接続を使い切る事故を防ぐため）
 
 ```ts
-// src/lib/prisma.ts
+// src/lib/api/prisma.ts
 import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
@@ -835,9 +1054,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 - Tailwindの警告をそのままにすること
 - モックアップにない挙動を推測で実装しない（不明点は確認する）
-- `lib/services`を経由せず、API RouteからPrisma Clientを直接呼ばない
-- Server Component（`page.tsx`）から`lib/services`やPrisma Clientを直接呼ばない（必ず`lib/api`経由でAPI Routeを叩く）
-- Client ComponentからAPI Routeを経由せず直接Prismaやサーバー専用ロジックを呼ばない（`'use client'`のファイルに`lib/services`をimportしない）
+- `repository.ts`を経由せず、`route.ts`や`service.ts`からPrisma Clientを直接呼ばない
+- `route.ts`にビジネスロジックを直接書く（`service.ts`に書く）。`service.ts`にDBアクセスの詳細（Prismaのクエリ）を直接書く（`repository.ts`に書く）
+- Server Component（`page.tsx`）から`service.ts`や`repository.ts`、Prisma Clientを直接呼ばない（必ず`lib/frontend/apiClient`経由でAPI Routeを叩く）
+- Client ComponentからAPI Routeを経由せず直接Prismaやサーバー専用ロジックを呼ばない（`'use client'`のファイルに`service.ts`や`repository.ts`をimportしない）
+- `lib/api`（バックエンド専用）にブラウザAPI依存のコードを置く、`lib/frontend`（フロントエンド専用）にPrisma等サーバー依存のコードを置く（利用するレイヤーを取り違えない）
 - feature間の直接import
 - `any`型の使用
 - ハードコードされた色指定
@@ -847,9 +1068,10 @@ if (process.env.NODE_ENV !== 'production') {
 - 子コンポーネントへの`'use client'`の付けすぎ（親のみで足りる場合がほとんど）
 - 同じUIパターン・ロジックのコピペによる重複実装
 - コンポーネントから`sonner`の`toast`を直接呼ぶ（必ず`src/utils/toast.ts`経由）
-- `src/lib/api`配下のミューテーション関数で`'use server'`を付け忘れる（`revalidatePath`が動かなくなる）
+- `src/lib/frontend/apiClient`配下のミューテーション関数で`'use server'`を付け忘れる（`revalidatePath`が動かなくなる）
 - フォームのバリデーションをzodのスキーマ経由にせず、HTML標準バリデーション（`required`等）や独自の手書きロジックだけで済ませる
 - `middleware.ts`を作成する（Next.js 16では`proxy.ts`を使う）
+- zodスキーマを`features/x/schemas/`配下に置く（`src/schemas`に統一する）
 
 ---
 

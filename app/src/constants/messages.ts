@@ -99,10 +99,17 @@ export const messages = {
     },
   },
   nav: {
+    groupTeamSpace: 'チームスペース',
+    groupLibrary: 'ライブラリ',
+    groupSystemAdmin: 'システム管理',
     projects: '案件一覧',
     adminTemplates: 'マイテンプレート',
     adminUsers: 'ユーザー管理',
+    publishedTemplates: '公開テンプレート',
+    companyManagement: '会社管理',
+    userRoleUser: '利用者',
     userRoleAdmin: '管理者',
+    userRoleSystemAdmin: 'システム管理者',
     logout: 'ログアウト',
   },
   projects: {

@@ -1,21 +1,19 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Folders, Layers, LogOut, Users } from 'lucide-react'
+import { Building2, Folders, Globe, Layers, LogOut, Users } from 'lucide-react'
 import { messages } from '@/constants/messages'
+import type { UserRole } from '@/types/User'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { NavGroup, type NavGroupItem } from './AppSidebar/NavGroup'
 
-const NAV_ITEMS = [
+const TEAM_SPACE_ITEMS: NavGroupItem[] = [
   { href: '/projects', label: messages.nav.projects, icon: Folders },
   {
     href: '/admin/templates',
@@ -25,9 +23,44 @@ const NAV_ITEMS = [
   { href: '/admin/users', label: messages.nav.adminUsers, icon: Users },
 ]
 
+const LIBRARY_ITEMS: NavGroupItem[] = [
+  {
+    href: '/templates/published',
+    label: messages.nav.publishedTemplates,
+    icon: Globe,
+  },
+]
+
+const SYSTEM_ADMIN_ITEMS: NavGroupItem[] = [
+  {
+    href: '/system/companies',
+    label: messages.nav.companyManagement,
+    icon: Building2,
+  },
+]
+
+const ROLE_LABEL: Record<UserRole, string> = {
+  user: messages.nav.userRoleUser,
+  admin: messages.nav.userRoleAdmin,
+  system_admin: messages.nav.userRoleSystemAdmin,
+}
+
+// TODO: getCurrentUser()実装後、実際のログインユーザーのロールに置き換える
+function getCurrentUserRole(): UserRole {
+  return 'system_admin'
+}
+
 // 認証必須画面（(auth)グループ）で共通のサイドバーナビゲーション
 export function AppSidebar() {
   const pathname = usePathname()
+
+  const role = getCurrentUserRole()
+  const isAdmin = role === 'admin' || role === 'system_admin'
+  const isSystemAdmin = role === 'system_admin'
+
+  const teamSpaceItems = isAdmin
+    ? TEAM_SPACE_ITEMS
+    : TEAM_SPACE_ITEMS.filter((item) => item.href === '/projects')
 
   return (
     <Sidebar
@@ -49,23 +82,24 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="gap-0.5 p-0">
-        <SidebarMenu className="gap-0.5">
-          {NAV_ITEMS.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith(item.href)}
-                className="h-auto rounded-md px-2 py-2.25 text-sm"
-              >
-                <Link href={item.href}>
-                  <item.icon className="size-4" />
-                  {item.label}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+      <SidebarContent className="gap-3 p-0">
+        <NavGroup
+          label={messages.nav.groupTeamSpace}
+          items={teamSpaceItems}
+          pathname={pathname}
+        />
+        <NavGroup
+          label={messages.nav.groupLibrary}
+          items={LIBRARY_ITEMS}
+          pathname={pathname}
+        />
+        {isSystemAdmin && (
+          <NavGroup
+            label={messages.nav.groupSystemAdmin}
+            items={SYSTEM_ADMIN_ITEMS}
+            pathname={pathname}
+          />
+        )}
       </SidebarContent>
 
       <SidebarFooter className="gap-3 border-t border-divider p-0 pt-4">
@@ -77,7 +111,7 @@ export function AppSidebar() {
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="text-[13px]">山田 太郎</span>
             <span className="w-fit rounded-[6px] bg-accent-800 px-2.5 py-0.75 text-[11px] text-accent-100">
-              {messages.nav.userRoleAdmin}
+              {ROLE_LABEL[role]}
             </span>
           </div>
         </div>

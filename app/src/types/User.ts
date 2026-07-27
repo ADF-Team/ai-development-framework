@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'admin'
+export type UserRole = 'user' | 'admin' | 'system_admin'
 export type UserStatus = 'active' | 'disabled'
 
 export interface UserListItem {
