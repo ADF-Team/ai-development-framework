@@ -5,7 +5,7 @@ import { Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
-import { duplicateTemplate } from '@/lib/api/adminTemplates/duplicateTemplate'
+import { duplicateTemplate } from '@/lib/frontend/apiClient/adminTemplates/duplicateTemplate'
 
 // 公開テンプレート詳細画面：「マイテンプレートに追加」ボタン（管理者権限にのみ表示。複製APIは既存の複製機能と共通）
 export function AddToMyTemplatesButton({

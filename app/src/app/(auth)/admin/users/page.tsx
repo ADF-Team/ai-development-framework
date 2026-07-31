@@ -1,4 +1,4 @@
-import { getUserList } from '@/lib/api/adminUsers/getUserList'
+import { getUserList } from '@/lib/frontend/apiClient/adminUsers/getUserList'
 import { UserManagementScreen } from '@/features/admin-users/components/UserManagementScreen'
 
 // ユーザー管理画面（/admin/users）

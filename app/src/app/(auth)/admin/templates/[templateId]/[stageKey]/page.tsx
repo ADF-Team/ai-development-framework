@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { isStageKey } from '@/types/Project'
-import { getStageTemplate } from '@/lib/api/adminTemplates/getStageTemplate'
+import { getStageTemplate } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplate'
 import { TemplateDetailScreen } from '@/features/admin-templates/components/TemplateDetailScreen'
 
 // テンプレート詳細画面（/admin/templates/[templateId]/[stageKey]）

@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
-import { getProjectList } from '@/lib/api/projects/getProjectList'
-import { getStageTemplateList } from '@/lib/api/adminTemplates/getStageTemplateList'
+import { getProjectList } from '@/lib/frontend/apiClient/projects/getProjectList'
+import { getStageTemplateList } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplateList'
 import { ProjectListScreen } from '@/features/projects/components/ProjectListScreen'
 
 // 案件一覧画面（/projects）

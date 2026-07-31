@@ -2,7 +2,7 @@ import { Ban, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
-import { patchUser } from '@/lib/api/adminUsers/patchUser'
+import { patchUser } from '@/lib/frontend/apiClient/adminUsers/patchUser'
 import type { UserListItem } from '@/types/User'
 
 // ユーザー管理画面：メンバー一覧の1行分のアカウント無効化／再有効化ボタン

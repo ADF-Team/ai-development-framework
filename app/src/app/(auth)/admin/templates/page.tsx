@@ -1,4 +1,4 @@
-import { getStageTemplateList } from '@/lib/api/adminTemplates/getStageTemplateList'
+import { getStageTemplateList } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplateList'
 import { MyTemplateListScreen } from '@/features/admin-templates/components/MyTemplateListScreen'
 
 // マイテンプレート一覧画面（/admin/templates）

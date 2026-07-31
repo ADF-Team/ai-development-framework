@@ -9,7 +9,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { messages } from '@/constants/messages'
-import { getStageTemplateVersion } from '@/lib/api/adminTemplates/getStageTemplateVersion'
+import { getStageTemplateVersion } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplateVersion'
 import { buildTemplateDiff } from '../../../utils/buildTemplateDiff'
 import type { StageKey } from '@/types/Project'
 import type { StageTemplateData } from '@/types/StageTemplate'

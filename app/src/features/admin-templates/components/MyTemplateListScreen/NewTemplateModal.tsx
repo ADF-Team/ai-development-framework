@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
-import { createTemplate } from '@/lib/api/adminTemplates/createTemplate'
+import { createTemplate } from '@/lib/frontend/apiClient/adminTemplates/createTemplate'
 import { newTemplateFormSchema } from '../../schemas/newTemplateFormSchema'
 
 // マイテンプレート一覧画面：新規テンプレート作成モーダル。作成後はそのテンプレートの編集画面へ遷移する

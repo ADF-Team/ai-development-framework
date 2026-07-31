@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import { getProject } from '@/lib/api/projects/getProject'
-import { getStage } from '@/lib/api/stages/getStage'
+import { getProject } from '@/lib/frontend/apiClient/projects/getProject'
+import { getStage } from '@/lib/frontend/apiClient/stages/getStage'
 import { StageWorkspace } from '@/features/stages/components/StageWorkspace'
 
 // 案件詳細画面（工程別進行画面。/projects/[projectId]）

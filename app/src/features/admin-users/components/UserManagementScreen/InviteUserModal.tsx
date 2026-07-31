@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
-import { postInviteUser } from '@/lib/api/adminUsers/postInviteUser'
+import { postInviteUser } from '@/lib/frontend/apiClient/adminUsers/postInviteUser'
 import { inviteUserFormSchema } from '../../schemas/inviteUserFormSchema'
 import type { UserListItem, UserRole } from '@/types/User'
 

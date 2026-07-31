@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { PanelCard, PanelCardKicker } from '@/components/card/PanelCard'
 import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
-import { postQualityGate } from '@/lib/api/stages/postQualityGate'
+import { postQualityGate } from '@/lib/frontend/apiClient/stages/postQualityGate'
 import type { StageKey } from '@/types/Project'
 import type { StageDetail } from '@/types/Stage'
 

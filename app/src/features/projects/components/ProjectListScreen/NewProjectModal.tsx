@@ -21,7 +21,7 @@ import {
 import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
-import { createProject } from '@/lib/api/projects/createProject'
+import { createProject } from '@/lib/frontend/apiClient/projects/createProject'
 import { newProjectFormSchema } from '../../schemas/newProjectFormSchema'
 import type { ProjectListItem } from '@/types/Project'
 import type { TemplateSummary } from '@/types/StageTemplate'
