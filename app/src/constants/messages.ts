@@ -163,6 +163,16 @@ export const messages = {
     },
     createProjectButton: 'このテンプレートで案件を作成する',
     duplicateButtonLabel: '複製する',
+    publishButton: '公開する',
+    unpublishButton: '公開を取り下げる',
+    publishedTag: '公開中',
+    publishedTemplateTag: '公開テンプレート',
+    publishConfirmModal: {
+      title: 'このテンプレートを公開しますか？',
+      description: 'ADFを使う人全員が見れるようになりますがよいですか。',
+      cancelButton: 'キャンセル',
+      confirmButton: '公開する',
+    },
     saveImpactModal: {
       title: 'このテンプレートを使用中の案件があります',
       description:
@@ -185,7 +195,15 @@ export const messages = {
       successUpdate: 'テンプレートを更新しました。',
       successCreate: 'テンプレートを作成しました。',
       successDuplicate: 'テンプレートを複製しました。',
+      successPublish: 'テンプレートを公開しました。',
+      successUnpublish: 'テンプレートの公開を取り下げました。',
     },
+  },
+  publishedTemplates: {
+    listTitle: '公開テンプレート',
+    listDescription: '全社で公開されているテンプレートを閲覧できます。',
+    backToListLink: '公開テンプレート一覧に戻る',
+    addToMyTemplatesButton: 'マイテンプレートに追加',
   },
   adminUsers: {
     listTitle: 'ユーザー管理',

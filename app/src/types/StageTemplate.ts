@@ -24,6 +24,9 @@ export interface TemplateSummary {
   version: number
   updatedAt: string
   updatedBy: string
+  isPublished: boolean
+  // 公開テンプレートを複製した直後・未編集の場合にtrue（新しいバージョンが保存されると自動的にfalseになる）
+  showPublishedTag: boolean
 }
 
 export interface StageTemplateData {

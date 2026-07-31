@@ -11,6 +11,10 @@ import type {
   TemplateSummary,
   TemplateVersionSummary,
 } from '@/types/StageTemplate'
+import type {
+  PublishedTemplateDetail,
+  PublishedTemplateSummary,
+} from '@/types/PublishedTemplate'
 
 // TODO: インフラ（Cloud SQL）準備後、Prisma経由でDBアクセスする実装に置き換える。
 // 現状はプロセス内メモリのモックストアでテンプレート（7工程分の質問セット・プロンプトテンプレート・品質ゲート項目をまとめて持つパック）を保持する。
@@ -389,6 +393,26 @@ const TEMPLATES = new Map<string, TemplateVersionRecord[]>([
   ],
 ])
 
+interface PublishState {
+  publishedAt: string | null
+  sourcePublishedTemplateId: string | null
+}
+
+// テンプレートの公開状態（templates.published_at / source_published_template_id相当）。TEMPLATESと同じキー（テンプレートID）で管理する
+const TEMPLATE_PUBLISH_STATE = new Map<string, PublishState>([
+  ['t1', { publishedAt: '2026-07-10', sourcePublishedTemplateId: null }],
+  ['t2', { publishedAt: '2026-03-01', sourcePublishedTemplateId: null }],
+])
+
+function getPublishState(templateId: string): PublishState {
+  return (
+    TEMPLATE_PUBLISH_STATE.get(templateId) ?? {
+      publishedAt: null,
+      sourcePublishedTemplateId: null,
+    }
+  )
+}
+
 function findVersionsOrThrow(templateId: string): TemplateVersionRecord[] {
   const versions = TEMPLATES.get(templateId)
   if (!versions) {
@@ -429,12 +453,17 @@ function toVersionSummaries(
 export function listTemplates(): TemplateSummary[] {
   return Array.from(TEMPLATES.entries()).map(([id, versions]) => {
     const current = currentVersion(versions)
+    const publishState = getPublishState(id)
     return {
       id,
       title: current.title,
       version: current.version,
       updatedAt: current.createdAt,
       updatedBy: current.createdBy,
+      isPublished: publishState.publishedAt !== null,
+      showPublishedTag:
+        publishState.sourcePublishedTemplateId !== null &&
+        versions.length === 1,
     }
   })
 }
@@ -465,12 +494,17 @@ export function createTemplate(payload: { title: string }): {
       stages: emptyStages,
     },
   ])
+  TEMPLATE_PUBLISH_STATE.set(id, {
+    publishedAt: null,
+    sourcePublishedTemplateId: null,
+  })
 
   return { id, version: 1 }
 }
 
 /**
- * テンプレートを複製する（現在有効な版の内容をコピーした新規テンプレートを作成する。バージョン履歴・IDは引き継がない）
+ * テンプレートを複製する（現在有効な版の内容をコピーした新規テンプレートを作成する。バージョン履歴・IDは引き継がない）。
+ * 複製元が公開テンプレートの場合、複製先の複製元IDを記録する（公開テンプレート詳細画面の「マイテンプレートに追加」もこの関数を使う）
  * @param templateId - 複製元のテンプレートID
  */
 export function duplicateTemplate(templateId: string): {
@@ -479,6 +513,7 @@ export function duplicateTemplate(templateId: string): {
 } {
   const versions = findVersionsOrThrow(templateId)
   const current = currentVersion(versions)
+  const sourcePublishState = getPublishState(templateId)
 
   const id = `t${Date.now()}`
   // TODO: getCurrentUser()実装後、実際のログインユーザーのdisplayNameに置き換える
@@ -491,8 +526,94 @@ export function duplicateTemplate(templateId: string): {
       stages: structuredClone(current.stages),
     },
   ])
+  TEMPLATE_PUBLISH_STATE.set(id, {
+    publishedAt: null,
+    sourcePublishedTemplateId:
+      sourcePublishState.publishedAt !== null ? templateId : null,
+  })
 
   return { id, version: 1 }
+}
+
+/**
+ * テンプレートを公開状態にする（既に公開済みの場合は何もしない）
+ * @param templateId - テンプレートID
+ */
+export function publishTemplate(templateId: string): {
+  id: string
+  publishedAt: string | null
+} {
+  findVersionsOrThrow(templateId)
+  const state = getPublishState(templateId)
+  if (state.publishedAt === null) {
+    TEMPLATE_PUBLISH_STATE.set(templateId, {
+      ...state,
+      publishedAt: new Date().toISOString().slice(0, 10),
+    })
+  }
+  return {
+    id: templateId,
+    publishedAt: getPublishState(templateId).publishedAt,
+  }
+}
+
+/**
+ * テンプレートを非公開状態に戻す（既に非公開の場合は何もしない）
+ * @param templateId - テンプレートID
+ */
+export function unpublishTemplate(templateId: string): {
+  id: string
+  publishedAt: string | null
+} {
+  findVersionsOrThrow(templateId)
+  const state = getPublishState(templateId)
+  TEMPLATE_PUBLISH_STATE.set(templateId, { ...state, publishedAt: null })
+  return { id: templateId, publishedAt: null }
+}
+
+/**
+ * 公開中のテンプレート一覧を取得する（公開テンプレート一覧画面用）
+ */
+export function listPublishedTemplates(): PublishedTemplateSummary[] {
+  return Array.from(TEMPLATES.entries())
+    .filter(([id]) => getPublishState(id).publishedAt !== null)
+    .map(([id, versions]) => {
+      const current = currentVersion(versions)
+      return {
+        id,
+        title: current.title,
+        version: current.version,
+        publishedAt: getPublishState(id).publishedAt as string,
+      }
+    })
+}
+
+/**
+ * 公開テンプレートの詳細（現在有効な版の7工程分の内容）を取得する。非公開の場合は404
+ * @param templateId - テンプレートID
+ */
+export function getPublishedTemplateDetail(
+  templateId: string
+): PublishedTemplateDetail {
+  const versions = findVersionsOrThrow(templateId)
+  const state = getPublishState(templateId)
+  if (state.publishedAt === null) {
+    throw new ServiceError(404, messages.common.errorMessage.notFound)
+  }
+  const current = currentVersion(versions)
+
+  return {
+    id: templateId,
+    title: current.title,
+    version: current.version,
+    publishedAt: state.publishedAt,
+    stages: STAGE_ORDER.map((stageKey) => ({
+      stageKey,
+      questions: current.stages[stageKey].questions,
+      promptTemplate: current.stages[stageKey].promptTemplate,
+      qualityGateItems: current.stages[stageKey].qualityGateItems,
+    })),
+  }
 }
 
 /**
