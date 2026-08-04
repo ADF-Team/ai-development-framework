@@ -42,7 +42,9 @@ export function NavGroup({
               >
                 <Link href={item.href}>
                   <item.icon className="size-4" />
-                  {item.label}
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {item.label}
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
