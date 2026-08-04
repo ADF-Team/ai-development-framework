@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Building2, Folders, Globe, Layers, LogOut, Users } from 'lucide-react'
 import { messages } from '@/constants/messages'
@@ -63,26 +64,23 @@ export function AppSidebar() {
     : TEAM_SPACE_ITEMS.filter((item) => item.href === '/projects')
 
   return (
-    <Sidebar
-      collapsible="none"
-      className="min-h-screen gap-0 border-r border-sidebar-border px-4 py-5"
-    >
-      <SidebarHeader className="mb-7 gap-0 p-0">
-        <div className="flex items-center gap-2.5 px-2">
+    <Sidebar collapsible="icon" className="border-sidebar-border">
+      <SidebarHeader className="gap-0 px-1 py-5">
+        <Link href="/projects" className="flex items-center gap-2.5">
           <Image
             src="/icon.png"
             alt={messages.common.brand}
             width={40}
             height={40}
-            className="block"
+            className="block size-10 max-w-none shrink-0"
           />
-          <span className="font-heading text-xl font-medium">
+          <span className="font-heading text-xl font-medium group-data-[collapsible=icon]:hidden">
             {messages.common.brand}
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
 
-      <SidebarContent className="gap-3 p-0">
+      <SidebarContent className="gap-3 px-2">
         <NavGroup
           label={messages.nav.groupTeamSpace}
           items={teamSpaceItems}
@@ -102,14 +100,14 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="gap-3 border-t border-divider p-0 pt-4">
+      <SidebarFooter className="gap-3 border-t border-divider px-2 pt-4 pb-5">
         {/* TODO: getCurrentUser()実装後、実際のログインユーザー情報に置き換える */}
-        <div className="flex items-center gap-2.5 px-2">
+        <div className="flex items-center gap-2.5">
           <div className="flex size-7 flex-none items-center justify-center rounded-full bg-accent-800 font-heading text-xs text-accent-100">
-            山
+            {messages.nav.mockUserName.slice(0, 1)}
           </div>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[13px]">山田 太郎</span>
+          <div className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
+            <span className="text-[13px]">{messages.nav.mockUserName}</span>
             <span className="w-fit rounded-[6px] bg-accent-800 px-2.5 py-0.75 text-[11px] text-accent-100">
               {ROLE_LABEL[role]}
             </span>
@@ -118,8 +116,10 @@ export function AppSidebar() {
 
         {/* TODO: signOut（Firebase）＋セッションCookie失効を実装する */}
         <button className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm text-accent hover:bg-accent/10">
-          <LogOut className="size-4" />
-          {messages.nav.logout}
+          <LogOut className="size-4 shrink-0" />
+          <span className="group-data-[collapsible=icon]:hidden">
+            {messages.nav.logout}
+          </span>
         </button>
       </SidebarFooter>
     </Sidebar>

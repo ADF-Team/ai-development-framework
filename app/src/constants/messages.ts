@@ -111,6 +111,7 @@ export const messages = {
     userRoleAdmin: '管理者',
     userRoleSystemAdmin: 'システム管理者',
     logout: 'ログアウト',
+    mockUserName: '山田 太郎',
   },
   projects: {
     title: '案件一覧',
