@@ -16,4 +16,8 @@ title: "POST /api/admin/templates/{templateId}/publish"
 { "id": "uuid", "publishedAt": "2026-07-24T00:00:00Z" }
 ```
 
+## エラー
+
+- `404`：`templateId`が存在しない場合
+
 [マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある「公開する」ボタン（`PublishConfirmModal`で確認後）から呼ばれる。公開すると、[公開テンプレート一覧画面](../../screens/published-templates.md)から全ユーザーが閲覧できるようになる。

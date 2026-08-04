@@ -24,10 +24,15 @@ title: "POST /api/projects/{id}/stages/{stageKey}/execute"
 
 ## エラー
 
+- `404`：案件／工程が存在しない
+- `403`：他組織の案件
+- `409`：`generated_prompt`が未生成の場合（先に[`POST /generate-prompt`](./generate-prompt.md)を呼ぶ必要がある）
 - `502`：Anthropic API呼び出し失敗
 - `429`：レート制限
 
-## ロジック概要（アプリ内実行時）
+`502`／`429`は、Anthropic API連携が実装された後に発生しうるエラー（設計上の想定）。2026-08時点の実装（`executeStage`）はAnthropic APIを呼ばず、保存済みの回答内容から成果物を組み立てるモックのため、実際にはこの2つは発生しない（`tokensUsed`もダミー値`{ input: 1200, output: 800 }`を固定で返す）。
+
+## ロジック概要（アプリ内実行時・Anthropic API連携後の設計）
 
 1. `generated_prompt`を取得
 2. Anthropic APIを呼び出し（シンプルな1ターン呼び出しを想定。ツール利用なし）

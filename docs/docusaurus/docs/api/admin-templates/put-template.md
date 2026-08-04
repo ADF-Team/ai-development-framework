@@ -14,10 +14,18 @@ title: "PUT /api/admin/templates/{templateId}/stages/{stageKey}"
 
 ## Request
 
-[GET](./get-template.md)と同じ形式のボディを送信（`version`・`versions`は不要。サーバー側で自動採番）。`title`は1〜255文字（`createTemplateSchema`と同じルールでバリデーションする）。
+[GET](./get-template.md)と同じ形式のボディを送信（`version`・`versions`は不要。サーバー側で自動採番）。`title`は本来1〜255文字（`createTemplateSchema`と同じルールでバリデーションする設計）だが、[`POST /api/admin/templates`](./create-template.md)と同様、現時点ではサーバー側バリデーションは未実装（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。
 
 ## Response 200
 
 ```json
 { "version": 4 }
 ```
+
+## エラー
+
+- `404`：`templateId`が存在しない、または`stageKey`が7工程マスタのいずれにも一致しない場合
+
+## 競合について（楽観ロックなし）
+
+本APIに`409 Conflict`は存在しない。2人の管理者が同じテンプレートを同時に開いて保存した場合でも、それぞれの保存は「直前バージョンに新しいバージョンを追記する」処理として独立に成功する（`updateStageTemplate`は保存時点の`versions`配列の最大値+1を次バージョン番号として採番するだけで、自分が読み込んだ時点のバージョン番号と現在の最新バージョンが一致するかは検証しない）。そのため、後から保存した方が事実上のlast-write-winsとなり、先に保存した内容は新しいバージョンとして履歴には残るものの「現在有効な版」ではなくなる（画面上で見えなくなる）。バージョン間の上書きに気づきたい場合は、[バージョン履歴](./get-template-version.md)から差分を確認する。

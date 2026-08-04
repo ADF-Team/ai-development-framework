@@ -18,4 +18,8 @@ title: "POST /api/admin/templates/{templateId}/unpublish"
 { "id": "uuid", "publishedAt": null }
 ```
 
+## エラー
+
+- `404`：`templateId`が存在しない場合
+
 [マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある「公開を取り下げる」ボタンから呼ばれる。

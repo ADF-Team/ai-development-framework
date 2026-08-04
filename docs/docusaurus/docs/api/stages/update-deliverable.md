@@ -21,3 +21,12 @@ title: "PATCH /api/projects/{id}/stages/{stageKey}/deliverable"
 ```json
 { "deliverableId": "uuid", "version": 2, "generationMethod": "manual" }
 ```
+
+## エラー
+
+- `404`：案件／工程が存在しない
+- `403`：他組織の案件
+
+## 競合について（楽観ロックなし）
+
+本APIに`409 Conflict`は存在しない。保存のたびに現在の`deliverable.version`+1を新バージョンとして無条件に追記するだけで、自分が編集を開始した時点のバージョンと現在の最新バージョンが一致するかは検証しない。そのため、2つのタブで同じ成果物を開いて両方保存すると、後から保存した内容が最新版として残り、先に保存した内容は履歴上の古いバージョンになる（last-write-wins。[`PUT /api/admin/templates/:templateId/stages/:stageKey`](../admin-templates/put-template.md)と同様の設計）。

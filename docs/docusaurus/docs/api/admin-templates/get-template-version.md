@@ -24,7 +24,12 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}/versions/{versio
 }
 ```
 
-**エラー**: `404`（存在しないテンプレートID・バージョン番号を指定した場合）
+## エラー
+
+- `404`：以下のいずれか
+  - `templateId`が存在しない
+  - `stageKey`が7工程マスタのいずれにも一致しない
+  - 指定した`version`番号のバージョンが存在しない
 
 ## 差分表示の仕組み
 

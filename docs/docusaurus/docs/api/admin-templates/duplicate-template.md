@@ -16,6 +16,10 @@ title: "POST /api/admin/templates/{templateId}/duplicate"
 { "id": "uuid", "version": 1 }
 ```
 
+## エラー
+
+- `404`：複製元の`templateId`が存在しない場合
+
 複製されたテンプレートの`title`は、複製元のタイトルに「のコピー」を付与した値になる（例：「標準テンプレート」→「標準テンプレートのコピー」）。
 
 [マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある「複製する」ボタンから呼ばれ、成功後は複製されたテンプレートの[テンプレート詳細画面](../../screens/template-detail.md)（工程1）へ遷移する。

@@ -26,4 +26,6 @@ title: "GET /api/admin/templates"
 }
 ```
 
+作成済みテンプレートが1件もない場合も`404`にはならず、`templates: []`（空配列）を返す（[一覧取得系のエラーなしポリシー](../index.md#一覧取得系getのエラーなしポリシー)参照）。
+
 各項目の内容は[`GET /api/admin/templates/:templateId/stages/:stageKey`](./get-template.md)の現在有効な版から算出したサマリー。

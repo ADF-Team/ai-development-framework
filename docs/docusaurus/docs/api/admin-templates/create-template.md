@@ -22,6 +22,6 @@ title: "POST /api/admin/templates"
 { "id": "uuid", "version": 1 }
 ```
 
-`title`は1〜255文字（`template_versions.title`のVARCHAR(255)に合わせる）。フォーム入力・リクエストボディ共通の`createTemplateSchema`（`src/schemas/`。`CLAUDE.md`「フォームバリデーション（zod）」参照）でバリデーションする。
+`title`は本来1〜255文字（`template_versions.title`のVARCHAR(255)に合わせる）で、フォーム入力・リクエストボディ共通の`createTemplateSchema`（`CLAUDE.md`「フォームバリデーション（zod）」参照）でバリデーションする設計だが、2026-08時点では`src/schemas/createTemplateSchema.ts`は未作成で、サーバー側では検証されない（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。空文字の`title`を送っても`422`にはならず、そのままテンプレートが作成される。
 
 作成後、[マイテンプレート一覧画面](../../screens/my-templates.md)の`NewTemplateModal`はこのテンプレートの[テンプレート詳細画面](../../screens/template-detail.md)（工程1）へ遷移する。

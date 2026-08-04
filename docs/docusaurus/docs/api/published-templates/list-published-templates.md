@@ -20,4 +20,6 @@ title: "GET /api/templates/published"
 }
 ```
 
+公開中のテンプレートが1件もない場合も`404`にはならず、`templates: []`（空配列）を返す（[一覧取得系のエラーなしポリシー](../index.md#一覧取得系getのエラーなしポリシー)参照）。
+
 [公開テンプレート一覧画面](../../screens/published-templates.md)の`PublishedTemplateCard`一覧表示に使う。

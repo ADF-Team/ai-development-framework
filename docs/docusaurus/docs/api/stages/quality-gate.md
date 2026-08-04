@@ -38,6 +38,13 @@ title: "POST /api/projects/{id}/stages/{stageKey}/quality-gate"
 
 未通過の場合も`quality_gate_result`への保存は行われる（`project_stages.status`は`quality_gate_pending`のまま維持）。
 
+## エラー
+
+- `404`：案件／工程が存在しない
+- `403`：他組織の案件
+
+「未通過」（一部項目が未チェック）はエラーではなく`200`で`{ passed: false, ... }`を返す点に注意（上記「Response 200（未通過）」参照）。
+
 ## ロジック概要
 
 1. `project.template_id`から`template_versions`の最新`version`を取得し、その`id`＋`stage_key`に紐づく`quality_gate_items`の項目一覧を取得

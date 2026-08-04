@@ -29,6 +29,10 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}"
 }
 ```
 
+## エラー
+
+- `404`：`templateId`が存在しない、または`stageKey`が7工程マスタのいずれにも一致しない場合（`assertStageKey`）
+
 `title`はテンプレート名（テンプレート詳細画面の見出し・マイテンプレート一覧のカード見出しに使用）。どの工程タブから見ても同じ値（テンプレート単位で1つ）。
 
 `version`／`versions`はテンプレート全体で共有される版番号・履歴（特定の工程だけの版ではない）。`versions`は[`VersionHistoryPanel`](../../screens/template-detail.md)・差分モーダル表示用のバージョン履歴（バージョン番号の降順）。

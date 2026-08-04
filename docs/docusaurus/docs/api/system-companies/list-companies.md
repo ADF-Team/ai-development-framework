@@ -20,4 +20,6 @@ title: "GET /api/system/companies"
 }
 ```
 
+会社が1件もない場合も`404`にはならず、`companies: []`（空配列）を返す（[一覧取得系のエラーなしポリシー](../index.md#一覧取得系getのエラーなしポリシー)参照）。
+
 [会社管理画面](../../screens/company-management.md)の`CompanyCard`一覧表示に使う。

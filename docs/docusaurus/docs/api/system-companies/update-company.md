@@ -22,4 +22,10 @@ title: "PATCH /api/system/companies/{id}"
 { "id": "uuid", "status": "suspended" }
 ```
 
+## エラー
+
+- `404`：`id`に一致する会社が存在しない場合
+
+`name`／`status`とも、[`POST /api/system/companies`](./create-company.md)の`createCompanySchema`のような入力バリデーションは行われない（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。楽観ロックも行われないため、`409 Conflict`は発生しない（同時編集はlast-write-wins）。
+
 [会社管理画面](../../screens/company-management.md)の`CompanyCard`（名称編集）・`SuspendCompanyModal`（無効化確認）から呼ばれる。

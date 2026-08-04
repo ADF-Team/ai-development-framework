@@ -21,3 +21,5 @@ title: "GET /api/admin/templates/{templateId}/projects"
 ```
 
 `projects`が1件以上ある場合、クライアント側で`SaveImpactModal`を表示し、管理者が続行を確認してから[`PUT /api/admin/templates/:templateId/stages/:stageKey`](./put-template.md)を呼ぶ。0件の場合は確認なしでそのまま保存する。
+
+対象案件が1件もない場合はもちろん、**存在しない`templateId`を指定した場合も`404`にはならず`projects: []`を返す**（`listInProgressProjectsByTemplate`は`templateId`の存在チェックを行わず、単純にフィルタするだけのため）。テンプレートの存在確認自体が必要な場合は[`GET /api/admin/templates/:templateId/stages/:stageKey`](./get-template.md)を使う。
