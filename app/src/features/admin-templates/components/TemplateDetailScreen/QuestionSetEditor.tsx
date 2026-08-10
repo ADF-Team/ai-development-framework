@@ -34,9 +34,11 @@ function withSequentialOrder(
 export function QuestionSetEditor({
   questions,
   onChange,
+  onQuestionAdded,
 }: {
   questions: TemplateQuestion[]
   onChange: (questions: TemplateQuestion[]) => void
+  onQuestionAdded?: (question: TemplateQuestion) => void
 }) {
   const [newQuestionText, setNewQuestionText] = useState('')
   const sensors = useSensors(
@@ -59,12 +61,12 @@ export function QuestionSetEditor({
 
   const handleAdd = () => {
     if (!newQuestionText.trim()) return
-    onChange(
-      withSequentialOrder([
-        ...questions,
-        { id: `q${Date.now()}`, text: newQuestionText, order: 0 },
-      ])
-    )
+    const updated = withSequentialOrder([
+      ...questions,
+      { id: `q${Date.now()}`, text: newQuestionText, order: 0 },
+    ])
+    onChange(updated)
+    onQuestionAdded?.(updated[updated.length - 1])
     setNewQuestionText('')
   }
 

@@ -1,5 +1,6 @@
 import { messages } from '@/constants/messages'
 import { STAGE_ORDER, isStageKey } from '@/types/Project'
+import { buildPromptTemplateFromQuestions } from '@/constants/templates'
 import { ServiceError } from './ServiceError'
 import type { StageKey } from '@/types/Project'
 import type { StageQuestion, QualityGateItem } from '@/types/Stage'
@@ -328,14 +329,7 @@ const REQUIREMENTS_PROMPT_TEMPLATE = `あなたは経験豊富なITコンサル�
 
 // 質問セットから、回答プレースホルダー付きの標準的なプロンプトテンプレートを組み立てる（要件定義以外の初期値として使用）
 function buildDefaultPromptTemplate(stageKey: StageKey): string {
-  const stageName = messages.stages.stageNames[stageKey]
-  const body = STAGE_QUESTIONS[stageKey]
-    .map(
-      (question) =>
-        `${question.order}. ${question.text}\n→ {{answer:${question.id}}}`
-    )
-    .join('\n\n')
-  return `あなたは${stageName}を担当する専門家です。\n${body}\n\n上記を踏まえ、${stageName}工程の成果物を作成してください。`
+  return buildPromptTemplateFromQuestions(stageKey, STAGE_QUESTIONS[stageKey])
 }
 
 const DEFAULT_STAGES: Record<StageKey, StageContent> = Object.fromEntries(
@@ -480,7 +474,11 @@ export function createTemplate(payload: { title: string }): {
   const emptyStages = Object.fromEntries(
     STAGE_ORDER.map((stageKey): [StageKey, StageContent] => [
       stageKey,
-      { questions: [], promptTemplate: '', qualityGateItems: [] },
+      {
+        questions: [],
+        promptTemplate: buildPromptTemplateFromQuestions(stageKey, []),
+        qualityGateItems: [],
+      },
     ])
   ) as Record<StageKey, StageContent>
 

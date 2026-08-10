@@ -13,6 +13,7 @@ import { useApiAction } from '@/hooks/useApiAction'
 import { getStageTemplate } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplate'
 import { putStageTemplate } from '@/lib/frontend/apiClient/adminTemplates/putStageTemplate'
 import { getProjectsUsingTemplate } from '@/lib/frontend/apiClient/adminTemplates/getProjectsUsingTemplate'
+import { buildPromptClosingLine } from '@/constants/templates'
 import { stageTemplateAtom } from '../stores/stageTemplateAtom'
 import { stageTemplateFormSchema } from '../schemas/stageTemplateFormSchema'
 import { StageSelector } from './TemplateDetailScreen/StageSelector'
@@ -90,6 +91,22 @@ export function TemplateDetailScreen({
     }
   }
 
+  // 質問追加時に、対応する回答プレースホルダー行をプロンプトテンプレートへ自動追記する（末尾の定型文が残っていればその直前に挿入する）
+  const handleQuestionAdded = (question: TemplateQuestion) => {
+    const snippet = `${question.order}. ${question.text}\n→ {{answer:${question.id}}}`
+    setPromptTemplate((prev) => {
+      if (!prev.trim()) return snippet
+
+      const closingLine = buildPromptClosingLine(stageKey)
+      const closingIndex = prev.lastIndexOf(closingLine)
+      if (closingIndex === -1) return `${prev}\n\n${snippet}`
+
+      const before = prev.slice(0, closingIndex).replace(/\n+$/, '')
+      const after = prev.slice(closingIndex)
+      return `${before}\n\n${snippet}\n\n${after}`
+    })
+  }
+
   const handleSaveClick = async () => {
     const validation = stageTemplateFormSchema.safeParse({
       title,
@@ -154,7 +171,11 @@ export function TemplateDetailScreen({
       <StageSelector templateId={templateId} selectedStageKey={stageKey} />
 
       <div className="mt-6 grid grid-cols-[1fr_1fr_260px] items-start gap-5">
-        <QuestionSetEditor questions={questions} onChange={setQuestions} />
+        <QuestionSetEditor
+          questions={questions}
+          onChange={setQuestions}
+          onQuestionAdded={handleQuestionAdded}
+        />
         <div className="flex flex-col gap-5">
           <PromptTemplateEditor
             value={promptTemplate}
