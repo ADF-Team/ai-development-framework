@@ -59,6 +59,14 @@ npm run dev
 
 http://localhost:3000 を開く。
 
+## コミット前の確認
+
+```bash
+npm run precommit
+```
+
+`build` → `format:check` → `lint` を順に実行する。エラーなく完了することを確認してからコミットする（`format`は`--write`で自動整形、`lint:fix`は自動修正可能な違反を直す）。
+
 ## スクリプト一覧（`app/`配下で実行）
 
 | コマンド | 内容 |
@@ -76,11 +84,3 @@ http://localhost:3000 を開く。
 | `npm run emulators:seed` | Emulatorにテストユーザー作成（`scripts/seedFirebaseAuthEmulator.mjs`） |
 | `npm run setup` | 上記db/emulators系を一括実行するローカル環境セットアップ（`scripts/setup.sh`） |
 | `npm run precommit` | `build` → `format:check` → `lint` を一括実行するコミット前チェック |
-
-## コミット前の確認
-
-```bash
-npm run precommit
-```
-
-`build` → `format:check` → `lint` を順に実行する。エラーなく完了することを確認してからコミットする（`format`は`--write`で自動整形、`lint:fix`は自動修正可能な違反を直す）。
