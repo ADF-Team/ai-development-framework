@@ -24,8 +24,12 @@ title: "PATCH /api/system/companies/{id}"
 
 ## エラー
 
+- `422`：リクエストボディが`updateCompanySchema`のバリデーションに違反する場合。`name`・`status`のどちらも指定しない（空オブジェクトを送る等）場合も含む。このエンドポイントは、[`POST /api/system/companies`](./create-company.md)と並んでサーバー側バリデーションが実装済み（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）
+  - `name`を指定する場合：空文字／256文字以上は不可
+  - `status`を指定する場合：`active`／`suspended`以外の値は不可
+  - `detail`には最初に検知したバリデーションエラーのメッセージ（`src/constants/messages.ts`の`companyManagement.validation.*`）が入る
 - `404`：`id`に一致する会社が存在しない場合
 
-`name`／`status`とも、[`POST /api/system/companies`](./create-company.md)の`createCompanySchema`のような入力バリデーションは行われない（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。楽観ロックも行われないため、`409 Conflict`は発生しない（同時編集はlast-write-wins）。
+楽観ロックは行われないため、`409 Conflict`は発生しない（同時編集はlast-write-wins）。
 
 [会社管理画面](../../screens/company-management.md)の`CompanyCard`（名称編集）・`SuspendCompanyModal`（無効化確認）から呼ばれる。
