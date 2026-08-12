@@ -1,0 +1,32 @@
+[debug] [2026-08-12T01:24:29.482Z] ----------------------------------------------------------------------
+[debug] [2026-08-12T01:24:29.483Z] Command:       /usr/local/bin/node /Users/matsumotokano/Desktop/社内システム開発/ai-development-framework/app/node_modules/.bin/firebase emulators:start --only auth --project demo-adf
+[debug] [2026-08-12T01:24:29.483Z] CLI Version:   15.26.0
+[debug] [2026-08-12T01:24:29.484Z] Platform:      darwin
+[debug] [2026-08-12T01:24:29.484Z] Node Version:  v20.18.1
+[debug] [2026-08-12T01:24:29.484Z] Detected Agent: claude-code_2-1-226_agent
+[debug] [2026-08-12T01:24:29.484Z] Time:          Wed Aug 12 2026 10:24:29 GMT+0900 (Japan Standard Time)
+[debug] [2026-08-12T01:24:29.484Z] ----------------------------------------------------------------------
+[debug] 
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[info] i  emulators: Detected demo project ID "demo-adf", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail. {"metadata":{"emulator":{"name":"hub"},"message":"Detected demo project ID \"demo-adf\", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail."}}
+[debug] [2026-08-12T01:24:30.339Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-12T01:24:30.339Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-12T01:24:30.339Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-08-12T01:24:30.341Z] Write emulator hub locator at /var/folders/_5/p3xm54956vnfxsj_4f9c559h0000gn/T/hub-demo-adf.json
+[debug] [2026-08-12T01:24:33.531Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

@@ -12,7 +12,14 @@
     "format:check": "prettier --check --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:seed": "node prisma/seed/index.mjs",
+    "emulators:up": "firebase emulators:start --only auth --project demo-adf",
+    "emulators:seed": "node --env-file=.env scripts/seedFirebaseAuthEmulator.mjs",
+    "setup": "bash scripts/setup.sh",
+    "precommit": "npm run build && npm run format:check && npm run lint"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -44,6 +51,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "firebase-tools": "^15.26.0",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"

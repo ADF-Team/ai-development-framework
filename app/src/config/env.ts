@@ -15,5 +15,12 @@ export const firebaseClientConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID as string,
 }
 
+// 設定されている場合、Firebase Admin SDKはFirebase Auth Emulatorに接続する（ローカル開発用）
+export const firebaseAuthEmulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST
+
+// 設定されている場合、Identity Platformのクライアント側SDKはFirebase Auth Emulatorに接続する（ローカル開発用）
+export const firebaseClientAuthEmulatorHost =
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST
+
 export const SESSION_COOKIE_NAME = 'session'
 export const SESSION_EXPIRES_IN_MS = 1000 * 60 * 60 * 24 * 14

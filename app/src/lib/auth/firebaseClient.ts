@@ -1,6 +1,9 @@
 import { getApps, initializeApp } from 'firebase/app'
-import { getAuth, type Auth } from 'firebase/auth'
-import { firebaseClientConfig } from '@/config/env'
+import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth'
+import {
+  firebaseClientAuthEmulatorHost,
+  firebaseClientConfig,
+} from '@/config/env'
 
 let auth: Auth | undefined
 
@@ -12,6 +15,12 @@ export function getFirebaseAuth(): Auth {
   if (!auth) {
     const app = getApps()[0] ?? initializeApp(firebaseClientConfig)
     auth = getAuth(app)
+    // NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOSTが設定されている場合はEmulatorに接続する
+    if (firebaseClientAuthEmulatorHost) {
+      connectAuthEmulator(auth, `http://${firebaseClientAuthEmulatorHost}`, {
+        disableWarnings: true,
+      })
+    }
   }
   return auth
 }
