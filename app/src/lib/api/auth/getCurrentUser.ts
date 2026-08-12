@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getFirebaseAdminAuth } from './firebaseAdmin'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/api/prisma'
 import { SESSION_COOKIE_NAME } from '@/config/env'
 
 /**
@@ -12,15 +12,20 @@ export async function getCurrentUser() {
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value
   if (!sessionCookie) return null
 
+  let uid: string
   try {
     const decoded =
       await getFirebaseAdminAuth().verifySessionCookie(sessionCookie)
-    const user = await prisma.user.findUnique({
-      where: { identityPlatformUid: decoded.uid },
-    })
-    if (!user || user.status === 'disabled') return null
-    return user
+    uid = decoded.uid
   } catch {
+    // セッションCookieが無効・期限切れの場合のみ未ログイン扱いにする
     return null
   }
+
+  // ここから先のエラー（DB障害等）は未ログインと区別するため呼び出し元へそのまま伝播させる
+  const user = await prisma.user.findUnique({
+    where: { identityPlatformUid: uid },
+  })
+  if (!user || user.status === 'disabled') return null
+  return user
 }

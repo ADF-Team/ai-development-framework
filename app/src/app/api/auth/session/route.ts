@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getFirebaseAdminAuth } from '@/lib/auth/firebaseAdmin'
-import { prisma } from '@/lib/prisma'
+import { getFirebaseAdminAuth } from '@/lib/api/auth/firebaseAdmin'
+import { prisma } from '@/lib/api/prisma'
 import { ERROR_STATUS, SUCCESS_STATUS } from '@/constants/response'
 import { SESSION_COOKIE_NAME, SESSION_EXPIRES_IN_MS } from '@/config/env'
 

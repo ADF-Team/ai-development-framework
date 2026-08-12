@@ -357,7 +357,7 @@ export function apiSuccess<T>(data: T, init?: { status?: number }) {
  */
 export function apiError(status: number, detail?: string) {
   return NextResponse.json(
-    { error: { detail: detail ?? messages.common.errorMessage.otherError } },
+    { detail: detail ?? messages.common.errorMessage.otherError },
     { status }
   )
 }
@@ -1092,3 +1092,4 @@ if (process.env.NODE_ENV !== 'production') {
 ## 参照ドキュメント
 
 - `docs/README.md` … 要件定義・基本設計・詳細設計（API仕様・DBスキーマ・品質ゲート等の正本）
+- `.claude/backend-code-review-checklist.md` … バックエンド（route/service/repository）実装時・レビュー時のチェックリスト。API実装を書き終えたら必ず参照する

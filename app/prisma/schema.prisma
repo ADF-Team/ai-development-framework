@@ -10,6 +10,7 @@ datasource db {
 enum UserRole {
   user
   admin
+  system_admin
 
   @@map("user_role")
 }
@@ -21,10 +22,18 @@ enum UserStatus {
   @@map("user_status")
 }
 
+enum OrganizationStatus {
+  active
+  suspended
+
+  @@map("organization_status")
+}
+
 model Organization {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String             @db.VarChar(255)
+  status    OrganizationStatus @default(active)
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz
 
   users User[]
 

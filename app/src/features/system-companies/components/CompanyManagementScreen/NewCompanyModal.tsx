@@ -12,7 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { messages } from '@/constants/messages'
-import { NAME_MAX_LENGTH } from '@/constants/validation'
+import {
+  DISPLAY_NAME_MAX_LENGTH,
+  EMAIL_MAX_LENGTH,
+  NAME_MAX_LENGTH,
+} from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
 import { postCreateCompany } from '@/lib/frontend/apiClient/systemCompanies/postCreateCompany'
 import { createCompanySchema } from '@/schemas/createCompanySchema'
@@ -99,6 +103,7 @@ export function NewCompanyModal({
               messages.companyManagement.newCompanyModal.adminEmailPlaceholder
             }
             value={adminEmail}
+            maxLength={EMAIL_MAX_LENGTH}
             onChange={(e) => setAdminEmail(e.target.value)}
           />
         </div>
@@ -113,7 +118,7 @@ export function NewCompanyModal({
               messages.companyManagement.newCompanyModal.adminNamePlaceholder
             }
             value={adminDisplayName}
-            maxLength={NAME_MAX_LENGTH}
+            maxLength={DISPLAY_NAME_MAX_LENGTH}
             onChange={(e) => setAdminDisplayName(e.target.value)}
           />
         </div>

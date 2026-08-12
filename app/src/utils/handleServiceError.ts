@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { ServiceError } from '@/lib/services/ServiceError'
+import { apiError } from '@/lib/api/response'
 
 /**
  * lib/servicesのServiceErrorをAPI RouteのレスポンスJSONに変換する
@@ -7,10 +7,7 @@ import { ServiceError } from '@/lib/services/ServiceError'
  */
 export function handleServiceError(error: unknown) {
   if (error instanceof ServiceError) {
-    return NextResponse.json(
-      { detail: error.message },
-      { status: error.status }
-    )
+    return apiError(error.status, error.message)
   }
   throw error
 }

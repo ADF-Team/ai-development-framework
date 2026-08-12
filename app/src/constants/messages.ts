@@ -8,6 +8,7 @@ export const messages = {
       notFound: 'リソースが見つかりません。',
       conflict: '競合が発生しました。',
       unprocessableEntity: '不正なリクエストです。',
+      emailConflict: 'このメールアドレスは既に使用されています。',
       tooManyRequests:
         'リクエストが混み合っています。しばらくしてから再度お試しください。',
       internalServerError: 'サーバーエラーが発生しました。',
@@ -276,8 +277,11 @@ export const messages = {
       nameRequired: '会社名を入力してください。',
       nameTooLong: '会社名は255文字以内で入力してください。',
       emailInvalid: 'メールアドレスの形式で入力してください。',
+      emailTooLong: 'メールアドレスは255文字以内で入力してください。',
       adminNameRequired: '初期管理者の表示名を入力してください。',
-      adminNameTooLong: '表示名は255文字以内で入力してください。',
+      adminNameTooLong: '表示名は100文字以内で入力してください。',
+      statusInvalid: 'ステータスの値が不正です。',
+      noUpdateFields: '変更する項目を指定してください。',
     },
     toastMessage: {
       successCreate: '会社を作成しました。',
