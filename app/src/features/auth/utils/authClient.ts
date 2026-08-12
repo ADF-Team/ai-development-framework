@@ -55,6 +55,21 @@ export async function signIn(
   }
 }
 
+export type SignOutResult = 'success' | 'error'
+
+/**
+ * ログアウトする（セッションCookieを削除し、Firebase側の認証状態も破棄する）
+ */
+export async function signOutUser(): Promise<SignOutResult> {
+  try {
+    await fetch('/api/auth/session', { method: 'DELETE' })
+    await signOut(getFirebaseAuth())
+    return 'success'
+  } catch {
+    return 'error'
+  }
+}
+
 export type ResetPasswordResult = 'sent' | 'error'
 
 /**

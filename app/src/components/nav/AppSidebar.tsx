@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Building2, Folders, Globe, Layers, LogOut, Users } from 'lucide-react'
 import { messages } from '@/constants/messages'
 import type { UserRole } from '@/types/User'
+import { signOutUser } from '@/features/auth/utils/authClient'
+import { showErrorToast } from '@/utils/toast'
 import {
   Sidebar,
   SidebarContent,
@@ -54,6 +57,8 @@ function getCurrentUserRole(): UserRole {
 // 認証必須画面（(auth)グループ）で共通のサイドバーナビゲーション
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const role = getCurrentUserRole()
   const isAdmin = role === 'admin' || role === 'system_admin'
@@ -62,6 +67,19 @@ export function AppSidebar() {
   const teamSpaceItems = isAdmin
     ? TEAM_SPACE_ITEMS
     : TEAM_SPACE_ITEMS.filter((item) => item.href === '/projects')
+
+  // ログアウトし、成功したらログイン画面へ遷移する
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    const result = await signOutUser()
+    setIsLoggingOut(false)
+
+    if (result === 'error') {
+      showErrorToast(messages.nav.logoutError)
+      return
+    }
+    router.push('/')
+  }
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
@@ -74,9 +92,14 @@ export function AppSidebar() {
             height={40}
             className="block size-10 max-w-none shrink-0"
           />
-          <span className="font-heading text-xl font-medium group-data-[collapsible=icon]:hidden">
-            {messages.common.brand}
-          </span>
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+            <span className="font-heading text-xl font-medium">
+              {messages.common.brand}
+            </span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {messages.common.brandFullName}
+            </span>
+          </div>
         </Link>
       </SidebarHeader>
 
@@ -114,8 +137,12 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {/* TODO: signOut（Firebase）＋セッションCookie失効を実装する */}
-        <button className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm text-accent hover:bg-accent/10">
+        <button
+          type="button"
+          disabled={isLoggingOut}
+          onClick={handleLogout}
+          className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm text-accent hover:bg-accent/10 disabled:pointer-events-none disabled:opacity-50"
+        >
           <LogOut className="size-4 shrink-0" />
           <span className="group-data-[collapsible=icon]:hidden">
             {messages.nav.logout}

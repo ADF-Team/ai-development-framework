@@ -56,3 +56,12 @@ export async function POST(request: NextRequest) {
 
   return new NextResponse(null, { status: SUCCESS_STATUS.NO_CONTENT })
 }
+
+/**
+ * セッションCookieを削除する（ログアウト）
+ */
+export async function DELETE() {
+  const cookieStore = await cookies()
+  cookieStore.delete(SESSION_COOKIE_NAME)
+  return new NextResponse(null, { status: SUCCESS_STATUS.NO_CONTENT })
+}
