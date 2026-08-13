@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 import type { StageTemplateData } from '@/types/StageTemplate'
 
 /**
@@ -11,13 +11,13 @@ import type { StageTemplateData } from '@/types/StageTemplate'
  * @param templateId - テンプレートID
  * @param stageKey - 工程キー
  * @param payload - 更新後のテンプレート内容
- * @returns 更新後のバージョン番号。エラー時はnull
+ * @returns 更新後のバージョン番号。エラー時は`error`を含む結果
  */
 export const putStageTemplate = async (
   templateId: string,
   stageKey: string,
   payload: Omit<StageTemplateData, 'version'>
-): Promise<number | null> => {
+): Promise<ApiActionResult<number>> => {
   const response = await fetchData(
     `/admin/templates/${templateId}/stages/${stageKey}`,
     undefined,
@@ -25,11 +25,13 @@ export const putStageTemplate = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath(`/admin/templates/${templateId}/${stageKey}`)
-  showSuccessToast(messages.adminTemplates.toastMessage.successUpdate)
-  return response.version
+  return {
+    ok: true,
+    data: response.version,
+    message: messages.adminTemplates.toastMessage.successUpdate,
+  }
 }

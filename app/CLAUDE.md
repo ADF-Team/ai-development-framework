@@ -811,7 +811,9 @@ export const getProject = async (id: string) => {
 }
 ```
 
-**POST（副作用を伴う操作）の例**：成功・失敗をtoastで必ず通知し、失敗時は`null`を返す
+**POST（副作用を伴う操作）の例**：成功・失敗を必ずtoastで通知するが、`sonner`の`toast()`はブラウザ側でしか動かないため、
+**Server Action自体の中ではtoastを呼ばない**。`fetchData`のエラー時は`{ ok: false, error }`、成功時は`{ ok: true, data, message }`
+（`useApiAction`がこの形を見てtoastを出す。下記「ミューテーションのローディング状態」参照）を返すだけにする。
 
 ```ts
 // src/lib/frontend/apiClient/stages/postExecuteStage.ts
@@ -821,18 +823,18 @@ import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { DeliverableData } from '@/types/Deliverable'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 
 /**
  * 工程のAI実行API
  * @param projectId - 案件ID
  * @param stageKey - 工程キー
- * @returns 生成された成果物データ。エラー時はnull
+ * @returns 生成された成果物データ。エラー時は`error`を含む結果
  */
 export const postExecuteStage = async (
   projectId: string,
   stageKey: string
-): Promise<DeliverableData | null> => {
+): Promise<ApiActionResult<DeliverableData>> => {
   const response = await fetchData(
     `/projects/${projectId}/stages/${stageKey}/execute`,
     undefined,
@@ -840,13 +842,15 @@ export const postExecuteStage = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath(`/projects/${projectId}`)
-  showSuccessToast(messages.stages.toastMessage.successExecute)
-  return response.deliverable
+  return {
+    ok: true,
+    data: response.deliverable,
+    message: messages.stages.toastMessage.successExecute,
+  }
 }
 ```
 
@@ -860,35 +864,38 @@ import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { StageTemplateData } from '@/types/StageTemplate'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 
 /**
  * テンプレート更新API（質問セット・プロンプト・品質ゲート項目を新バージョンとして保存）
  * @param stageKey - 工程キー
  * @param payload - 更新後のテンプレート内容
- * @returns 更新後のバージョン番号。エラー時はnull
+ * @returns 更新後のバージョン番号。エラー時は`error`を含む結果
  */
 export const putStageTemplate = async (
   stageKey: string,
   payload: Omit<StageTemplateData, 'version'>
-): Promise<number | null> => {
+): Promise<ApiActionResult<number>> => {
   const response = await fetchData(`/admin/templates/${stageKey}`, undefined, {
     method: 'PUT',
     body: payload,
   })
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath(`/admin/templates/${stageKey}`)
-  showSuccessToast(messages.adminTemplates.toastMessage.successUpdate)
-  return response.version
+  return {
+    ok: true,
+    data: response.version,
+    message: messages.adminTemplates.toastMessage.successUpdate,
+  }
 }
 ```
 
 > 💡 `revalidatePath`に渡すパスは、そのミューテーションの影響を受ける画面（一覧・詳細）に合わせる（例：案件作成なら`/projects`、成果物更新なら`/projects/[id]`）。
+> 成功時のメッセージが状況によって変わる場合（例：品質ゲート通過時と未通過時でtoastの種類ごと変える）は、`message`に加えて`toastType: 'success' | 'error'`を返せる（省略時は`'success'`。`postQualityGate.ts`参照）。
 
 **PATCH（部分更新：成果物編集・ユーザー無効化など）**：POST/PUTと同じ構造で`method: 'PATCH'`にする（`docs/README.md` C2の`PATCH /deliverable`・`PATCH /admin/users/:id`が該当）。
 
@@ -903,28 +910,47 @@ export const putStageTemplate = async (
 
 ### ミューテーションのローディング状態
 
-`isLoading`を各コンポーネントで個別に`useState`で持たず、共通フックでラップする（「再利用」ルールに従う）。
+`isLoading`を各コンポーネントで個別に`useState`で持たず、共通フックでラップする（「再利用」ルールに従う）。**成功／失敗のtoast表示も本フックが一元的に行う**（`src/lib/frontend/apiClient`のミューテーション関数はServer Actionとしてサーバー側で実行されるため、その内部で直接`sonner`の`toast()`を呼んでも効果がない。ブラウザに戻ってきた後——つまりこのフックの`run`関数の中——で呼ぶ必要がある）。
 
 ```ts
 // src/hooks/useApiAction.ts
 import { useState } from 'react'
+import { showErrorToast, showSuccessToast } from '@/utils/toast'
 
 /**
- * API呼び出しのローディング状態を管理する共通フック
- * @param action - src/lib/frontend/apiClient の関数（成功時は値、失敗時はnullを返す想定）
- * @returns run（実行関数）とisLoading
+ * apiClientのミューテーション関数（Server Action）が返す結果の形
+ */
+export type ApiActionResult<T> =
+  | { ok: true; data: T; message: string; toastType?: 'success' | 'error' }
+  | { ok: false; error: string }
+
+/**
+ * API呼び出しのローディング状態管理と、成功／失敗トースト表示を行う共通フック
+ * @param action - src/lib/frontend/apiClient のミューテーション関数（ApiActionResultを返す想定）
+ * @returns run（実行関数。成功時は値、失敗時はnullを返す）とisLoading
  */
 export function useApiAction<Args extends unknown[], T>(
-  action: (...args: Args) => Promise<T | null>
+  action: (...args: Args) => Promise<ApiActionResult<T>>
 ) {
   const [isLoading, setIsLoading] = useState(false)
 
-  // isLoadingを管理しながらactionを実行する
-  const run = async (...args: Args) => {
+  // isLoadingを管理しながらactionを実行し、結果に応じてtoastを表示する
+  const run = async (...args: Args): Promise<T | null> => {
     setIsLoading(true)
     const result = await action(...args)
     setIsLoading(false)
-    return result
+
+    if (!result.ok) {
+      showErrorToast(result.error)
+      return null
+    }
+
+    if (result.toastType === 'error') {
+      showErrorToast(result.message)
+    } else {
+      showSuccessToast(result.message)
+    }
+    return result.data
   }
 
   return { run, isLoading }

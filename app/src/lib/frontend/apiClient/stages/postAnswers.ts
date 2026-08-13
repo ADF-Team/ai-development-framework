@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 import type { StageStatus } from '@/types/Project'
 
 /**
@@ -11,13 +11,15 @@ import type { StageStatus } from '@/types/Project'
  * @param projectId - 案件ID
  * @param stageKey - 工程キー
  * @param answers - 質問ID→回答のマップ
- * @returns 保存後の工程ステータス。エラー時はnull
+ * @returns 保存後の工程ステータス。エラー時は`error`を含む結果
  */
 export const postAnswers = async (
   projectId: string,
   stageKey: string,
   answers: Record<string, string>
-): Promise<{ projectStageId: string; status: StageStatus } | null> => {
+): Promise<
+  ApiActionResult<{ projectStageId: string; status: StageStatus }>
+> => {
   const response = await fetchData(
     `/projects/${projectId}/stages/${stageKey}/answers`,
     undefined,
@@ -25,11 +27,13 @@ export const postAnswers = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath(`/projects/${projectId}`)
-  showSuccessToast(messages.stages.toastMessage.successAnswerSave)
-  return response
+  return {
+    ok: true,
+    data: response,
+    message: messages.stages.toastMessage.successAnswerSave,
+  }
 }

@@ -3,25 +3,25 @@
 import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 import type { StageKey } from '@/types/Project'
+
+type QualityGateData =
+  | { passed: true; nextStage: StageKey | null; projectCompleted: boolean }
+  | { passed: false; missingItemIds: string[] }
 
 /**
  * 品質ゲート判定API（チェック結果を保存し、通過時は次工程へ移行する）
  * @param projectId - 案件ID
  * @param stageKey - 工程キー
  * @param checkedItemIds - チェック済みの品質ゲート項目ID一覧
- * @returns 通過判定結果。エラー時はnull
+ * @returns 通過判定結果。エラー時は`error`を含む結果
  */
 export const postQualityGate = async (
   projectId: string,
   stageKey: string,
   checkedItemIds: string[]
-): Promise<
-  | { passed: true; nextStage: StageKey | null; projectCompleted: boolean }
-  | { passed: false; missingItemIds: string[] }
-  | null
-> => {
+): Promise<ApiActionResult<QualityGateData>> => {
   const response = await fetchData(
     `/projects/${projectId}/stages/${stageKey}/quality-gate`,
     undefined,
@@ -29,19 +29,25 @@ export const postQualityGate = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath(`/projects/${projectId}`)
+
   if (response.passed) {
-    showSuccessToast(
-      response.projectCompleted
+    return {
+      ok: true,
+      data: response,
+      message: response.projectCompleted
         ? messages.stages.toastMessage.successProjectCompleted
-        : messages.stages.toastMessage.successQualityGatePass
-    )
-  } else {
-    showErrorToast(messages.stages.toastMessage.qualityGateMissingItems)
+        : messages.stages.toastMessage.successQualityGatePass,
+    }
   }
-  return response
+
+  return {
+    ok: true,
+    data: response,
+    message: messages.stages.toastMessage.qualityGateMissingItems,
+    toastType: 'error',
+  }
 }

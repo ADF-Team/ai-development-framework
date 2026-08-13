@@ -3,16 +3,16 @@
 import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 
 /**
  * テンプレート非公開API
  * @param templateId - 非公開に戻すテンプレートのID
- * @returns 成功時true。エラー時はnull
+ * @returns 成功時true。エラー時は`error`を含む結果
  */
 export const postUnpublishTemplate = async (
   templateId: string
-): Promise<true | null> => {
+): Promise<ApiActionResult<true>> => {
   const response = await fetchData(
     `/admin/templates/${templateId}/unpublish`,
     undefined,
@@ -20,12 +20,14 @@ export const postUnpublishTemplate = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath('/admin/templates')
   revalidatePath('/templates/published')
-  showSuccessToast(messages.adminTemplates.toastMessage.successUnpublish)
-  return true
+  return {
+    ok: true,
+    data: true,
+    message: messages.adminTemplates.toastMessage.successUnpublish,
+  }
 }

@@ -3,16 +3,16 @@
 import { revalidatePath } from 'next/cache'
 import { fetchData } from '../FetchData'
 import { messages } from '@/constants/messages'
-import { showSuccessToast, showErrorToast } from '@/utils/toast'
+import type { ApiActionResult } from '@/hooks/useApiAction'
 
 /**
  * テンプレート複製API（現在有効な版の内容をコピーした新規テンプレートを作成する）
  * @param templateId - 複製元のテンプレートID
- * @returns 作成された複製テンプレートのID。エラー時はnull
+ * @returns 作成された複製テンプレートのID。エラー時は`error`を含む結果
  */
 export const duplicateTemplate = async (
   templateId: string
-): Promise<string | null> => {
+): Promise<ApiActionResult<string>> => {
   const response = await fetchData(
     `/admin/templates/${templateId}/duplicate`,
     undefined,
@@ -20,11 +20,13 @@ export const duplicateTemplate = async (
   )
 
   if (response.error) {
-    showErrorToast(response.error.messages)
-    return null
+    return { ok: false, error: response.error.messages }
   }
 
   revalidatePath('/admin/templates')
-  showSuccessToast(messages.adminTemplates.toastMessage.successDuplicate)
-  return response.id
+  return {
+    ok: true,
+    data: response.id,
+    message: messages.adminTemplates.toastMessage.successDuplicate,
+  }
 }
