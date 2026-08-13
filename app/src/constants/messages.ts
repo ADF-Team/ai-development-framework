@@ -204,7 +204,7 @@ export const messages = {
   },
   publishedTemplates: {
     listTitle: '公開テンプレート',
-    listDescription: '全社で公開されているテンプレートを閲覧できます。',
+    listDescription: '公開されているテンプレートを閲覧できます。',
     backToListLink: '公開テンプレート一覧に戻る',
     addToMyTemplatesButton: 'マイテンプレートに追加',
   },

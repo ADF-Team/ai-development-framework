@@ -29,13 +29,26 @@ enum OrganizationStatus {
   @@map("organization_status")
 }
 
+enum StageKey {
+  requirements
+  design
+  implementation
+  review
+  security
+  test
+  documentation
+
+  @@map("stage_key")
+}
+
 model Organization {
   id        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String             @db.VarChar(255)
   status    OrganizationStatus @default(active)
   createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz
 
-  users User[]
+  users     User[]
+  templates Template[]
 
   @@map("organizations")
 }
@@ -50,8 +63,85 @@ model User {
   status              UserStatus @default(active)
   createdAt           DateTime   @default(now()) @map("created_at") @db.Timestamptz
 
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization     Organization      @relation(fields: [organizationId], references: [id])
+  templateVersions TemplateVersion[]
 
   @@index([organizationId])
   @@map("users")
+}
+
+// テンプレート（7工程分のパック）そのもの。複数作成できる。publishedAtが非NULLなら公開中
+model Template {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId            String    @map("organization_id") @db.Uuid
+  publishedAt               DateTime? @map("published_at") @db.Timestamptz
+  sourcePublishedTemplateId String?   @map("source_published_template_id") @db.Uuid
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  organization        Organization      @relation(fields: [organizationId], references: [id])
+  sourceTemplate      Template?         @relation("TemplateDuplicates", fields: [sourcePublishedTemplateId], references: [id])
+  duplicatedTemplates Template[]        @relation("TemplateDuplicates")
+  versions            TemplateVersion[]
+
+  @@index([organizationId])
+  @@index([publishedAt])
+  @@map("templates")
+}
+
+// 追記型。1回の保存で7工程分まとめて新版になる。titleはテンプレート名
+model TemplateVersion {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateId String   @map("template_id") @db.Uuid
+  title      String   @db.VarChar(255)
+  version    Int
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  template          Template           @relation(fields: [templateId], references: [id])
+  creator           User               @relation(fields: [createdBy], references: [id])
+  questionTemplates QuestionTemplate[]
+  promptTemplates   PromptTemplate[]
+  qualityGateItems  QualityGateItem[]
+
+  @@unique([templateId, version])
+  @@map("template_versions")
+}
+
+// templateVersions 1件×7工程分のレコードを持つ（管理者編集用。版そのものはTemplateVersionが持つ）
+model QuestionTemplate {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateVersionId String   @map("template_version_id") @db.Uuid
+  stageKey          StageKey @map("stage_key")
+  questions         Json
+
+  templateVersion TemplateVersion @relation(fields: [templateVersionId], references: [id])
+
+  @@unique([templateVersionId, stageKey])
+  @@map("question_templates")
+}
+
+// templateVersions 1件×7工程分のレコードを持つ（管理者編集用。版そのものはTemplateVersionが持つ）
+model PromptTemplate {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateVersionId String   @map("template_version_id") @db.Uuid
+  stageKey          StageKey @map("stage_key")
+  templateText      String   @map("template_text") @db.Text
+
+  templateVersion TemplateVersion @relation(fields: [templateVersionId], references: [id])
+
+  @@unique([templateVersionId, stageKey])
+  @@map("prompt_templates")
+}
+
+// templateVersions 1件×7工程分のレコードを持つ（管理者編集用。版そのものはTemplateVersionが持つ）
+model QualityGateItem {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateVersionId String   @map("template_version_id") @db.Uuid
+  stageKey          StageKey @map("stage_key")
+  items             Json
+
+  templateVersion TemplateVersion @relation(fields: [templateVersionId], references: [id])
+
+  @@unique([templateVersionId, stageKey])
+  @@map("quality_gate_items")
 }

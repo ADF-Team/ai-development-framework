@@ -8,7 +8,7 @@ title: "POST /api/admin/templates/{templateId}/publish"
 
 <ApiEndpoint method="POST" path="/api/admin/templates/{templateId}/publish" />
 
-管理者ロールのみアクセス可。テンプレートを公開状態にする（`templates.published_at`を現在時刻に更新）。既に公開済みの場合はエラーにせず何もしない（冪等）。
+`admin`／`system_admin`ロールのみアクセス可。テンプレートを公開状態にする（`templates.published_at`を現在時刻に更新）。既に公開済みの場合はエラーにせず、`published_at`を上書きせずそのまま返す（冪等）。
 
 ## Response 200
 
@@ -18,6 +18,6 @@ title: "POST /api/admin/templates/{templateId}/publish"
 
 ## エラー
 
-- `404`：`templateId`が存在しない場合
+- `404`：`templateId`が存在しない場合（他組織のテンプレートを含む）
 
 [マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある「公開する」ボタン（`PublishConfirmModal`で確認後）から呼ばれる。公開すると、[公開テンプレート一覧画面](../../screens/published-templates.md)から全ユーザーが閲覧できるようになる。

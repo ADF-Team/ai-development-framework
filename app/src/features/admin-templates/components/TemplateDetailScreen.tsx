@@ -15,7 +15,7 @@ import { putStageTemplate } from '@/lib/frontend/apiClient/adminTemplates/putSta
 import { getProjectsUsingTemplate } from '@/lib/frontend/apiClient/adminTemplates/getProjectsUsingTemplate'
 import { buildPromptClosingLine } from '@/constants/templates'
 import { stageTemplateAtom } from '../stores/stageTemplateAtom'
-import { stageTemplateFormSchema } from '../schemas/stageTemplateFormSchema'
+import { stageTemplateSchema } from '@/schemas/stageTemplateSchema'
 import { StageSelector } from './TemplateDetailScreen/StageSelector'
 import { QuestionSetEditor } from './TemplateDetailScreen/QuestionSetEditor'
 import { PromptTemplateEditor } from './TemplateDetailScreen/PromptTemplateEditor'
@@ -108,7 +108,7 @@ export function TemplateDetailScreen({
   }
 
   const handleSaveClick = async () => {
-    const validation = stageTemplateFormSchema.safeParse({
+    const validation = stageTemplateSchema.safeParse({
       title,
       questions,
       promptTemplate,

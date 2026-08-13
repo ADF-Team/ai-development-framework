@@ -8,7 +8,7 @@ title: "GET /api/admin/templates"
 
 <ApiEndpoint method="GET" path="/api/admin/templates" />
 
-管理者ロールのみアクセス可（`403`：一般利用者がアクセスした場合）。[マイテンプレート一覧画面](../../screens/my-templates.md)用に、テンプレート概要（現在有効な版の情報のみ）をまとめて返す。
+`admin`／`system_admin`ロールのみアクセス可。アクセス者自身の`organization_id`に属するテンプレートのみを返す（作成日時の新しい順）。[マイテンプレート一覧画面](../../screens/my-templates.md)用に、テンプレート概要（現在有効な版の情報のみ）をまとめて返す。
 
 ## Response 200
 

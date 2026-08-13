@@ -8,7 +8,7 @@ title: "GET /api/templates/published"
 
 <ApiEndpoint method="GET" path="/api/templates/published" />
 
-管理者・利用者ともにアクセス可。公開中（`published_at`が非NULL）のテンプレート一覧を、名称・現在バージョン・公開日時付きで返す。
+ログイン済みであれば全ロールアクセス可。アクセス者自身の組織内で公開中（`published_at`が非NULL）のテンプレート一覧を、名称・現在バージョン・公開日時付きで返す（公開日時の新しい順）。
 
 ## Response 200
 

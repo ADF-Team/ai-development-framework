@@ -16,7 +16,7 @@ import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
 import { createTemplate } from '@/lib/frontend/apiClient/adminTemplates/createTemplate'
-import { newTemplateFormSchema } from '../../schemas/newTemplateFormSchema'
+import { newTemplateSchema } from '@/schemas/newTemplateSchema'
 
 // マイテンプレート一覧画面：新規テンプレート作成モーダル。作成後はそのテンプレートの編集画面へ遷移する
 export function NewTemplateModal({
@@ -41,7 +41,7 @@ export function NewTemplateModal({
   }
 
   const handleCreate = async () => {
-    const validation = newTemplateFormSchema.safeParse({ title })
+    const validation = newTemplateSchema.safeParse({ title })
     if (!validation.success) {
       setErrorMessage(validation.error.issues[0].message)
       return

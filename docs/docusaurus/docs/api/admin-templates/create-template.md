@@ -22,6 +22,10 @@ title: "POST /api/admin/templates"
 { "id": "uuid", "version": 1 }
 ```
 
-`title`は本来1〜255文字（`template_versions.title`のVARCHAR(255)に合わせる）で、フォーム入力・リクエストボディ共通の`createTemplateSchema`（`CLAUDE.md`「フォームバリデーション（zod）」参照）でバリデーションする設計だが、2026-08時点では`src/schemas/createTemplateSchema.ts`は未作成で、サーバー側では検証されない（[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。空文字の`title`を送っても`422`にはならず、そのままテンプレートが作成される。
+## エラー
+
+- `422`：リクエストボディが`newTemplateSchema`（`src/schemas/newTemplateSchema.ts`。フォーム入力・リクエストボディ共通）のバリデーションに違反する場合（`title`が空文字／256文字以上）。`title`は`template_versions.title`のVARCHAR(255)に合わせて1〜255文字。`detail`には最初に検知したバリデーションエラーのメッセージ（`src/constants/messages.ts`の`adminTemplates.validation.*`）が入る
+
+作成時、サーバー側で7工程分の`question_templates`／`prompt_templates`／`quality_gate_items`を空の内容（質問セット・品質ゲート項目は空配列、プロンプトテンプレートは冒頭・末尾の定型文のみ）で一括作成する（`version: 1`の`template_versions`に紐づく）。
 
 作成後、[マイテンプレート一覧画面](../../screens/my-templates.md)の`NewTemplateModal`はこのテンプレートの[テンプレート詳細画面](../../screens/template-detail.md)（工程1）へ遷移する。

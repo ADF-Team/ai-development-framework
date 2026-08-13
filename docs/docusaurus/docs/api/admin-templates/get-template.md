@@ -8,7 +8,7 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}"
 
 <ApiEndpoint method="GET" path="/api/admin/templates/{templateId}/stages/{stageKey}" />
 
-管理者ロールのみアクセス可（`403`：一般利用者がアクセスした場合）。
+`admin`／`system_admin`ロールのみアクセス可（`403`：`user`ロールがアクセスした場合）。アクセス者自身の組織に属するテンプレートのみ取得可能（他組織の`templateId`を指定した場合は、存在しない場合と同じ`404`）。
 
 ## Response 200
 
@@ -31,7 +31,7 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}"
 
 ## エラー
 
-- `404`：`templateId`が存在しない、または`stageKey`が7工程マスタのいずれにも一致しない場合（`assertStageKey`）
+- `404`：`templateId`が存在しない（他組織のテンプレートを含む）、または`stageKey`が7工程マスタのいずれにも一致しない場合（`assertStageKey`）
 
 `title`はテンプレート名（テンプレート詳細画面の見出し・マイテンプレート一覧のカード見出しに使用）。どの工程タブから見ても同じ値（テンプレート単位で1つ）。
 

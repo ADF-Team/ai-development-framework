@@ -8,7 +8,7 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}/versions/{versio
 
 <ApiEndpoint method="GET" path="/api/admin/templates/{templateId}/stages/{stageKey}/versions/{version}" />
 
-管理者ロールのみアクセス可。[`VersionHistoryPanel`](../../screens/template-detail.md)で特定バージョンをクリックした際、差分モーダル（`VersionDiffModal`）表示のために該当バージョン・指定工程の内容を取得する。
+`admin`／`system_admin`ロールのみアクセス可。アクセス者自身の組織に属するテンプレートのみ取得可能。[`VersionHistoryPanel`](../../screens/template-detail.md)で特定バージョンをクリックした際、差分モーダル（`VersionDiffModal`）表示のために該当バージョン・指定工程の内容を取得する。
 
 ## Response 200
 
@@ -27,7 +27,7 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}/versions/{versio
 ## エラー
 
 - `404`：以下のいずれか
-  - `templateId`が存在しない
+  - `templateId`が存在しない（他組織のテンプレートを含む）
   - `stageKey`が7工程マスタのいずれにも一致しない
   - 指定した`version`番号のバージョンが存在しない
 

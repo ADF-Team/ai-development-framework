@@ -10,7 +10,9 @@ title: 公開テンプレート
 
 **対応テーブル**：[`templates` / `template_versions` / `question_templates` / `prompt_templates` / `quality_gate_items`](../../db/tables.md#question_templates-prompt_templates-quality_gate_items)（`docs/README.md` C1）
 
-利用者・管理者・システム管理者のいずれもアクセス可（ログイン済みであれば全ロール閲覧のみ可能）。管理者が[公開したテンプレート](../admin-templates/publish-template.md)（`templates.published_at`が非NULL）だけを対象にする。
+利用者・管理者・システム管理者のいずれもアクセス可（`requireUser()`。ログイン済みであれば全ロール閲覧のみ可能）。管理者が[公開したテンプレート](../admin-templates/publish-template.md)（`templates.published_at`が非NULL）だけを対象にする。
+
+常にアクセス者自身の`organization_id`にスコープされ、他組織が公開したテンプレートは見えない（組織をまたいだ公開ではない）。`templates.source_published_template_id`の設計注記にある「将来組織をまたいだ複製にも対応」は2026-08時点では未対応。
 
 ## エンドポイント一覧
 

@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
-import { getStageTemplateVersion } from '@/lib/services/templates'
 import { handleServiceError } from '@/utils/handleServiceError'
+import { apiSuccess } from '@/lib/api/response'
+import { requireAdmin } from '@/lib/api/auth/requireAdmin'
+import { getStageTemplateVersion } from '../../../../../service'
 
-// TODO: インフラ（Cloud SQL）準備後、getCurrentUserによる認証チェック＋管理者ロール判定を追加する
 // テンプレートの特定バージョン・指定工程の内容取得API（バージョン履歴の差分表示用）
 export async function GET(
   _request: Request,
@@ -13,9 +13,16 @@ export async function GET(
   }
 ) {
   const { templateId, stageKey, version } = await params
+
   try {
-    return NextResponse.json(
-      getStageTemplateVersion(templateId, stageKey, Number(version))
+    const user = await requireAdmin()
+    return apiSuccess(
+      await getStageTemplateVersion(
+        user.organizationId,
+        templateId,
+        stageKey,
+        version
+      )
     )
   } catch (error) {
     return handleServiceError(error)

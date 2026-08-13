@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 
-export const stageTemplateFormSchema = z.object({
+export const stageTemplateSchema = z.object({
   title: z
     .string()
     .trim()
@@ -20,4 +20,4 @@ export const stageTemplateFormSchema = z.object({
     .min(1, messages.adminTemplates.validation.qualityGateItemsRequired),
 })
 
-export type StageTemplateFormValues = z.infer<typeof stageTemplateFormSchema>
+export type StageTemplateInput = z.infer<typeof stageTemplateSchema>
