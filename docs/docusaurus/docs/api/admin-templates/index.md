@@ -14,6 +14,8 @@ title: 管理者：テンプレート
 
 **2026-08時点で、実際にPrisma経由でDBアクセスするよう実装されているのは以下のエンドポイントのうち[`GET /api/admin/templates/:templateId/projects`](./get-template-projects.md)を除く全て**（`Template`・`TemplateVersion`・`QuestionTemplate`・`PromptTemplate`・`QualityGateItem`の5テーブルに実書き込みする）。`GET .../projects`のみ、参照先の`projects`（案件）APIが未実装のため、引き続き空配列を返すモック実装のまま（[該当ページ](./get-template-projects.md)参照）。
 
+同じ組織内でテンプレート名（現在有効な版のタイトル）が重複することは、作成・複製・リネームのいずれの経路でも許可されない（`409`）。
+
 ## エンドポイント一覧
 
 - [`GET /api/admin/templates`](./list-templates.md)：テンプレート概要一覧取得
@@ -25,3 +27,4 @@ title: 管理者：テンプレート
 - [`POST /api/admin/templates/:templateId/duplicate`](./duplicate-template.md)：テンプレートの複製（[公開テンプレート](../published-templates/index.md)を複製元に指定した場合も同じロジックで動作する）
 - [`POST /api/admin/templates/:templateId/publish`](./publish-template.md)：テンプレートを公開状態にする
 - [`POST /api/admin/templates/:templateId/unpublish`](./unpublish-template.md)：テンプレートを非公開状態に戻す
+- [`DELETE /api/admin/templates/:templateId`](./delete-template.md)：テンプレートを削除（バージョン履歴も含めて完全に削除。取り消し不可）

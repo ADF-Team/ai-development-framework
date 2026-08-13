@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Calendar, Copy } from 'lucide-react'
+import { Calendar, Copy, Trash2 } from 'lucide-react'
 import { Tag } from '@/components/tag/Tag'
 import { Button } from '@/components/ui/button'
 import { messages } from '@/constants/messages'
@@ -9,11 +9,21 @@ import { useApiAction } from '@/hooks/useApiAction'
 import { duplicateTemplate } from '@/lib/frontend/apiClient/adminTemplates/duplicateTemplate'
 import { postPublishTemplate } from '@/lib/frontend/apiClient/adminTemplates/postPublishTemplate'
 import { postUnpublishTemplate } from '@/lib/frontend/apiClient/adminTemplates/postUnpublishTemplate'
+import { deleteTemplate } from '@/lib/frontend/apiClient/adminTemplates/deleteTemplate'
 import { PublishConfirmModal } from './PublishConfirmModal'
+import { DeleteTemplateModal } from './DeleteTemplateModal'
 import type { TemplateSummary } from '@/types/StageTemplate'
 
 // マイテンプレート一覧の1件分。テンプレート名・現在バージョン・最終更新日時・更新者・公開状態を表示する
-export function TemplateCard({ template }: { template: TemplateSummary }) {
+export function TemplateCard({
+  template,
+  onUpdated,
+  onDeleted,
+}: {
+  template: TemplateSummary
+  onUpdated: (template: TemplateSummary) => void
+  onDeleted: (templateId: string) => void
+}) {
   const router = useRouter()
   const { run: runDuplicate, isLoading: isDuplicating } =
     useApiAction(duplicateTemplate)
@@ -22,7 +32,9 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
   const { run: runUnpublish, isLoading: isUnpublishing } = useApiAction(
     postUnpublishTemplate
   )
+  const { run: runDelete, isLoading: isDeleting } = useApiAction(deleteTemplate)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleDuplicate = async () => {
     const id = await runDuplicate(template.id)
@@ -33,11 +45,25 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
 
   const handlePublish = async () => {
     setShowPublishConfirm(false)
-    await runPublish(template.id)
+    const result = await runPublish(template.id)
+    if (result) {
+      onUpdated({ ...template, isPublished: true })
+    }
   }
 
   const handleUnpublish = async () => {
-    await runUnpublish(template.id)
+    const result = await runUnpublish(template.id)
+    if (result) {
+      onUpdated({ ...template, isPublished: false })
+    }
+  }
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false)
+    const result = await runDelete(template.id)
+    if (result) {
+      onDeleted(template.id)
+    }
   }
 
   return (
@@ -77,6 +103,18 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
         >
           <Copy />
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="relative z-10 text-destructive hover:text-destructive"
+          disabled={isDeleting}
+          onClick={() => setShowDeleteConfirm(true)}
+          aria-label={messages.adminTemplates.deleteButtonLabel}
+          title={messages.adminTemplates.deleteButtonLabel}
+        >
+          <Trash2 />
+        </Button>
       </div>
 
       <div className="flex items-center justify-between gap-2">
@@ -115,6 +153,13 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
         isPublishing={isPublishing}
         onCancel={() => setShowPublishConfirm(false)}
         onConfirm={handlePublish}
+      />
+      <DeleteTemplateModal
+        open={showDeleteConfirm}
+        isPublished={template.isPublished}
+        isDeleting={isDeleting}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
       />
     </div>
   )

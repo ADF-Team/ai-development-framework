@@ -78,6 +78,25 @@ async function requireTemplateForOrg(
   return template
 }
 
+// 同じ組織内に同名（現在有効な版のタイトルが一致）のテンプレートが無いことを確認する
+async function assertTitleAvailable(
+  organizationId: string,
+  title: string,
+  excludeTemplateId?: string
+) {
+  const existingId = await repository.findTemplateIdByCurrentTitle(
+    organizationId,
+    title,
+    excludeTemplateId
+  )
+  if (existingId) {
+    throw new ServiceError(
+      ERROR_STATUS.CONFLICT,
+      messages.adminTemplates.validation.titleDuplicate
+    )
+  }
+}
+
 async function requireTemplateDetailForOrg(
   organizationId: string,
   templateId: string
@@ -101,11 +120,12 @@ export function getTemplateList(organizationId: string) {
 }
 
 // 新規テンプレートを作成する（7工程とも空の内容で初期化される）
-export function createTemplate(
+export async function createTemplate(
   organizationId: string,
   userId: string,
   input: NewTemplateInput
 ) {
+  await assertTitleAvailable(organizationId, input.title)
   return repository.insertTemplateWithFirstVersion({
     organizationId,
     title: input.title,
@@ -123,15 +143,26 @@ export async function duplicateTemplate(
   templateId: string
 ) {
   const detail = await requireTemplateDetailForOrg(organizationId, templateId)
+  const copyTitle = buildCopyTitle(detail.title)
+  await assertTitleAvailable(organizationId, copyTitle)
   return repository.insertTemplateWithFirstVersion({
     organizationId,
-    title: buildCopyTitle(detail.title),
+    title: copyTitle,
     version: 1,
     createdBy: userId,
     stages: detail.stages,
     sourcePublishedTemplateId:
       detail.publishedAt !== null ? templateId : undefined,
   })
+}
+
+// テンプレートを削除する（バージョン履歴・7工程分の内容も含めて完全に削除される。取り消し不可）
+export async function deleteTemplate(
+  organizationId: string,
+  templateId: string
+) {
+  await requireTemplateForOrg(organizationId, templateId)
+  await repository.deleteTemplate(templateId)
 }
 
 // テンプレートを公開状態にする（既に公開済みの場合は何もせず、既存のpublishedAtをそのまま返す。冪等）
@@ -194,6 +225,7 @@ export async function updateStageTemplate(
   input: StageTemplateInput
 ): Promise<{ version: number }> {
   assertStageKey(stageKey)
+  await assertTitleAvailable(organizationId, input.title, templateId)
 
   const result = await repository.appendVersion({
     organizationId,

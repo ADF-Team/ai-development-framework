@@ -33,7 +33,9 @@ title: "POST /api/system/companies"
 ## エラー
 
 - `422`：リクエストボディが`createCompanySchema`のバリデーションに違反する場合（`companyName`が空文字／256文字以上、`adminEmail`がメール形式でない、`adminDisplayName`が空文字／256文字以上）。このエンドポイントは、サーバー側バリデーションが実装済みの数少ないエンドポイントの1つ（もう1つは[`PATCH /api/system/companies/:id`](./update-company.md)。[リクエストボディのバリデーションについて](../index.md#リクエストボディのバリデーションについて)参照）。`detail`には最初に検知したバリデーションエラーのメッセージ（`src/constants/messages.ts`の`companyManagement.validation.*`）が入る
-- `409`：同一メールアドレス（`adminEmail`）が既に他の会社の初期管理者として使われている場合（`users.email`のユニーク制約違反をPrismaのP2002エラーとして検知し変換する。詳細は`src/lib/services/ServiceError.ts`の`mapPrismaError`）
+- `409`：以下のいずれか（`users.email`／`organizations.name`のユニーク制約違反をPrismaのP2002エラーとして検知し変換する。詳細は`src/lib/services/ServiceError.ts`の`mapPrismaError`）
+  - 同一メールアドレス（`adminEmail`）が既に他の会社の初期管理者として使われている場合
+  - 同一の会社名（`companyName`）が既に使われている場合（`detail`: `この会社名は既に使用されています。`。`organizations.name`はDBの一意制約で保証される）
 - 上記1〜2（`organizations`／`users`レコードの作成）は`prisma.$transaction`で1トランザクションとして実行され、失敗時はロールバックする（会社だけ作成されて初期管理者が存在しない、という不整合な状態を防ぐ。詳細は`docs/README.md` C4「会社作成時の初期化ロジック」）。ただし2026-08時点ではステップ3（Identity Platform側のユーザー作成・招待メール送信）自体が未実装で、作成される`users`レコードの`identityPlatformUid`には`pending:<uuid>`というプレースホルダ値が入る（`src/app/api/system/companies/service.ts`の`registerCompany`参照）。そのため、作成された初期管理者は実際にはまだログインできない
 
 [会社管理画面](../../screens/company-management.md)の`NewCompanyModal`から呼ばれる。

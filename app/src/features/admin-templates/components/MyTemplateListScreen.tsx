@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import { Button } from '@/components/ui/button'
 import { messages } from '@/constants/messages'
@@ -18,8 +18,20 @@ export function MyTemplateListScreen({
   templates: TemplateSummary[]
 }) {
   useHydrateAtoms([[templateListAtom, templates]])
-  const templateList = useAtomValue(templateListAtom)
+  const [templateList, setTemplateList] = useAtom(templateListAtom)
   const [showNewTemplateModal, setShowNewTemplateModal] = useState(false)
+
+  const handleUpdated = (updated: TemplateSummary) => {
+    setTemplateList((prev) =>
+      prev.map((template) => (template.id === updated.id ? updated : template))
+    )
+  }
+
+  const handleDeleted = (templateId: string) => {
+    setTemplateList((prev) =>
+      prev.filter((template) => template.id !== templateId)
+    )
+  }
 
   return (
     <div className="mx-auto w-full max-w-300 flex-1 p-8">
@@ -39,7 +51,12 @@ export function MyTemplateListScreen({
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
         {templateList.map((template) => (
-          <TemplateCard key={template.id} template={template} />
+          <TemplateCard
+            key={template.id}
+            template={template}
+            onUpdated={handleUpdated}
+            onDeleted={handleDeleted}
+          />
         ))}
       </div>
 

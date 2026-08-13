@@ -166,6 +166,7 @@ export const messages = {
     },
     createProjectButton: 'このテンプレートで案件を作成する',
     duplicateButtonLabel: '複製する',
+    deleteButtonLabel: '削除する',
     publishButton: '公開する',
     unpublishButton: '公開を取り下げる',
     publishedTag: '公開中',
@@ -183,6 +184,15 @@ export const messages = {
       cancelButton: 'キャンセル',
       confirmButton: '保存する',
     },
+    deleteConfirmModal: {
+      title: 'このテンプレートを削除しますか？',
+      description:
+        'この操作は取り消せません。バージョン履歴も含めて完全に削除されます。',
+      publishedWarning:
+        'このテンプレートは現在公開中です。削除すると公開テンプレート一覧からも見えなくなります。',
+      cancelButton: 'キャンセル',
+      confirmButton: '削除する',
+    },
     versionDiffTitle: 'バージョン差分',
     versionDiffNoChanges: '変更なし',
     versionDiffInitialNote:
@@ -190,6 +200,7 @@ export const messages = {
     validation: {
       titleRequired: 'テンプレート名を入力してください。',
       titleTooLong: 'テンプレート名は255文字以内で入力してください。',
+      titleDuplicate: 'この名前のテンプレートは既に存在します。',
       questionsRequired: '質問を1つ以上登録してください。',
       promptTemplateRequired: 'プロンプトテンプレートを入力してください。',
       qualityGateItemsRequired: '品質ゲート項目を1つ以上登録してください。',
@@ -200,6 +211,7 @@ export const messages = {
       successDuplicate: 'テンプレートを複製しました。',
       successPublish: 'テンプレートを公開しました。',
       successUnpublish: 'テンプレートの公開を取り下げました。',
+      successDelete: 'テンプレートを削除しました。',
     },
   },
   publishedTemplates: {
@@ -281,6 +293,7 @@ export const messages = {
     validation: {
       nameRequired: '会社名を入力してください。',
       nameTooLong: '会社名は255文字以内で入力してください。',
+      nameDuplicate: 'この会社名は既に使用されています。',
       emailInvalid: 'メールアドレスの形式で入力してください。',
       emailTooLong: 'メールアドレスは255文字以内で入力してください。',
       adminNameRequired: '初期管理者の表示名を入力してください。',

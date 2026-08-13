@@ -29,7 +29,8 @@ title: "PATCH /api/system/companies/{id}"
   - `status`を指定する場合：`active`／`suspended`以外の値は不可
   - `detail`には最初に検知したバリデーションエラーのメッセージ（`src/constants/messages.ts`の`companyManagement.validation.*`）が入る
 - `404`：`id`に一致する会社が存在しない場合
+- `409`：`name`を変更する場合、変更後の会社名が既に他の会社で使われている場合（`detail`: `この会社名は既に使用されています。`。`organizations.name`のDB一意制約違反をPrismaのP2002エラーとして検知し変換する）
 
-楽観ロックは行われないため、`409 Conflict`は発生しない（同時編集はlast-write-wins）。
+楽観ロック（バージョンチェック）は行われないため、同じ会社の`name`／`status`を2人が同時に更新した場合は last-write-wins になる（`409`が発生するのは上記の会社名重複ケースのみ）。
 
 [会社管理画面](../../screens/company-management.md)の`CompanyCard`（名称編集）・`SuspendCompanyModal`（無効化確認）から呼ばれる。

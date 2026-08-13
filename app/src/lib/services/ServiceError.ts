@@ -15,6 +15,8 @@ export class ServiceError extends Error {
 // P2002（一意制約違反）の対象列ごとの詳細メッセージ。未登録の列は汎用メッセージにフォールバックする
 const UNIQUE_CONSTRAINT_MESSAGES: Partial<Record<string, string>> = {
   email: messages.common.errorMessage.emailConflict,
+  name: messages.companyManagement.validation.nameDuplicate,
+  title: messages.adminTemplates.validation.titleDuplicate,
 }
 
 // P2002（一意制約違反）発生時に、違反した列に応じて詳細なメッセージを返す

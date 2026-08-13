@@ -137,6 +137,27 @@ export async function findTemplateForOrg(
   )
 }
 
+// 同じ組織内で、現在のタイトル（Template.title。非正規化カラム）が一致する他のテンプレートのIDを探す（名前重複チェック用の早期リターン）。
+// excludeTemplateIdを指定すると、そのテンプレート自身は対象から除外する（リネーム時に自分自身とは衝突させないため）。
+// 実際の重複禁止はDBの一意制約（organizationId, title）で保証されるため、これは高速な事前チェックに過ぎない
+export async function findTemplateIdByCurrentTitle(
+  organizationId: string,
+  title: string,
+  excludeTemplateId?: string
+): Promise<string | null> {
+  const template = await withPrismaErrorMapping(() =>
+    prisma.template.findFirst({
+      where: {
+        organizationId,
+        title,
+        ...(excludeTemplateId ? { id: { not: excludeTemplateId } } : {}),
+      },
+      select: { id: true },
+    })
+  )
+  return template?.id ?? null
+}
+
 // テンプレート＋現在有効な版（7工程分の内容込み）を取得する
 export async function findTemplateDetailForOrg(
   organizationId: string,
@@ -264,6 +285,7 @@ export async function insertTemplateWithFirstVersion(payload: {
       const created = await tx.template.create({
         data: {
           organizationId: payload.organizationId,
+          title: payload.title,
           sourcePublishedTemplateId: payload.sourcePublishedTemplateId ?? null,
         },
       })
@@ -314,6 +336,12 @@ export async function appendVersion(payload: {
         version: latest.version + 1,
         createdBy: payload.createdBy,
         stages,
+      })
+      // Template.title（非正規化カラム）も同一トランザクション内で同期させる。
+      // 重複時はここでDBの一意制約違反（P2002）が発生し、withPrismaErrorMappingが409に変換する
+      await tx.template.update({
+        where: { id: payload.templateId },
+        data: { title: payload.title },
       })
       return { version: created.version }
     })
@@ -374,4 +402,12 @@ export async function findPublishedTemplateDetail(
     publishedAt: (template.publishedAt as Date).toISOString(),
     stages: toStagesContent(current),
   }
+}
+
+// テンプレートを削除する（バージョン履歴・7工程分の内容もカスケード削除される。schema.prismaのonDelete: Cascade参照）。
+// このテンプレートを複製元として参照している他のテンプレートは、削除されずsourcePublishedTemplateIdがnullになるだけ（onDelete: SetNull）
+export async function deleteTemplate(templateId: string): Promise<void> {
+  await withPrismaErrorMapping(() =>
+    prisma.template.delete({ where: { id: templateId } })
+  )
 }
