@@ -445,17 +445,40 @@ export function getFirebaseAdminAuth(): Auth {
 
 ```ts
 // src/lib/api/auth/getCurrentUser.ts
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { getFirebaseAdminAuth } from './firebaseAdmin'
 import { prisma } from '@/lib/api/prisma'
+import { SESSION_COOKIE_NAME } from '@/config/env'
+
+const BEARER_PREFIX = 'Bearer '
+
+/**
+ * リクエストからセッションCookieの値を取り出す
+ *
+ * APIルートは`fetchData`（Server Action）経由で呼ばれる場合が大半で、`fetchData`はCookieをそのまま
+ * 転送せず`Authorization: Bearer <session cookie>`ヘッダとして送る（下記「データ取得パターン」参照）。
+ * 一方、Server Component（`app/(auth)/admin/layout.tsx`等）からブラウザの実リクエストの一部として
+ * 直接呼ばれる場合は、Authorizationヘッダは付かずCookieとして届く。両方をサポートする
+ * （`Authorization`ヘッダを見ずに`cookies()`だけで実装すると、Server Action内部からの`fetch`呼び出しには
+ * ブラウザのCookieが自動転送されないため、`fetchData`経由の呼び出しが常に未ログイン扱いになってしまう）
+ */
+async function resolveSessionCookie(): Promise<string | undefined> {
+  const headerStore = await headers()
+  const authorization = headerStore.get('authorization')
+  if (authorization?.startsWith(BEARER_PREFIX)) {
+    return authorization.slice(BEARER_PREFIX.length)
+  }
+
+  const cookieStore = await cookies()
+  return cookieStore.get(SESSION_COOKIE_NAME)?.value
+}
 
 /**
  * セッションCookieから現在のユーザー情報を取得する
  * @returns ユーザー情報（未ログイン・無効化済みの場合はnull）
  */
 export async function getCurrentUser() {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('session')?.value
+  const sessionCookie = await resolveSessionCookie()
   if (!sessionCookie) return null
 
   try {
@@ -472,6 +495,8 @@ export async function getCurrentUser() {
 ```
 
 各APIルートの先頭で呼び、`user`が`null`なら`401`、`organization_id`が一致しなければ`403`、管理者用ルートで`role !== 'admin'`なら`403`を返す（`docs/README.md` C2のエラーコードに対応）。
+
+`POST`／`DELETE /api/auth/session`だけは例外で、ブラウザのクライアントコンポーネントから`fetchData`を経由せず直接`fetch`する（ログイン前でセッションCookie自体をこれから発行する／破棄するだけのエンドポイントのため）。この2つは実際にブラウザのCookieが載った直接リクエストなので、`POST`のセッションCookie発行自体は`cookies().set(...)`で行う（`getCurrentUser()`とは別の話）。
 
 ### ルート保護（`src/proxy.ts`）
 

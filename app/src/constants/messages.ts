@@ -240,8 +240,12 @@ export const messages = {
     },
     validation: {
       emailInvalid: 'メールアドレスの形式で入力してください。',
+      emailTooLong: 'メールアドレスは255文字以内で入力してください。',
       displayNameRequired: '表示名を入力してください。',
-      displayNameTooLong: '表示名は255文字以内で入力してください。',
+      displayNameTooLong: '表示名は100文字以内で入力してください。',
+      roleInvalid: 'ロールの値が不正です。',
+      statusInvalid: 'ステータスの値が不正です。',
+      noUpdateFields: '変更する項目を指定してください。',
     },
     toastMessage: {
       successInvite: '招待メールを送信しました。',

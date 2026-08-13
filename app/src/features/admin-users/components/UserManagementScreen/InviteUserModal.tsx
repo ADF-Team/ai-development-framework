@@ -13,10 +13,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { messages } from '@/constants/messages'
-import { NAME_MAX_LENGTH } from '@/constants/validation'
+import { DISPLAY_NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
 import { postInviteUser } from '@/lib/frontend/apiClient/adminUsers/postInviteUser'
-import { inviteUserFormSchema } from '../../schemas/inviteUserFormSchema'
+import { inviteUserSchema } from '@/schemas/inviteUserSchema'
 import type { UserListItem, UserRole } from '@/types/User'
 
 // ユーザー管理画面：メンバー招待モーダル（メールアドレス・ロール・表示名を指定して招待する）
@@ -47,7 +47,7 @@ export function InviteUserModal({
   }
 
   const handleInvite = async () => {
-    const validation = inviteUserFormSchema.safeParse({
+    const validation = inviteUserSchema.safeParse({
       email,
       displayName,
       role,
@@ -93,7 +93,7 @@ export function InviteUserModal({
             id="invite-user-name"
             placeholder={messages.adminUsers.inviteModal.namePlaceholder}
             value={displayName}
-            maxLength={NAME_MAX_LENGTH}
+            maxLength={DISPLAY_NAME_MAX_LENGTH}
             onChange={(e) => setDisplayName(e.target.value)}
           />
         </div>

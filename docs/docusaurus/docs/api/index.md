@@ -26,13 +26,17 @@ title: API
 - 管理者用ルートで`role`が`admin`でも`system_admin`でもない場合：`403`
 - システム管理者用ルート（会社管理）で`role !== 'system_admin'`の場合：`403`
 
-**2026-08時点で実際に認証チェックが実装されているのは[システム管理者：会社](./system-companies/index.md)配下のエンドポイントのみ**（`requireSystemAdmin()`経由で`getCurrentUser()`を呼ぶ）。この実装済みの範囲では、上記のうち成立するのは「`user`が取得できない場合：`401`」「`role !== 'system_admin'`の場合：`403`」の2つだけで、以下は未実装（`getCurrentUser()`が組織の状態を見ておらず、会社管理エンドポイント自体が組織横断で動くため`organization_id`一致チェックの対象にもならない）。
+**2026-08時点で実際に認証チェックが実装されているのは[システム管理者：会社](./system-companies/index.md)（`requireSystemAdmin()`）と[管理者：ユーザー](./admin-users/index.md)（`requireAdmin()`）配下のエンドポイントのみ**（どちらも内部で`getCurrentUser()`を呼ぶ）。この実装済みの範囲では、上記のうち成立するのは以下。
 
-- 所属組織`suspended`時の`401`
-- `organization_id`不一致時の`403`
-- （`system_admin`以外の）管理者用ロールチェックによる`403`
+- `user`が取得できない場合：`401`（両方）
+- 管理者用ロールチェックによる`403`：[管理者：ユーザー](./admin-users/index.md)は`role`が`admin`でも`system_admin`でもない場合、[システム管理者：会社](./system-companies/index.md)は`role !== 'system_admin'`の場合
+- `organization_id`のスコープ：[管理者：ユーザー](./admin-users/index.md)はアクセス者自身の`organization_id`に常に絞り込む（一覧・作成は自組織内のみ、更新は他組織のIDを指定すると`403`ではなく`404`を返す。存在有無を漏らさないため）
 
-案件・工程・テンプレート・ユーザー管理系の各`route.ts`は、2026-08時点では`getCurrentUser()`自体を呼んでおらず（ソースコード中に`TODO: インフラ（Cloud SQL）準備後、getCurrentUserによる認証チェックを追加する`という共通コメントがある）、認証なしでアクセスできてしまう状態にある。各エンドポイントページの実装状況の注記もあわせて参照。
+以下は、実装済みの範囲でも未対応（[システム管理者：会社](./system-companies/index.md)は会社管理という性質上、組織横断で動くため）。
+
+- 所属組織`suspended`時の`401`（`getCurrentUser()`が組織の状態を見ていないため）
+
+案件・工程・テンプレート系の各`route.ts`は、2026-08時点では`getCurrentUser()`自体を呼んでおらず（ソースコード中に`TODO: インフラ（Cloud SQL）準備後、getCurrentUserによる認証チェックを追加する`という共通コメントがある）、認証なしでアクセスできてしまう状態にある。各エンドポイントページの実装状況の注記もあわせて参照。
 
 上記の設計上の想定挙動は全エンドポイント共通のため、個別のエンドポイントページでは`401`／`403`は原則として再掲しない（そのエンドポイント固有のエラーのみ記載する）。
 
@@ -52,4 +56,11 @@ title: API
 
 ## リクエストボディのバリデーションについて
 
-`CLAUDE.md`の設計方針上、フォームとAPIリクエストボディの両方でzodスキーマによる検証（不正時は`422 Unprocessable Entity`）を行う想定だが、2026-08時点で実際にサーバー側バリデーションが実装されているのは[`POST /api/system/companies`](./system-companies/create-company.md)（`createCompanySchema`）と[`PATCH /api/system/companies/:id`](./system-companies/update-company.md)（`updateCompanySchema`）の2つのみ。それ以外のPOST/PUT/PATCHエンドポイント（案件作成・テンプレート作成/更新・メンバー招待/更新等）は、対応するzodスキーマ（例：`createProjectSchema`）自体が未作成で、リクエストボディはJSONとして受け取った値をそのまま使用する（空文字や規定文字数超えの値を送っても`422`にはならず、そのまま保存される）。該当エンドポイントのページにその旨を明記している。
+`CLAUDE.md`の設計方針上、フォームとAPIリクエストボディの両方でzodスキーマによる検証（不正時は`422 Unprocessable Entity`）を行う想定だが、2026-08時点で実際にサーバー側バリデーションが実装されているのは以下の4エンドポイントのみ。
+
+- [`POST /api/system/companies`](./system-companies/create-company.md)（`createCompanySchema`）
+- [`PATCH /api/system/companies/:id`](./system-companies/update-company.md)（`updateCompanySchema`）
+- [`POST /api/admin/users`](./admin-users/invite-user.md)（`inviteUserSchema`）
+- [`PATCH /api/admin/users/:id`](./admin-users/update-user.md)（`updateUserSchema`）
+
+それ以外のPOST/PUT/PATCHエンドポイント（案件作成・テンプレート作成/更新等）は、対応するzodスキーマ（例：`createProjectSchema`）自体が未作成で、リクエストボディはJSONとして受け取った値をそのまま使用する（空文字や規定文字数超えの値を送っても`422`にはならず、そのまま保存される）。該当エンドポイントのページにその旨を明記している。
