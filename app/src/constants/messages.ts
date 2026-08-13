@@ -201,6 +201,8 @@ export const messages = {
       titleRequired: 'テンプレート名を入力してください。',
       titleTooLong: 'テンプレート名は255文字以内で入力してください。',
       titleDuplicate: 'この名前のテンプレートは既に存在します。',
+      inUseByProjects:
+        'このテンプレートを参照している案件があるため削除できません。',
       questionsRequired: '質問を1つ以上登録してください。',
       promptTemplateRequired: 'プロンプトテンプレートを入力してください。',
       qualityGateItemsRequired: '品質ゲート項目を1つ以上登録してください。',

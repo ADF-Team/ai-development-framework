@@ -8,7 +8,7 @@ title: "GET /api/admin/templates/{templateId}/projects"
 
 <ApiEndpoint method="GET" path="/api/admin/templates/{templateId}/projects" />
 
-管理者ロールのみアクセス可。[テンプレート詳細画面](../../screens/template-detail.md)で保存ボタンを押した際、このテンプレートを参照している**進行中**（`overall_status: in_progress`）の案件一覧を取得し、影響確認モーダル（`SaveImpactModal`）の表示要否・内容を判定するために使う（完了済み案件は対象外）。
+`admin`／`system_admin`ロールのみアクセス可。[テンプレート詳細画面](../../screens/template-detail.md)で保存ボタンを押した際、このテンプレートを参照している**進行中**（`overall_status: in_progress`）の案件一覧を取得し、影響確認モーダル（`SaveImpactModal`）の表示要否・内容を判定するために使う（完了済み案件は対象外）。
 
 ## Response 200
 
@@ -22,4 +22,4 @@ title: "GET /api/admin/templates/{templateId}/projects"
 
 `projects`が1件以上ある場合、クライアント側で`SaveImpactModal`を表示し、管理者が続行を確認してから[`PUT /api/admin/templates/:templateId/stages/:stageKey`](./put-template.md)を呼ぶ。0件の場合は確認なしでそのまま保存する。
 
-対象案件が1件もない場合はもちろん、**存在しない`templateId`を指定した場合も`404`にはならず`projects: []`を返す**（`listInProgressProjectsByTemplate`は`templateId`の存在チェックを行わず、単純にフィルタするだけのため）。テンプレートの存在確認自体が必要な場合は[`GET /api/admin/templates/:templateId/stages/:stageKey`](./get-template.md)を使う。
+対象案件が1件もない場合はもちろん、**存在しない・他組織の`templateId`を指定した場合も`404`にはならず`projects: []`を返す**（アクセス者自身の組織・指定`templateId`の両方に絞り込むだけで、`templateId`自体の存在確認は行わないため）。テンプレートの存在確認自体が必要な場合は[`GET /api/admin/templates/:templateId/stages/:stageKey`](./get-template.md)を使う。

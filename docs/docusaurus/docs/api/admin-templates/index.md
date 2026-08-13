@@ -12,9 +12,9 @@ title: 管理者：テンプレート
 
 `role`が`admin`または`system_admin`のユーザーのみアクセス可（`requireAdmin()`。403：`user`ロールがアクセスした場合）。常にアクセス者自身の`organization_id`にスコープされ、他組織のテンプレートは一覧に出てこない・IDを直接指定しても操作できない（存在しない場合と同じ`404`）。テンプレートは複数作成でき、それぞれが7工程分の質問セット・プロンプトテンプレート・品質ゲート項目のパックを持つ。
 
-**2026-08時点で、実際にPrisma経由でDBアクセスするよう実装されているのは以下のエンドポイントのうち[`GET /api/admin/templates/:templateId/projects`](./get-template-projects.md)を除く全て**（`Template`・`TemplateVersion`・`QuestionTemplate`・`PromptTemplate`・`QualityGateItem`の5テーブルに実書き込みする）。`GET .../projects`のみ、参照先の`projects`（案件）APIが未実装のため、引き続き空配列を返すモック実装のまま（[該当ページ](./get-template-projects.md)参照）。
+**2026-08時点で、以下のエンドポイントは全てPrisma経由で実DBにアクセスする**（`Template`・`TemplateVersion`・`QuestionTemplate`・`PromptTemplate`・`QualityGateItem`テーブルに加え、[案件](../projects/index.md)実装後は`GET .../projects`が`Project`テーブルも参照する）。
 
-同じ組織内でテンプレート名（現在有効な版のタイトル）が重複することは、作成・複製・リネームのいずれの経路でも許可されない（`409`）。
+同じ組織内でテンプレート名（現在有効な版のタイトル）が重複することは、作成・複製・リネームのいずれの経路でも許可されない（`409`）。また、[案件](../projects/index.md)から参照されているテンプレートは削除できない（`409`。[`DELETE`](./delete-template.md)参照）。
 
 ## エンドポイント一覧
 

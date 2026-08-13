@@ -151,12 +151,14 @@ export function TemplateDetailScreen({
           className="mt-1 h-auto font-heading text-[24px] font-semibold md:text-[24px]"
         />
         <div className="mt-1 flex shrink-0 gap-2.5">
-          <Button type="button" variant="outline" asChild>
-            <Link href={`/projects?newFromTemplate=${templateId}`}>
-              <FolderPlus />
-              {messages.adminTemplates.createProjectButton}
-            </Link>
-          </Button>
+          {template.isPublished && (
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/projects?newFromTemplate=${templateId}`}>
+                <FolderPlus />
+                {messages.adminTemplates.createProjectButton}
+              </Link>
+            </Button>
+          )}
           <Button
             type="button"
             disabled={!hasChanges || isSaving || isCheckingImpact}

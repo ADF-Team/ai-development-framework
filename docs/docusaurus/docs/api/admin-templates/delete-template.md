@@ -19,9 +19,6 @@ title: "DELETE /api/admin/templates/{templateId}"
 ## エラー
 
 - `404`：`templateId`が存在しない場合（他組織のテンプレートを含む）
+- `409`：このテンプレートを参照している案件（`projects.template_id`）が1件でも存在する場合（進行中・完了済みを問わない。`detail`: `このテンプレートを参照している案件があるため削除できません。`）。案件からの参照は`Project.templateId`が`onDelete`指定なしの外部キー（Postgresのデフォルトで`ON DELETE RESTRICT`）のため、このチェックを素通りしてもDBの制約違反（P2003）を検知し、汎用的な`409`に変換する（`src/lib/services/ServiceError.ts`の`mapPrismaError`。二重の安全網）
 
-[マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある削除アイコンボタンから、確認モーダル（`DeleteTemplateModal`）を経て呼ばれる。
-
-## 案件からの参照について
-
-2026-08時点では`projects`（案件）APIが未実装のため、このテンプレートを参照している進行中の案件があるかどうかのチェックは行わない。`projects`実装後は、[`GET /api/admin/templates/:templateId/projects`](./get-template-projects.md)と同様の確認（参照中の案件がある場合の警告・ブロック）を追加すべき点に注意。
+[マイテンプレート一覧画面](../../screens/my-templates.md)の`TemplateCard`にある削除アイコンボタンから、確認モーダル（`DeleteTemplateModal`）を経て呼ばれる。フロント側では参照中の案件があるかどうかを事前チェックしていない（`409`が返ってきた場合、エラートーストで通知するのみ）。

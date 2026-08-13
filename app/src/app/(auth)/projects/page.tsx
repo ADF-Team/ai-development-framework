@@ -1,13 +1,13 @@
 import { Suspense } from 'react'
 import { getProjectList } from '@/lib/frontend/apiClient/projects/getProjectList'
-import { getStageTemplateList } from '@/lib/frontend/apiClient/adminTemplates/getStageTemplateList'
+import { getPublishedTemplateList } from '@/lib/frontend/apiClient/publishedTemplates/getPublishedTemplateList'
 import { ProjectListScreen } from '@/features/projects/components/ProjectListScreen'
 
 // 案件一覧画面（/projects）
 export default async function ProjectsPage() {
   const [projectsResponse, templatesResponse] = await Promise.all([
     getProjectList(),
-    getStageTemplateList(),
+    getPublishedTemplateList(),
   ])
   const projects =
     'projects' in projectsResponse ? projectsResponse.projects : []

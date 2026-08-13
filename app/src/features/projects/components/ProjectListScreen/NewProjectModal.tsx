@@ -22,9 +22,9 @@ import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 import { useApiAction } from '@/hooks/useApiAction'
 import { createProject } from '@/lib/frontend/apiClient/projects/createProject'
-import { newProjectFormSchema } from '../../schemas/newProjectFormSchema'
+import { createProjectSchema } from '@/schemas/createProjectSchema'
 import type { ProjectListItem } from '@/types/Project'
-import type { TemplateSummary } from '@/types/StageTemplate'
+import type { PublishedTemplateSummary } from '@/types/PublishedTemplate'
 
 // 案件一覧画面：新規案件作成モーダル（テンプレートを選択し、その内容を参照する案件を作成する）
 export function NewProjectModal({
@@ -36,7 +36,7 @@ export function NewProjectModal({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  templates: TemplateSummary[]
+  templates: PublishedTemplateSummary[]
   initialTemplateId?: string
   onCreated: (project: ProjectListItem) => void
 }) {
@@ -56,7 +56,7 @@ export function NewProjectModal({
   }
 
   const handleCreate = async () => {
-    const validation = newProjectFormSchema.safeParse({ name, templateId })
+    const validation = createProjectSchema.safeParse({ name, templateId })
     if (!validation.success) {
       setErrorMessage(validation.error.issues[0].message)
       return

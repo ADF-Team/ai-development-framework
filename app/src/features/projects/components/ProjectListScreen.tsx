@@ -9,7 +9,7 @@ import { ProjectListHeader } from './ProjectListScreen/ProjectListHeader'
 import { ProjectCard } from './ProjectListScreen/ProjectCard'
 import { NewProjectModal } from './ProjectListScreen/NewProjectModal'
 import type { ProjectListItem } from '@/types/Project'
-import type { TemplateSummary } from '@/types/StageTemplate'
+import type { PublishedTemplateSummary } from '@/types/PublishedTemplate'
 
 // 案件一覧画面（/projects）のエントリーポイント
 export function ProjectListScreen({
@@ -17,7 +17,7 @@ export function ProjectListScreen({
   templates,
 }: {
   initialProjects: ProjectListItem[]
-  templates: TemplateSummary[]
+  templates: PublishedTemplateSummary[]
 }) {
   useHydrateAtoms([[projectsAtom, initialProjects]])
   const [projects, setProjects] = useAtom(projectsAtom)

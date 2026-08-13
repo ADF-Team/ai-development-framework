@@ -1,4 +1,8 @@
 import * as repository from './repository'
+import {
+  hasProjectsReferencingTemplate,
+  findInProgressProjectsByTemplate,
+} from '../../projects/repository'
 import { STAGE_ORDER, isStageKey } from '@/types/Project'
 import { buildPromptTemplateFromQuestions } from '@/constants/templates'
 import { ServiceError } from '@/lib/services/ServiceError'
@@ -119,6 +123,14 @@ export function getTemplateList(organizationId: string) {
   return repository.findTemplateSummaries(organizationId)
 }
 
+// このテンプレートを参照している進行中の案件一覧を取得する（テンプレート編集時の影響確認用）
+export function getProjectsUsingTemplate(
+  organizationId: string,
+  templateId: string
+) {
+  return findInProgressProjectsByTemplate(organizationId, templateId)
+}
+
 // 新規テンプレートを作成する（7工程とも空の内容で初期化される）
 export async function createTemplate(
   organizationId: string,
@@ -162,6 +174,12 @@ export async function deleteTemplate(
   templateId: string
 ) {
   await requireTemplateForOrg(organizationId, templateId)
+  if (await hasProjectsReferencingTemplate(templateId)) {
+    throw new ServiceError(
+      ERROR_STATUS.CONFLICT,
+      messages.adminTemplates.validation.inUseByProjects
+    )
+  }
   await repository.deleteTemplate(templateId)
 }
 
@@ -211,6 +229,7 @@ export async function getStageTemplate(
     qualityGateItems: stage.qualityGateItems,
     version: detail.version,
     versions,
+    isPublished: detail.publishedAt !== null,
   }
 }
 

@@ -41,4 +41,5 @@ export interface StageTemplateData {
 
 export interface StageTemplateDetail extends StageTemplateData {
   versions: TemplateVersionSummary[]
+  isPublished: boolean
 }

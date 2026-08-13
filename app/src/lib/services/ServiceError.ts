@@ -53,6 +53,14 @@ export function mapPrismaError(error: unknown): ServiceError | null {
         ERROR_STATUS.UNPROCESSABLE_ENTITY,
         messages.common.errorMessage.unprocessableEntity
       )
+    case 'P2003':
+      // 外部キー制約違反（他レコードから参照されている行を削除しようとした場合等）。
+      // 個別のリソースであらかじめ参照有無をチェックして専用メッセージの409を返すのが基本だが、
+      // チェック漏れ・レースで到達した場合の保険として汎用的な409に変換する
+      return new ServiceError(
+        ERROR_STATUS.CONFLICT,
+        messages.common.errorMessage.conflict
+      )
     default:
       return null
   }

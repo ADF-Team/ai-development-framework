@@ -25,7 +25,8 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}"
     { "version": 3, "createdAt": "2026-07-10", "createdBy": "山田" },
     { "version": 2, "createdAt": "2026-05-02", "createdBy": "田中" },
     { "version": 1, "createdAt": "2026-02-14", "createdBy": "山田" }
-  ]
+  ],
+  "isPublished": true
 }
 ```
 
@@ -36,3 +37,5 @@ title: "GET /api/admin/templates/{templateId}/stages/{stageKey}"
 `title`はテンプレート名（テンプレート詳細画面の見出し・マイテンプレート一覧のカード見出しに使用）。どの工程タブから見ても同じ値（テンプレート単位で1つ）。
 
 `version`／`versions`はテンプレート全体で共有される版番号・履歴（特定の工程だけの版ではない）。`versions`は[`VersionHistoryPanel`](../../screens/template-detail.md)・差分モーダル表示用のバージョン履歴（バージョン番号の降順）。
+
+`isPublished`は[`TemplateSummary`](./list-templates.md)の同名フィールドと同じ意味（`templates.published_at`が非NULLか）。[テンプレート詳細画面](../../screens/template-detail.md)の「このテンプレートで案件を作成する」ボタンは、`isPublished`が`true`の場合のみ表示される（[案件作成API](../projects/create-project.md)がtemplateIdに公開中のテンプレートしか受け付けないため）。

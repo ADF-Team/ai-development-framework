@@ -2,13 +2,7 @@ import { messages } from '@/constants/messages'
 import { STAGE_ORDER, isStageKey } from '@/types/Project'
 import { ServiceError } from './ServiceError'
 import { STAGE_QUALITY_GATE_ITEMS, getStageTemplateContent } from './templates'
-import type {
-  ProjectListItem,
-  ProjectDetail,
-  StageKey,
-  StageStatus,
-  OverallStatus,
-} from '@/types/Project'
+import type { StageKey, StageStatus, OverallStatus } from '@/types/Project'
 import type { StageDetail, StageQuestion } from '@/types/Stage'
 import type { DeliverableData } from '@/types/Deliverable'
 
@@ -384,20 +378,6 @@ function findStageOrThrow(
   return project.stages[stageKey]
 }
 
-// 案件レコードを一覧表示用アイテム（7工程分のステータスサマリー付き）に変換する
-function toListItem(project: ProjectRecord): ProjectListItem {
-  return {
-    id: project.id,
-    name: project.name,
-    overallStatus: project.overallStatus,
-    currentStage: project.currentStage,
-    stageStatuses: Object.fromEntries(
-      STAGE_ORDER.map((key) => [key, project.stages[key].status])
-    ) as Record<StageKey, StageStatus>,
-    createdAt: project.createdAt,
-  }
-}
-
 // 質問への回答をプロンプトテンプレートに埋め込んでプロンプト文を組み立てる
 function buildPrompt(
   stageKey: StageKey,
@@ -419,79 +399,6 @@ function buildPrompt(
     '上記を踏まえ、実務で使えるレベルの成果物をMarkdown形式で出力してください。'
   )
   return lines.join('\n')
-}
-
-/**
- * 案件一覧を、各案件の7工程分のステータスサマリー付きで取得する
- */
-export function listProjects(): ProjectListItem[] {
-  return Array.from(PROJECTS.values()).map(toListItem)
-}
-
-/**
- * 指定テンプレートを参照している進行中の案件一覧を取得する（テンプレート編集時の影響確認用）
- * @param templateId - テンプレートID
- */
-export function listInProgressProjectsByTemplate(
-  templateId: string
-): { id: string; name: string }[] {
-  return Array.from(PROJECTS.values())
-    .filter(
-      (project) =>
-        project.templateId === templateId &&
-        project.overallStatus === 'in_progress'
-    )
-    .map((project) => ({ id: project.id, name: project.name }))
-}
-
-/**
- * 案件を作成する（選択したテンプレートを参照する状態で、7工程分のレコードを一括作成する）
- * @param name - 案件名
- * @param templateId - 参照するテンプレートID
- */
-export function createProject(
-  name: string,
-  templateId: string
-): ProjectListItem {
-  // テンプレートの存在確認（工程1の内容取得を試みることで検証する）
-  getStageTemplateContent(templateId, STAGE_ORDER[0])
-
-  const id = `p${Date.now()}`
-  const stages = Object.fromEntries(
-    STAGE_ORDER.map((stageKey) => [stageKey, emptyStage()])
-  ) as Record<StageKey, StageRecord>
-  stages.requirements.status = 'in_progress'
-
-  const project: ProjectRecord = {
-    id,
-    name,
-    templateId,
-    overallStatus: 'in_progress',
-    currentStage: 'requirements',
-    createdAt: new Date().toISOString().slice(0, 10),
-    stages,
-  }
-  PROJECTS.set(id, project)
-
-  return toListItem(project)
-}
-
-/**
- * 案件詳細（工程別ステータス一覧含む）を取得する
- * @param projectId - 案件ID
- */
-export function getProjectDetail(projectId: string): ProjectDetail {
-  const project = findProjectOrThrow(projectId)
-  return {
-    id: project.id,
-    name: project.name,
-    overallStatus: project.overallStatus,
-    currentStage: project.currentStage,
-    stages: STAGE_ORDER.map((stageKey) => ({
-      stageKey,
-      status: project.stages[stageKey].status,
-    })),
-  }
 }
 
 /**

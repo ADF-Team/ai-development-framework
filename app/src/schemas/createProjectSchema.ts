@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { messages } from '@/constants/messages'
 import { NAME_MAX_LENGTH } from '@/constants/validation'
 
-export const newProjectFormSchema = z.object({
+export const createProjectSchema = z.object({
   name: z
     .string()
     .trim()
@@ -14,4 +14,4 @@ export const newProjectFormSchema = z.object({
     .min(1, messages.projects.validation.templateRequired),
 })
 
-export type NewProjectFormValues = z.infer<typeof newProjectFormSchema>
+export type CreateProjectInput = z.infer<typeof createProjectSchema>

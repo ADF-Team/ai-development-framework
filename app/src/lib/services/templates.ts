@@ -6,11 +6,9 @@ import type { StageKey } from '@/types/Project'
 import type { StageQuestion, QualityGateItem } from '@/types/Stage'
 import type {
   StageTemplateData,
-  StageTemplateDetail,
   TemplateQuestion,
   TemplateQualityGateItem,
   TemplateSummary,
-  TemplateVersionSummary,
 } from '@/types/StageTemplate'
 import type {
   PublishedTemplateDetail,
@@ -429,18 +427,6 @@ function currentVersion(
   )
 }
 
-function toVersionSummaries(
-  versions: TemplateVersionRecord[]
-): TemplateVersionSummary[] {
-  return versions
-    .map(({ version, createdAt, createdBy }) => ({
-      version,
-      createdAt,
-      createdBy,
-    }))
-    .sort((a, b) => b.version - a.version)
-}
-
 /**
  * テンプレート（7工程分のパック）一覧を取得する（マイテンプレート一覧画面用）
  */
@@ -627,32 +613,6 @@ export function getStageTemplateContent(
   const versions = findVersionsOrThrow(templateId)
   assertStageKey(stageKey)
   return currentVersion(versions).stages[stageKey]
-}
-
-/**
- * テンプレート名・特定工程の質問セット・プロンプトテンプレート・品質ゲート項目（現在有効な版）とバージョン履歴を取得する
- * @param templateId - テンプレートID
- * @param stageKey - 工程キー
- */
-export function getStageTemplate(
-  templateId: string,
-  stageKey: string
-): StageTemplateDetail {
-  const versions = findVersionsOrThrow(templateId)
-  assertStageKey(stageKey)
-  const current = currentVersion(versions)
-  const stage = current.stages[stageKey]
-
-  return {
-    templateId,
-    stageKey,
-    title: current.title,
-    questions: stage.questions,
-    promptTemplate: stage.promptTemplate,
-    qualityGateItems: stage.qualityGateItems,
-    version: current.version,
-    versions: toVersionSummaries(versions),
-  }
 }
 
 /**
