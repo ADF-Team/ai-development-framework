@@ -258,7 +258,10 @@ export async function submitQualityGate(
 
   const items = content.qualityGateItems
   const qualityGateResult = Object.fromEntries(
-    items.map((item) => [item.id, { checked: checkedItemIds.includes(item.id) }])
+    items.map((item) => [
+      item.id,
+      { checked: checkedItemIds.includes(item.id) },
+    ])
   )
   const missingItemIds = items
     .filter((item) => !checkedItemIds.includes(item.id))

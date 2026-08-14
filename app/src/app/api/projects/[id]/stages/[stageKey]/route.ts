@@ -12,9 +12,7 @@ export async function GET(
 
   try {
     const user = await requireUser()
-    return apiSuccess(
-      await getStageDetail(user.organizationId, id, stageKey)
-    )
+    return apiSuccess(await getStageDetail(user.organizationId, id, stageKey))
   } catch (error) {
     return handleServiceError(error)
   }
