@@ -1144,3 +1144,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 - `docs/README.md` … 要件定義・基本設計・詳細設計（API仕様・DBスキーマ・品質ゲート等の正本）
 - `.claude/backend-code-review-checklist.md` … バックエンド（route/service/repository）実装時・レビュー時のチェックリスト。API実装を書き終えたら必ず参照する
+- `docs/TODO.md` … コード上の`TODO`コメント・ドキュメントにのみ記載された既知のギャップの一覧。認証（Identity Platform）・AI（Anthropic API）連携待ちの項目や、インフラ準備後に対応する項目を洗い出す際に参照する

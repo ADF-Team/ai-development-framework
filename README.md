@@ -65,22 +65,22 @@ http://localhost:3000 を開く。
 npm run precommit
 ```
 
-`build` → `format:check` → `lint` を順に実行する。エラーなく完了することを確認してからコミットする（`format`は`--write`で自動整形、`lint:fix`は自動修正可能な違反を直す）。
+`build` → `format` → `lint` を順に実行する。エラーなく完了することを確認してからコミットする。
 
 ## スクリプト一覧（`app/`配下で実行）
 
-| コマンド | 内容 |
-| --- | --- |
-| `npm run dev` | 開発サーバー起動 |
-| `npm run build` | 本番ビルド |
-| `npm run start` | 本番ビルドの起動 |
-| `npm run lint` / `npm run lint:fix` | ESLint実行 / 自動修正 |
-| `npm run format` / `npm run format:check` | Prettier整形 / チェックのみ |
-| `npm run db:up` / `npm run db:down` | ローカルPostgreSQLの起動 / 停止 |
-| `npm run db:migrate` | `prisma migrate dev`（マイグレーション作成・適用） |
-| `npm run db:generate` | Prisma Clientの再生成 |
-| `npm run db:seed` | 動作確認用シードデータ投入（`prisma/seed/`） |
-| `npm run emulators:up` | Firebase Auth Emulator起動 |
-| `npm run emulators:seed` | Emulatorにテストユーザー作成（`scripts/seedFirebaseAuthEmulator.mjs`） |
-| `npm run setup` | 上記db/emulators系を一括実行するローカル環境セットアップ（`scripts/setup.sh`） |
-| `npm run precommit` | `build` → `format:check` → `lint` を一括実行するコミット前チェック |
+| コマンド                                  | 内容                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `npm run dev`                             | 開発サーバー起動                                                               |
+| `npm run build`                           | 本番ビルド                                                                     |
+| `npm run start`                           | 本番ビルドの起動                                                               |
+| `npm run lint` / `npm run lint:fix`       | ESLint実行 / 自動修正                                                          |
+| `npm run format` / `npm run format:check` | Prettier整形 / チェックのみ                                                    |
+| `npm run db:up` / `npm run db:down`       | ローカルPostgreSQLの起動 / 停止                                                |
+| `npm run db:migrate`                      | `prisma migrate dev`（マイグレーション作成・適用）                             |
+| `npm run db:generate`                     | Prisma Clientの再生成                                                          |
+| `npm run db:seed`                         | 動作確認用シードデータ投入（`prisma/seed/`）                                   |
+| `npm run emulators:up`                    | Firebase Auth Emulator起動                                                     |
+| `npm run emulators:seed`                  | Emulatorにテストユーザー作成（`scripts/seedFirebaseAuthEmulator.mjs`）         |
+| `npm run setup`                           | 上記db/emulators系を一括実行するローカル環境セットアップ（`scripts/setup.sh`） |
+| `npm run precommit`                       | `build` → `format:check` → `lint` を一括実行するコミット前チェック             |
