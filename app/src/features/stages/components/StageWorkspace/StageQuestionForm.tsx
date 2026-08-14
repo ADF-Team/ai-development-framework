@@ -8,7 +8,7 @@ import { useApiAction } from '@/hooks/useApiAction'
 import { postAnswers } from '@/lib/frontend/apiClient/stages/postAnswers'
 import { postGeneratePrompt } from '@/lib/frontend/apiClient/stages/postGeneratePrompt'
 import { postExecuteStage } from '@/lib/frontend/apiClient/stages/postExecuteStage'
-import { stageAnswersFormSchema } from '../../schemas/stageAnswersFormSchema'
+import { stageAnswersFormSchema } from '@/schemas/frontend/stageAnswersFormSchema'
 import type { StageDetail } from '@/types/Stage'
 
 // 案件詳細画面：工程の質問セットに回答するフォーム

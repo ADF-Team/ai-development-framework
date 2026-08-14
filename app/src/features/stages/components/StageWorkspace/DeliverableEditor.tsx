@@ -7,7 +7,7 @@ import { Tag } from '@/components/tag/Tag'
 import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
 import { patchDeliverable } from '@/lib/frontend/apiClient/stages/patchDeliverable'
-import { deliverableContentFormSchema } from '../../schemas/deliverableContentFormSchema'
+import { deliverableContentFormSchema } from '@/schemas/deliverableContentFormSchema'
 import type { StageKey } from '@/types/Project'
 import type { DeliverableData } from '@/types/Deliverable'
 

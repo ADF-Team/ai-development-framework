@@ -8,7 +8,7 @@ import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
 import { postExecuteStage } from '@/lib/frontend/apiClient/stages/postExecuteStage'
 import { patchDeliverable } from '@/lib/frontend/apiClient/stages/patchDeliverable'
-import { deliverableContentFormSchema } from '../../schemas/deliverableContentFormSchema'
+import { deliverableContentFormSchema } from '@/schemas/deliverableContentFormSchema'
 import type { StageDetail, ExecutionMode } from '@/types/Stage'
 
 // 案件詳細画面：実行モード（アプリ内実行／プロンプトのみ）の切り替えと成果物生成

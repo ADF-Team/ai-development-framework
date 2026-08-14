@@ -8,6 +8,8 @@ title: "GET /api/projects/{id}/stages/{stageKey}"
 
 <ApiEndpoint method="GET" path="/api/projects/{id}/stages/{stageKey}" />
 
+`questions`／`qualityGateItems`は、案件が参照する[テンプレート](../admin-templates/index.md)の現在有効な版から取得する（テンプレート編集は既存案件にも反映されるライブ参照。[案件作成API](../projects/create-project.md)と同じ設計）。
+
 ## Response 200
 
 ```json
@@ -30,5 +32,4 @@ title: "GET /api/projects/{id}/stages/{stageKey}"
 
 ## エラー
 
-- `404`：存在しない
-- `403`：他組織の案件
+- `404`：案件が存在しない（他組織の案件を含む）、または`stageKey`が7工程マスタのいずれにも一致しない場合

@@ -1,12 +1,14 @@
 import { messages } from '@/constants/messages'
-import { STAGE_ORDER, isStageKey } from '@/types/Project'
+import { isStageKey } from '@/types/Project'
 import { ServiceError } from './ServiceError'
 import { STAGE_QUALITY_GATE_ITEMS, getStageTemplateContent } from './templates'
 import type { StageKey, StageStatus, OverallStatus } from '@/types/Project'
-import type { StageDetail, StageQuestion } from '@/types/Stage'
 import type { DeliverableData } from '@/types/Deliverable'
 
-// TODO: インフラ（Cloud SQL）準備後、Prisma経由でDBアクセスする実装に置き換える。
+// TODO: Anthropic API連携実装後、Prisma経由でDBアクセスする実装に置き換える。
+// 案件・工程詳細・回答保存・プロンプト生成・成果物保存・品質ゲートは
+// src/app/api/projects/[id]/stages/[stageKey]/ 配下のrepository/serviceでPrisma実装済みのため、
+// このファイルはexecuteStage（AI実行API。Claude API未連携のためモックのまま）専用に残っている。
 // 現状はプロセス内メモリのモックストアで案件・工程の状態を保持する（サーバー再起動でリセットされる）
 // 各案件はtemplateId（lib/services/templates）を1つ参照し、工程ごとの質問セット・プロンプトテンプレート・
 // 品質ゲート項目は常にそのテンプレートの現在有効な版から取得する（テンプレート編集は既存案件にも反映される＝ライブ参照）
@@ -378,105 +380,6 @@ function findStageOrThrow(
   return project.stages[stageKey]
 }
 
-// 質問への回答をプロンプトテンプレートに埋め込んでプロンプト文を組み立てる
-function buildPrompt(
-  stageKey: StageKey,
-  questions: StageQuestion[],
-  answers: Record<string, string>
-): string {
-  const stageName = messages.stages.stageNames[stageKey]
-  const lines = [
-    `あなたは${stageName}を担当する専門家です。以下のヒアリング回答をもとに、${stageName}工程の成果物を作成してください。`,
-    '',
-  ]
-  questions.forEach((question, index) => {
-    const answer = answers[question.id]
-    if (answer) {
-      lines.push(`${index + 1}. ${question.text}`, `→ ${answer}`, '')
-    }
-  })
-  lines.push(
-    '上記を踏まえ、実務で使えるレベルの成果物をMarkdown形式で出力してください。'
-  )
-  return lines.join('\n')
-}
-
-/**
- * 特定工程の質問・回答・プロンプト・成果物・品質ゲート状況を取得する
- * （質問セット・品質ゲート項目は、案件が参照するテンプレートの現在有効な版から取得する）
- * @param projectId - 案件ID
- * @param stageKey - 工程キー
- */
-export function getStageDetail(
-  projectId: string,
-  stageKey: string
-): StageDetail {
-  const project = findProjectOrThrow(projectId)
-  const stage = findStageOrThrow(project, stageKey)
-  const key = stageKey as StageKey
-  const template = getStageTemplateContent(project.templateId, key)
-  return {
-    stageKey: key,
-    status: stage.status,
-    questions: template.questions,
-    answers: stage.answers,
-    generatedPrompt: stage.generatedPrompt,
-    deliverable: stage.deliverable,
-    qualityGateItems: template.qualityGateItems,
-    qualityGateResult: stage.qualityGateResult,
-  }
-}
-
-/**
- * 工程の質問への回答を保存する
- * @param projectId - 案件ID
- * @param stageKey - 工程キー
- * @param answers - 質問ID→回答のマップ
- */
-export function saveStageAnswers(
-  projectId: string,
-  stageKey: string,
-  answers: Record<string, string>
-): { projectStageId: string; status: StageStatus } {
-  const project = findProjectOrThrow(projectId)
-  const stage = findStageOrThrow(project, stageKey)
-
-  stage.answers = { ...stage.answers, ...answers }
-  const hasAnswer = Object.values(stage.answers).some(
-    (value) => value.trim() !== ''
-  )
-  if (stage.status === 'not_started' && hasAnswer) {
-    stage.status = 'in_progress'
-  }
-
-  return { projectStageId: `${projectId}-${stageKey}`, status: stage.status }
-}
-
-/**
- * 保存済みの回答をプロンプトテンプレートに埋め込み、プロンプトを生成する
- * @param projectId - 案件ID
- * @param stageKey - 工程キー
- */
-export function generateStagePrompt(
-  projectId: string,
-  stageKey: string
-): { generatedPrompt: string } {
-  const project = findProjectOrThrow(projectId)
-  const stage = findStageOrThrow(project, stageKey)
-  const key = stageKey as StageKey
-
-  const hasAnswer = Object.values(stage.answers).some(
-    (value) => value.trim() !== ''
-  )
-  if (!hasAnswer) {
-    throw new ServiceError(409, messages.common.errorMessage.conflict)
-  }
-
-  const template = getStageTemplateContent(project.templateId, key)
-  stage.generatedPrompt = buildPrompt(key, template.questions, stage.answers)
-  return { generatedPrompt: stage.generatedPrompt }
-}
-
 /**
  * Claude APIを呼び出し、生成プロンプトから成果物を生成・保存する（アプリ内実行時のみ）
  * @param projectId - 案件ID
@@ -529,93 +432,4 @@ export function executeStage(
     generationMethod: stage.deliverable.generationMethod,
     tokensUsed: { input: 1200, output: 800 },
   }
-}
-
-/**
- * 成果物を保存・編集する（プロンプトのみモードでの貼り付け／既存成果物の編集の両方に使用）
- * @param projectId - 案件ID
- * @param stageKey - 工程キー
- * @param content - 保存する成果物本文
- */
-export function saveDeliverable(
-  projectId: string,
-  stageKey: string,
-  content: string
-): {
-  deliverableId: string
-  version: number
-  generationMethod: DeliverableData['generationMethod']
-} {
-  const project = findProjectOrThrow(projectId)
-  const stage = findStageOrThrow(project, stageKey)
-
-  const version = (stage.deliverable?.version ?? 0) + 1
-  stage.deliverable = makeDeliverable(
-    content,
-    version,
-    'manual',
-    `${projectId}-${stageKey}`
-  )
-  if (stage.status === 'in_progress' || stage.status === 'not_started') {
-    stage.status = 'quality_gate_pending'
-  }
-
-  return {
-    deliverableId: stage.deliverable.id,
-    version: stage.deliverable.version,
-    generationMethod: stage.deliverable.generationMethod,
-  }
-}
-
-/**
- * 品質ゲートのチェック結果を保存し、通過判定・次工程への移行を行う
- * @param projectId - 案件ID
- * @param stageKey - 工程キー
- * @param checkedItemIds - チェック済みの品質ゲート項目ID一覧
- */
-export function submitQualityGate(
-  projectId: string,
-  stageKey: string,
-  checkedItemIds: string[]
-):
-  | { passed: true; nextStage: StageKey | null; projectCompleted: boolean }
-  | { passed: false; missingItemIds: string[] } {
-  const project = findProjectOrThrow(projectId)
-  const stage = findStageOrThrow(project, stageKey)
-  const key = stageKey as StageKey
-  const items = getStageTemplateContent(
-    project.templateId,
-    key
-  ).qualityGateItems
-
-  stage.qualityGateResult = Object.fromEntries(
-    items.map((item) => [
-      item.id,
-      { checked: checkedItemIds.includes(item.id) },
-    ])
-  )
-
-  const missingItemIds = items
-    .filter((item) => !checkedItemIds.includes(item.id))
-    .map((item) => item.id)
-
-  if (missingItemIds.length > 0) {
-    return { passed: false, missingItemIds }
-  }
-
-  stage.status = 'completed'
-  const currentIndex = STAGE_ORDER.indexOf(key)
-  const nextStageKey = STAGE_ORDER[currentIndex + 1] ?? null
-
-  if (nextStageKey) {
-    const nextStage = project.stages[nextStageKey]
-    if (nextStage.status === 'not_started') {
-      nextStage.status = 'in_progress'
-    }
-    project.currentStage = nextStageKey
-    return { passed: true, nextStage: nextStageKey, projectCompleted: false }
-  }
-
-  project.overallStatus = 'completed'
-  return { passed: true, nextStage: null, projectCompleted: true }
 }

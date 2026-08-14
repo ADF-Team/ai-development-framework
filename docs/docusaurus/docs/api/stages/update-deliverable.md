@@ -8,13 +8,15 @@ title: "PATCH /api/projects/{id}/stages/{stageKey}/deliverable"
 
 <ApiEndpoint method="PATCH" path="/api/projects/{id}/stages/{stageKey}/deliverable" />
 
-`execution_mode: prompt_only`で外部生成した内容を貼り付ける場合、および既存成果物を編集する場合の両方で使用する。保存のたびに新しい`version`の行が追記され、`generationMethod`は常に`manual`として記録される。
+`execution_mode: prompt_only`で外部生成した内容を貼り付ける場合、および既存成果物を編集する場合の両方で使用する。保存のたびに新しい`version`の行が追記され、`generationMethod`は常に`manual`として記録される。`project_stages.status`が`not_started`または`in_progress`だった場合は`quality_gate_pending`に進む（それ以外のステータスの場合は変化しない）。
 
 ## Request
 
 ```json
 { "content": "貼り付け・編集後の内容" }
 ```
+
+`content`は`deliverableContentFormSchema`（`src/schemas/deliverableContentFormSchema.ts`）で検証する（トリム後1文字以上必須。フォーム側と共通のスキーマ）。
 
 ## Response 200
 
@@ -24,8 +26,8 @@ title: "PATCH /api/projects/{id}/stages/{stageKey}/deliverable"
 
 ## エラー
 
-- `404`：案件／工程が存在しない
-- `403`：他組織の案件
+- `404`：案件・工程が存在しない（他組織の案件を含む）
+- `422`：`content`が空文字（トリム後）の場合
 
 ## 競合について（楽観ロックなし）
 

@@ -38,10 +38,12 @@ title: "POST /api/projects/{id}/stages/{stageKey}/quality-gate"
 
 未通過の場合も`quality_gate_result`への保存は行われる（`project_stages.status`は`quality_gate_pending`のまま維持）。
 
+`checkedItemIds`は`postQualityGateSchema`（`src/schemas/api/postQualityGateSchema.ts`）で検証する（文字列配列であること。空配列も許可される＝全項目未チェックとして扱われる）。
+
 ## エラー
 
-- `404`：案件／工程が存在しない
-- `403`：他組織の案件
+- `404`：案件・工程が存在しない（他組織の案件を含む）
+- `422`：`checkedItemIds`が文字列配列でない場合
 
 「未通過」（一部項目が未チェック）はエラーではなく`200`で`{ passed: false, ... }`を返す点に注意（上記「Response 200（未通過）」参照）。
 

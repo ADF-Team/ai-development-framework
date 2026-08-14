@@ -32,6 +32,8 @@ title: "POST /api/projects/{id}/stages/{stageKey}/execute"
 
 `502`／`429`は、Anthropic API連携が実装された後に発生しうるエラー（設計上の想定）。2026-08時点の実装（`executeStage`）はAnthropic APIを呼ばず、保存済みの回答内容から成果物を組み立てるモックのため、実際にはこの2つは発生しない（`tokensUsed`もダミー値`{ input: 1200, output: 800 }`を固定で返す）。
 
+[工程](./index.md)配下の他5エンドポイントとは異なり、本エンドポイントのみ`src/lib/services/projects.ts`のプロセス内メモリストア（`getCurrentUser`による認証チェック・組織スコープも未実装）を参照し続けている。そのため、実際にPrisma（実DB）で作成した案件IDを渡すと、モックストア側にそのIDが存在せず**常に`404`になる**（メモリストアのシードデータ`p1`〜`p4`を指定した場合のみ動作する）。「プロンプトのみ」実行モード（[`PATCH /deliverable`](./update-deliverable.md)への貼り付け保存）は実DBの案件で問題なく利用できる。
+
 ## ロジック概要（アプリ内実行時・Anthropic API連携後の設計）
 
 1. `generated_prompt`を取得

@@ -26,17 +26,17 @@ title: API
 - 管理者用ルートで`role`が`admin`でも`system_admin`でもない場合：`403`
 - システム管理者用ルート（会社管理）で`role !== 'system_admin'`の場合：`403`
 
-**2026-08時点で実際に認証チェックが実装されているのは[システム管理者：会社](./system-companies/index.md)（`requireSystemAdmin()`）、[管理者：ユーザー](./admin-users/index.md)（`requireAdmin()`）、[管理者：テンプレート](./admin-templates/index.md)（`requireAdmin()`）、[公開テンプレート](./published-templates/index.md)（`requireUser()`）、[案件](./projects/index.md)（`requireUser()`）配下のエンドポイントのみ**（いずれも内部で`getCurrentUser()`を呼ぶ）。この実装済みの範囲では、上記のうち成立するのは以下。
+**2026-08時点で実際に認証チェックが実装されているのは[システム管理者：会社](./system-companies/index.md)（`requireSystemAdmin()`）、[管理者：ユーザー](./admin-users/index.md)（`requireAdmin()`）、[管理者：テンプレート](./admin-templates/index.md)（`requireAdmin()`）、[公開テンプレート](./published-templates/index.md)（`requireUser()`）、[案件](./projects/index.md)（`requireUser()`）、[工程](./stages/index.md)（`requireUser()`。[`POST .../execute`](./stages/execute.md)を除く）配下のエンドポイントのみ**（いずれも内部で`getCurrentUser()`を呼ぶ）。この実装済みの範囲では、上記のうち成立するのは以下。
 
 - `user`が取得できない場合：`401`（全て）
-- 管理者用ロールチェックによる`403`：[管理者：ユーザー](./admin-users/index.md)・[管理者：テンプレート](./admin-templates/index.md)は`role`が`admin`でも`system_admin`でもない場合、[システム管理者：会社](./system-companies/index.md)は`role !== 'system_admin'`の場合。[公開テンプレート](./published-templates/index.md)・[案件](./projects/index.md)はロール不問（ログイン済みなら誰でも利用可）なので`403`は発生しない
-- `organization_id`のスコープ：[管理者：ユーザー](./admin-users/index.md)・[管理者：テンプレート](./admin-templates/index.md)・[公開テンプレート](./published-templates/index.md)・[案件](./projects/index.md)はアクセス者自身の`organization_id`に常に絞り込む（一覧・作成は自組織内のみ、更新・詳細取得は他組織のIDを指定すると`403`ではなく`404`を返す。存在有無を漏らさないため）
+- 管理者用ロールチェックによる`403`：[管理者：ユーザー](./admin-users/index.md)・[管理者：テンプレート](./admin-templates/index.md)は`role`が`admin`でも`system_admin`でもない場合、[システム管理者：会社](./system-companies/index.md)は`role !== 'system_admin'`の場合。[公開テンプレート](./published-templates/index.md)・[案件](./projects/index.md)・[工程](./stages/index.md)はロール不問（ログイン済みなら誰でも利用可）なので`403`は発生しない
+- `organization_id`のスコープ：[管理者：ユーザー](./admin-users/index.md)・[管理者：テンプレート](./admin-templates/index.md)・[公開テンプレート](./published-templates/index.md)・[案件](./projects/index.md)・[工程](./stages/index.md)はアクセス者自身の`organization_id`に常に絞り込む（一覧・作成は自組織内のみ、更新・詳細取得は他組織のIDを指定すると`403`ではなく`404`を返す。存在有無を漏らさないため）
 
 以下は、実装済みの範囲でも未対応（[システム管理者：会社](./system-companies/index.md)は会社管理という性質上、組織横断で動くため）。
 
 - 所属組織`suspended`時の`401`（`getCurrentUser()`が組織の状態を見ていないため）
 
-[工程](./stages/index.md)配下の各`route.ts`は、2026-08時点では`getCurrentUser()`自体を呼んでおらず（ソースコード中に`TODO: インフラ（Cloud SQL）準備後、getCurrentUserによる認証チェックを追加する`という共通コメントがある）、認証なしでアクセスできてしまう状態にある。各エンドポイントページの実装状況の注記もあわせて参照。
+[工程](./stages/index.md)配下のうち[`POST .../execute`](./stages/execute.md)のみ、2026-08時点では`getCurrentUser()`自体を呼んでおらず（ソースコード中に`TODO: インフラ（Cloud SQL）準備後、getCurrentUserによる認証チェックを追加する`という共通コメントがある）、認証なしでアクセスできてしまう状態にある。同エンドポイントページの実装状況の注記もあわせて参照。
 
 上記の設計上の想定挙動は全エンドポイント共通のため、個別のエンドポイントページでは`401`／`403`は原則として再掲しない（そのエンドポイント固有のエラーのみ記載する）。
 
@@ -65,5 +65,8 @@ title: API
 - [`POST /api/admin/templates`](./admin-templates/create-template.md)（`newTemplateSchema`）
 - [`PUT /api/admin/templates/:templateId/stages/:stageKey`](./admin-templates/put-template.md)（`stageTemplateSchema`）
 - [`POST /api/projects`](./projects/create-project.md)（`createProjectSchema`）
+- [`POST /api/projects/:id/stages/:stageKey/answers`](./stages/save-answers.md)（`postStageAnswersSchema`）
+- [`PATCH /api/projects/:id/stages/:stageKey/deliverable`](./stages/update-deliverable.md)（`deliverableContentFormSchema`）
+- [`POST /api/projects/:id/stages/:stageKey/quality-gate`](./stages/quality-gate.md)（`postQualityGateSchema`）
 
-それ以外のPOST/PUT/PATCHエンドポイント（[工程](./stages/index.md)配下の回答保存・成果物編集等）は、対応するzodスキーマ自体が未作成で、リクエストボディはJSONとして受け取った値をそのまま使用する（空文字や規定文字数超えの値を送っても`422`にはならず、そのまま保存される）。該当エンドポイントのページにその旨を明記している。
+それ以外のPOST/PUT/PATCHエンドポイント（[管理者：テンプレート](./admin-templates/index.md)の複製・公開状態変更等、リクエストボディを取らないもの・値の妥当性チェックが不要なものを除く）は、対応するzodスキーマ自体が未作成で、リクエストボディはJSONとして受け取った値をそのまま使用する（空文字や規定文字数超えの値を送っても`422`にはならず、そのまま保存される）。該当エンドポイントのページにその旨を明記している。
