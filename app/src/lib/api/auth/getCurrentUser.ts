@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { cookies, headers } from 'next/headers'
 import { getFirebaseAdminAuth } from './firebaseAdmin'
 import { prisma } from '@/lib/api/prisma'
@@ -25,10 +26,11 @@ async function resolveSessionCookie(): Promise<string | undefined> {
 }
 
 /**
- * セッションCookieから現在のユーザー情報を取得する
+ * セッションCookieから現在のユーザー情報を取得する（Reactの`cache()`で1リクエスト内の重複呼び出しをまとめる。
+ * 1リクエスト内で複数の`layout.tsx`・`route.ts`から呼ばれても、Firebase Admin検証・Prisma参照は1回で済む）
  * @returns ユーザー情報（未ログイン・無効化済みの場合はnull）
  */
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const sessionCookie = await resolveSessionCookie()
   if (!sessionCookie) return null
 
@@ -48,4 +50,4 @@ export async function getCurrentUser() {
   })
   if (!user || user.status === 'disabled') return null
   return user
-}
+})

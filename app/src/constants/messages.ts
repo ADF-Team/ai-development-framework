@@ -113,7 +113,6 @@ export const messages = {
     userRoleSystemAdmin: 'システム管理者',
     logout: 'ログアウト',
     logoutError: 'ログアウトに失敗しました。',
-    mockUserName: '山田 太郎',
   },
   projects: {
     title: '案件一覧',

@@ -49,18 +49,18 @@ const ROLE_LABEL: Record<UserRole, string> = {
   system_admin: messages.nav.userRoleSystemAdmin,
 }
 
-// TODO: getCurrentUser()実装後、実際のログインユーザーのロールに置き換える
-function getCurrentUserRole(): UserRole {
-  return 'system_admin'
-}
-
 // 認証必須画面（(auth)グループ）で共通のサイドバーナビゲーション
-export function AppSidebar() {
+export function AppSidebar({
+  userDisplayName,
+  role,
+}: {
+  userDisplayName: string
+  role: UserRole
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const role = getCurrentUserRole()
   const isAdmin = role === 'admin' || role === 'system_admin'
   const isSystemAdmin = role === 'system_admin'
 
@@ -124,13 +124,12 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="gap-3 border-t border-divider px-2 pt-4 pb-5">
-        {/* TODO: getCurrentUser()実装後、実際のログインユーザー情報に置き換える */}
         <div className="flex items-center gap-2.5">
           <div className="flex size-7 flex-none items-center justify-center rounded-full bg-accent-800 font-heading text-xs text-accent-100">
-            {messages.nav.mockUserName.slice(0, 1)}
+            {userDisplayName.slice(0, 1)}
           </div>
           <div className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-            <span className="text-[13px]">{messages.nav.mockUserName}</span>
+            <span className="text-[13px]">{userDisplayName}</span>
             <span className="w-fit rounded-[6px] bg-accent-800 px-2.5 py-0.75 text-[11px] text-accent-100">
               {ROLE_LABEL[role]}
             </span>

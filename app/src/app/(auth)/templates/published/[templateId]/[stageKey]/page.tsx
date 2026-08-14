@@ -1,13 +1,8 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { isStageKey } from '@/types/Project'
 import { getPublishedTemplateDetail } from '@/lib/frontend/apiClient/publishedTemplates/getPublishedTemplateDetail'
 import { PublishedTemplateDetailScreen } from '@/features/published-templates/components/PublishedTemplateDetailScreen'
-import type { UserRole } from '@/types/User'
-
-// TODO: getCurrentUser()実装後、実際のログインユーザーのロールに置き換える
-function getCurrentUserRole(): UserRole {
-  return 'admin'
-}
+import { getCurrentUser } from '@/lib/api/auth/getCurrentUser'
 
 // 公開テンプレート詳細画面（/templates/published/[templateId]/[stageKey]）
 export default async function PublishedTemplateStagePage({
@@ -25,8 +20,11 @@ export default async function PublishedTemplateStagePage({
     notFound()
   }
 
-  const role = getCurrentUserRole()
-  const isAdmin = role === 'admin' || role === 'system_admin'
+  const user = await getCurrentUser()
+  if (!user) {
+    redirect('/login')
+  }
+  const isAdmin = user.role === 'admin' || user.role === 'system_admin'
 
   return (
     <PublishedTemplateDetailScreen
