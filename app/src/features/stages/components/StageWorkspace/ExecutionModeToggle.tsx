@@ -79,7 +79,7 @@ export function ExecutionModeToggle({
           type="button"
           onClick={() => setMode('ai_executed')}
           className={cn(
-            'flex-1 border-r border-divider px-3 py-1.5 text-[13px]',
+            'flex-1 rounded-l-md border-r border-divider px-3 py-1.5 text-[13px]',
             mode === 'ai_executed'
               ? 'text-accent shadow-[inset_0_0_0_1px_var(--color-accent)]'
               : 'hover:bg-text/7'
@@ -91,7 +91,7 @@ export function ExecutionModeToggle({
           type="button"
           onClick={() => setMode('prompt_only')}
           className={cn(
-            'flex-1 px-3 py-1.5 text-[13px]',
+            'flex-1 rounded-r-md px-3 py-1.5 text-[13px]',
             mode === 'prompt_only'
               ? 'text-accent shadow-[inset_0_0_0_1px_var(--color-accent)]'
               : 'hover:bg-text/7'

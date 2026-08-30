@@ -1,4 +1,4 @@
-import { Textarea } from '@/components/ui/textarea'
+import { ExpandableTextarea } from '@/components/textarea/ExpandableTextarea'
 import { PanelCard, PanelCardKicker } from '@/components/card/PanelCard'
 import { messages } from '@/constants/messages'
 
@@ -15,11 +15,13 @@ export function PromptTemplateEditor({
       <PanelCardKicker>
         {messages.adminTemplates.promptTemplateLabel}
       </PanelCardKicker>
-      <Textarea
+      <ExpandableTextarea
         rows={10}
-        className="field-sizing-fixed h-96 overflow-y-auto font-mono text-[12.5px] leading-relaxed"
+        className="field-sizing-fixed h-96 overflow-y-auto text-[12.5px] leading-relaxed"
+        monospace
+        modalTitle={messages.adminTemplates.promptTemplateLabel}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
       />
     </PanelCard>
   )

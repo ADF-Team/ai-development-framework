@@ -2,8 +2,9 @@ import { GripVertical, Trash2 } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { ExpandableInput } from '@/components/input/ExpandableInput'
 import { cn } from '@/lib/utils'
+import { messages } from '@/constants/messages'
 import type { TemplateQuestion } from '@/types/StageTemplate'
 
 // QuestionSetEditorの質問1行分。ドラッグハンドルで並び替え可能
@@ -39,10 +40,11 @@ export function SortableQuestionRow({
       >
         <GripVertical className="size-4" />
       </button>
-      <Input
+      <ExpandableInput
         value={question.text}
-        onChange={(e) => onUpdate(question.id, e.target.value)}
-        className="h-8 flex-1 text-[13px]"
+        onChange={(value) => onUpdate(question.id, value)}
+        modalTitle={messages.adminTemplates.questionListLabel}
+        className="h-8 text-[13px]"
       />
       <Button
         type="button"

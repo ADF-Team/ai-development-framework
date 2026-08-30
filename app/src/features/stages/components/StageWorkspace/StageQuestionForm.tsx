@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { WandSparkles, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { ExpandableTextarea } from '@/components/textarea/ExpandableTextarea'
 import { Label } from '@/components/ui/label'
 import { messages } from '@/constants/messages'
 import { useApiAction } from '@/hooks/useApiAction'
@@ -92,13 +92,14 @@ export function StageQuestionForm({
           <Label htmlFor={question.id}>
             {question.order}. {question.text}
           </Label>
-          <Textarea
+          <ExpandableTextarea
             id={question.id}
             rows={2}
             placeholder={messages.stages.questionForm.answerPlaceholder}
+            modalTitle={`${question.order}. ${question.text}`}
             value={answers[question.id] ?? ''}
-            onChange={(e) =>
-              setAnswers((prev) => ({ ...prev, [question.id]: e.target.value }))
+            onChange={(value) =>
+              setAnswers((prev) => ({ ...prev, [question.id]: value }))
             }
           />
         </div>

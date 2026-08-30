@@ -17,6 +17,9 @@ export const messages = {
       otherError: 'リクエストに失敗しました。',
       error: 'エラーが発生しました。',
     },
+    expandableTextarea: {
+      expandButtonAriaLabel: '拡大して編集',
+    },
   },
   welcome: {
     headingLines: ['属人化から、', '標準化へ。'],

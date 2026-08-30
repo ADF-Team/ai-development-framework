@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { ExpandableInput } from '@/components/input/ExpandableInput'
 import { PanelCard, PanelCardKicker } from '@/components/card/PanelCard'
 import { messages } from '@/constants/messages'
 import type { TemplateQuestion } from '@/types/StageTemplate'
@@ -108,10 +108,11 @@ export function QuestionSetEditor({
         </SortableContext>
       </DndContext>
       <div className="mt-2.5 flex gap-2">
-        <Input
+        <ExpandableInput
           placeholder={messages.adminTemplates.newQuestionPlaceholder}
+          modalTitle={messages.adminTemplates.questionListLabel}
           value={newQuestionText}
-          onChange={(e) => setNewQuestionText(e.target.value)}
+          onChange={setNewQuestionText}
         />
         <Button
           type="button"
